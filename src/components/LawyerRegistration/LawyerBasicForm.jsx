@@ -203,7 +203,7 @@ const LawyerBasicForm = ({ onSuccess, onClose }) => {
             "languagesIndian",
             <Languages />,
             "text",
-            "Hindi, Marathi",
+            "Marathi, Tamil",
           ],
           [
             "Languages Known (International)",

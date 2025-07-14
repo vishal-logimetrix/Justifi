@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Scale, Menu, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
+import logo from "../assets/images/logo2.jpeg"
+// import logo from "../assets/images/logo.jpeg"
 const Header = () => {
   const [showOffcanvas, setShowOffcanvas] = useState(false);
 
@@ -16,9 +17,12 @@ const Header = () => {
           <div className="container">
             <Link className="navbar-brand d-flex align-items-center" to="/home">
               <div className="bg-primary p-2 rounded-circle me-2">
-                <Scale size={24} className="text-white" />
+                <Scale size={32} className="text-white" />
               </div>
-              <span className="fw-bold">JUSTIFI</span>
+              <span className="fw-bold">
+                <img src={logo} alt="logo" style={{height: '50px'}} />
+              </span>
+              {/* <span className="fw-bold">JUSTIFI</span> */}
             </Link>
             <button className="navbar-toggler d-lg-none" type="button" onClick={toggleOffcanvas}>
               <Menu size={24} />

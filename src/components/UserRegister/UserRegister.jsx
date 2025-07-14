@@ -1,27 +1,57 @@
 import React, { useState } from 'react';
-import { User, Calendar, Phone, MapPin, Landmark, Hash, Building2, Locate } from 'lucide-react';
+import {
+  User,
+  Calendar,
+  Phone,
+  MapPin,
+  Landmark,
+  Hash,
+  Building2,
+  Locate,
+  Briefcase,
+  Mail,
+  Lock,
+  Building,
+} from 'lucide-react';
 import { toast } from 'react-toastify';
 import { postRequest } from '../../api/httpService';
 
-
 const UserRegister = () => {
-  const [form, setForm] = useState({
-    role: 'user',
-    fullName: '',
+  const [accountType, setAccountType] = useState('personal');
+  const [loading, setLoading] = useState(false);
+
+  const initialForm = {
+    account_type: 'personal',
+    first_name: '',
+    last_name: '',
+    email: '',
+    password: '',
+    mobile_no: '',
+    alternate_mobile_no: '',
     dob: '',
-    phone: '',
-    alternatePhone: '',
     address: '',
     landmark: '',
     pincode: '',
     city: '',
     state: '',
-  });
+    firm_name: '',
+    gstin: '',
+    contact_email: '',
+    contact_number: '',
+  };
 
-  const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState(initialForm);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleAccountTypeChange = (type) => {
+    setAccountType(type);
+    setForm((prev) => ({
+      ...initialForm,
+      account_type: type,
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -29,212 +59,91 @@ const UserRegister = () => {
     setLoading(true);
 
     try {
-      const res = await postRequest('/users/register', form);
+      const res = await postRequest('/users/register/user', form);
       toast.success('User registered successfully');
       console.log('Response:', res);
-      // Optionally reset form
-      setForm({
-        role: 'user',
-        fullName: '',
-        dob: '',
-        phone: '',
-        alternatePhone: '',
-        address: '',
-        landmark: '',
-        pincode: '',
-        city: '',
-        state: '',
-      });
+      setForm({ ...initialForm, account_type: accountType });
     } catch (error) {
-      toast.error(
-        error?.response?.data?.message || 'Registration failed. Please try again.'
-      );
+      // toast.error(
+      //   error?.response?.data?.message || 'Registration failed. Please try again.'
+      // );
     } finally {
       setLoading(false);
     }
   };
 
+  const renderInput = (label, name, icon, type = 'text', placeholder = '') => (
+    <div className="col-md-6">
+      <label className="form-label">{label}</label>
+      <div className="input-group">
+        <span className="input-group-text">{icon}</span>
+        <input
+          type={type}
+          name={name}
+          value={form[name]}
+          onChange={handleChange}
+          className="form-control"
+          placeholder={placeholder}
+          required
+        />
+      </div>
+    </div>
+  );
+
   return (
-    <form onSubmit={handleSubmit} className="px-4">
-      {/* Full Name */}
-      <div className="mb-3">
-        <label className="form-label">Full Name</label>
-        <div className="input-group">
-          <span className="input-group-text">
-            <User size={18} />
-          </span>
-          <input
-            type="text"
-            name="fullName"
-            value={form.fullName}
-            onChange={handleChange}
-            className="form-control"
-            placeholder="Enter your full name"
-            required
-          />
-        </div>
-      </div>
+    <div className="container py-4">
+      {/* <h3 className="mb-4">User Registration</h3> */}
 
-      {/* Date of Birth */}
-      <div className="mb-3">
-        <label className="form-label">Date of Birth</label>
-        <div className="input-group">
-          <span className="input-group-text">
-            <Calendar size={18} />
-          </span>
-          <input
-            type="date"
-            name="dob"
-            value={form.dob}
-            onChange={handleChange}
-            className="form-control"
-            required
-          />
-        </div>
-      </div>
-
-      {/* Phone Number */}
-      <div className="mb-3">
-        <label className="form-label">Phone Number</label>
-        <div className="input-group">
-          <span className="input-group-text">
-            <Phone size={18} />
-          </span>
-          <input
-            type="tel"
-            name="phone"
-            value={form.phone}
-            onChange={handleChange}
-            className="form-control"
-            placeholder="Enter your phone number"
-            required
-          />
-        </div>
-      </div>
-
-      {/* Alternate Phone */}
-      <div className="mb-3">
-        <label className="form-label">Alternate Number</label>
-        <div className="input-group">
-          <span className="input-group-text">
-            <Phone size={18} />
-          </span>
-          <input
-            type="tel"
-            name="alternatePhone"
-            value={form.alternatePhone}
-            onChange={handleChange}
-            className="form-control"
-            placeholder="Enter alternate number"
-          />
-        </div>
-      </div>
-
-      {/* Address */}
-      <div className="mb-3">
-        <label className="form-label">Address</label>
-        <div className="input-group">
-          <span className="input-group-text">
-            <MapPin size={18} />
-          </span>
-          <input
-            type="text"
-            name="address"
-            value={form.address}
-            onChange={handleChange}
-            className="form-control"
-            placeholder="Enter your address"
-            required
-          />
-        </div>
-      </div>
-
-      {/* Landmark */}
-      <div className="mb-3">
-        <label className="form-label">Landmark</label>
-        <div className="input-group">
-          <span className="input-group-text">
-            <Landmark size={18} />
-          </span>
-          <input
-            type="text"
-            name="landmark"
-            value={form.landmark}
-            onChange={handleChange}
-            className="form-control"
-            placeholder="Nearby landmark"
-          />
-        </div>
-      </div>
-
-      {/* Pincode */}
-      <div className="mb-3">
-        <label className="form-label">Pincode</label>
-        <div className="input-group">
-          <span className="input-group-text">
-            <Hash size={18} />
-          </span>
-          <input
-            type="text"
-            name="pincode"
-            value={form.pincode}
-            onChange={handleChange}
-            className="form-control"
-            placeholder="Enter pincode"
-            required
-          />
-        </div>
-      </div>
-
-      {/* City */}
-      <div className="mb-3">
-        <label className="form-label">City</label>
-        <div className="input-group">
-          <span className="input-group-text">
-            <Building2 size={18} />
-          </span>
-          <input
-            type="text"
-            name="city"
-            value={form.city}
-            onChange={handleChange}
-            className="form-control"
-            placeholder="Enter city"
-            required
-          />
-        </div>
-      </div>
-
-      {/* State */}
-      <div className="mb-4">
-        <label className="form-label">State</label>
-        <div className="input-group">
-          <span className="input-group-text">
-            <Locate size={18} />
-          </span>
-          <input
-            type="text"
-            name="state"
-            value={form.state}
-            onChange={handleChange}
-            className="form-control"
-            placeholder="Enter state"
-            required
-          />
-        </div>
-      </div>
-
-      {/* Submit */}
-      <div className="text-center">
+      {/* Account Type Switcher */}
+      <div className="mb-4 d-flex gap-3 d-flex justify-content-center">
         <button
-          type="submit"
-          className="btn btn-primary px-4 py-2 fw-bold"
-          disabled={loading}
+          type="button"
+          className={`btn ${accountType === 'personal' ? 'btn-primary' : 'btn-outline-primary'}`}
+          onClick={() => handleAccountTypeChange('personal')}
         >
-          {loading ? 'Submitting...' : 'Register Now'}
+          Personal Use
+        </button>
+        <button
+          type="button"
+          className={`btn ${accountType === 'business' ? 'btn-primary' : 'btn-outline-primary'}`}
+          onClick={() => handleAccountTypeChange('business')}
+        >
+          Business Use
         </button>
       </div>
-    </form>
+
+      <form onSubmit={handleSubmit}>
+        <div className="row g-3">
+          {renderInput('First Name', 'first_name', <User size={18} />, 'text', 'Rohit')}
+          {renderInput('Last Name', 'last_name', <User size={18} />, 'text', 'Sharma')}
+          {renderInput('Email', 'email', <Mail size={18} />, 'email', 'example@domain.com')}
+          {renderInput('Password', 'password', <Lock size={18} />, 'password', '********')}
+          {renderInput('Mobile Number', 'mobile_no', <Phone size={18} />, 'tel', '9876543210')}
+          {renderInput('Alternate Mobile', 'alternate_mobile_no', <Phone size={18} />, 'tel', '9123456780')}
+          {renderInput('Date of Birth', 'dob', <Calendar size={18} />, 'date')}
+          {renderInput('Address', 'address', <MapPin size={18} />, 'text', 'B/102, Lotus Residency')}
+          {renderInput('Landmark', 'landmark', <Landmark size={18} />, 'text', 'Near City Mall')}
+          {renderInput('Pincode', 'pincode', <Hash size={18} />, 'text', '400001')}
+          {renderInput('City', 'city', <Building2 size={18} />, 'text', 'Mumbai')}
+          {renderInput('State', 'state', <Locate size={18} />, 'text', 'Maharashtra')}
+
+          {accountType === 'business' && (
+            <>
+              {renderInput('Firm Name', 'firm_name', <Building size={18} />, 'text', 'Justify Legal Associates')}
+              {renderInput('GSTIN', 'gstin', <Hash size={18} />, 'text', '29ABCDE1234F1Z5')}
+              {renderInput('Contact Email', 'contact_email', <Mail size={18} />, 'email', 'support@justifycorp.com')}
+              {renderInput('Contact Number', 'contact_number', <Phone size={18} />, 'tel', '18001234567')}
+            </>
+          )}
+        </div>
+
+        <div className="text-center mt-4">
+          <button type="submit" className="btn btn-primary px-5 py-2 fw-bold" disabled={loading}>
+            {loading ? 'Registering...' : 'Register Now'}
+          </button>
+        </div>
+      </form>
+    </div>
   );
 };
 
