@@ -66,76 +66,6 @@ const Dashboard = () => {
       className="container-fluid p-0 bg-light"
       style={{ minHeight: "100vh" }}
     >
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="container py-3">
-          <div className="d-flex justify-content-between align-items-center">
-            {/* Logo & Title */}
-            <div className="d-flex align-items-center">
-              <div className="bg-primary p-2 rounded-circle me-3">
-                <Scale size={24} className="text-white" />
-              </div>
-              <h1 className="h4 fw-bold mb-0">
-                JUSTIFI <span className="text-primary">Dashboard</span>
-              </h1>
-            </div>
-
-            {/* Search & Admin */}
-            <div className="d-flex align-items-center">
-              {/* Search */}
-              <div className="position-relative me-4">
-                <input
-                  type="text"
-                  className="form-control ps-5"
-                  placeholder="Search by name, email or bar ID"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                <Search
-                  size={18}
-                  className="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"
-                />
-              </div>
-
-              {/* Admin Dropdown */}
-              <div className="dropdown">
-                <button
-                  className="btn btn-sm btn-light d-flex align-items-center"
-                  type="button"
-                  id="adminDropdown"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
-                  <div className="bg-primary bg-opacity-10 rounded-circle p-2 me-2">
-                    <User size={18} className="text-primary" />
-                  </div>
-                  <span className="me-2">Admin</span>
-                  <ChevronDown size={16} />
-                </button>
-                <ul
-                  className="dropdown-menu dropdown-menu-end"
-                  aria-labelledby="adminDropdown"
-                >
-                  <li>
-                    <button className="dropdown-item" onClick={onProfile}>
-                      Profile
-                    </button>
-                  </li>
-                  <li>
-                    <hr className="dropdown-divider" />
-                  </li>
-                  <li>
-                    <button className="dropdown-item" onClick={onLogout}>
-                      Logout
-                    </button>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
-
       <div className="container py-4">
         <div className="">
           {/* Main Content */}
@@ -304,7 +234,7 @@ const Dashboard = () => {
 
       {showAddLawyer && (
         <div
-          className="modal fade show"
+          className="modal fade show custom-modal"
           style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
         >
           <div className="modal-dialog modal-lg">

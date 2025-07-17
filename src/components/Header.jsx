@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { Scale, Menu, X } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import logo from "../assets/images/logo2.jpeg"
-// import logo from "../assets/images/logo.jpeg"
+import { useState } from "react";
+import { Scale, Menu, X } from "lucide-react";
+import { Link } from "react-router-dom";
+import logo from "../assets/images/logo2.jpeg";
+
 const Header = () => {
   const [showOffcanvas, setShowOffcanvas] = useState(false);
 
@@ -20,22 +20,47 @@ const Header = () => {
                 <Scale size={32} className="text-white" />
               </div>
               <span className="fw-bold">
-                <img src={logo} alt="logo" style={{height: '50px'}} />
+                <img src={logo} alt="logo" style={{ height: "50px" }} />
               </span>
               {/* <span className="fw-bold">JUSTIFI</span> */}
             </Link>
-            <button className="navbar-toggler d-lg-none" type="button" onClick={toggleOffcanvas}>
+            <button
+              className="navbar-toggler d-lg-none"
+              type="button"
+              onClick={toggleOffcanvas}
+            >
               <Menu size={24} />
             </button>
             <div className="collapse navbar-collapse d-none d-lg-flex">
               <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
-                <li className="nav-item mx-2"><Link className="nav-link fw-medium" to="/home">Home</Link></li>
-                {/* <li className="nav-item mx-2"><Link className="nav-link fw-medium" to="/ask-query">Ask Query</Link></li>
+                <li className="nav-item mx-2">
+                  <Link className="nav-link fw-medium" to="/home">
+                    Home
+                  </Link>
+                </li>
+                {/* 
                 <li className="nav-item mx-2"><Link className="nav-link fw-medium" to="/find-lawyer">Find Lawyer</Link></li>
-                <li className="nav-item mx-2"><Link className="nav-link fw-medium" to="/for-advocates">For Advocates</Link></li>
-                <li className="nav-item mx-2"><Link className="nav-link fw-medium" to="/about">About</Link></li> */}
-                <li className="nav-item mx-2"><Link className="nav-link fw-medium" to="/login">Login</Link></li>
-                <li className="nav-item mx-2"><Link className="nav-link fw-medium" to="/register">Register</Link></li>
+                <li className="nav-item mx-2"><Link className="nav-link fw-medium" to="/for-advocates">For Advocates</Link></li>*/}
+                <li className="nav-item mx-2">
+                  <Link className="nav-link fw-medium" to="/about-us">
+                    About
+                  </Link>
+                </li>
+                <li className="nav-item mx-2">
+                  <Link className="nav-link fw-medium" to="/ask-query">
+                    Ask Query
+                  </Link>
+                </li>
+                <li className="nav-item mx-2">
+                  <Link className="nav-link fw-medium" to="/login">
+                    Login
+                  </Link>
+                </li>
+                <li className="nav-item mx-2">
+                  <Link className="nav-link fw-medium" to="/register">
+                    Register
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>
@@ -44,40 +69,83 @@ const Header = () => {
 
       {/* Backdrop */}
       <div
-        className={`offcanvas-backdrop-custom ${showOffcanvas ? 'show' : ''}`}
+        className={`offcanvas-backdrop-custom ${showOffcanvas ? "show" : ""}`}
         onClick={toggleOffcanvas}
       />
 
       {/* Offcanvas Panel */}
-      <div className={`custom-offcanvas ${showOffcanvas ? 'show' : ''}`}>
+      <div className={`custom-offcanvas ${showOffcanvas ? "show" : ""}`}>
         <div className="offcanvas-header border-bottom px-4 py-3 d-flex justify-content-between align-items-center">
-          <h5 className="offcanvas-title mb-0 fw-bold">JUSTIFI</h5>
-          <button type="button" className="btn" onClick={toggleOffcanvas}>
+          <Link className="navbar-brand d-flex align-items-center" to="/home">
+              <div className="bg-primary p-2 rounded-circle me-2">
+                <Scale size={32} className="text-white" />
+              </div>
+              <span className="fw-bold">
+                <img src={logo} alt="logo" style={{ height: "50px" }} />
+              </span>
+              {/* <span className="fw-bold">JUSTIFI</span> */}
+            </Link>
+          <button type="button" className="btn" onClick={toggleOffcanvas} 
+          style={{
+            border: '1px solid gray', 
+            borderRadius: '50%',
+            height: '40px',
+            width: '40px',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginLeft: '30px'
+          }}
+          >
             <X size={24} />
           </button>
         </div>
         <div className="offcanvas-body px-4 pt-3">
           <ul className="navbar-nav">
             <li className="nav-item mb-3">
-              <Link className="nav-link offcanvas-link" to="/home" onClick={toggleOffcanvas}>Home</Link>
+              <Link
+                className="nav-link offcanvas-link"
+                to="/home"
+                onClick={toggleOffcanvas}
+              >
+                Home
+              </Link>
             </li>
             <li className="nav-item mb-3">
-              <Link className="nav-link offcanvas-link" to="/ask-query" onClick={toggleOffcanvas}>Ask Query</Link>
+              <Link
+                className="nav-link offcanvas-link"
+                to="/about-us"
+                onClick={toggleOffcanvas}
+              >
+                About Us
+              </Link>
             </li>
             <li className="nav-item mb-3">
-              <Link className="nav-link offcanvas-link" to="/find-lawyer" onClick={toggleOffcanvas}>Find Lawyer</Link>
+              <Link
+                className="nav-link offcanvas-link"
+                to="/ask-query"
+                onClick={toggleOffcanvas}
+              >
+                Ask Query
+              </Link>
             </li>
             <li className="nav-item mb-3">
-              <Link className="nav-link offcanvas-link" to="/for-advocates" onClick={toggleOffcanvas}>For Advocates</Link>
+              <Link
+                className="nav-link offcanvas-link"
+                to="/login"
+                onClick={toggleOffcanvas}
+              >
+                Login
+              </Link>
             </li>
             <li className="nav-item mb-3">
-              <Link className="nav-link offcanvas-link" to="/about" onClick={toggleOffcanvas}>About</Link>
-            </li>
-            <li className="nav-item mb-3">
-              <Link className="nav-link offcanvas-link" to="/login" onClick={toggleOffcanvas}>Login</Link>
-            </li>
-            <li className="nav-item mb-3">
-              <Link className="nav-link offcanvas-link" to="/register" onClick={toggleOffcanvas}>Register</Link>
+              <Link
+                className="nav-link offcanvas-link"
+                to="/register"
+                onClick={toggleOffcanvas}
+              >
+                Register
+              </Link>
             </li>
           </ul>
         </div>

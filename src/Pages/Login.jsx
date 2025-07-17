@@ -3,7 +3,7 @@ import { Scale, User, Lock, Briefcase, ShieldCheck, BarChart2, FileText, Calenda
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Header from '../components/Header';
-import logo from "../assets/images/logo.jpeg"
+import logo from "../assets/images/logo_t.png"
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -45,10 +45,12 @@ const Login = () => {
               <div className="bg-primary p-3 rounded-circle d-flex align-items-center justify-content-center me-3">
                 <Scale size={36} className="text-white" />
               </div>
-              {/* <h1 className="display-4 fw-bold mb-0">
+              <h1 className="display-4 fw-bold mb-0">
                 <img src={logo} alt="logo" />
+              </h1>
+              {/* <h1 className="display-4 fw-bold mb-0">
+                JUSTIFI
               </h1> */}
-              <h1 className="display-4 fw-bold mb-0">JUSTIFI</h1>
             </div>
             
             <p className="lead mb-5 text-light opacity-75">
