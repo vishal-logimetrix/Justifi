@@ -1,15 +1,22 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.jsx'
-import { BrowserRouter } from 'react-router-dom'
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+import { BrowserRouter } from 'react-router-dom';
+import './index.css'; // or your global styles
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-
-createRoot(document.getElementById('root')).render(
-<StrictMode>
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
   <BrowserRouter>
     <App />
   </BrowserRouter>
-</StrictMode>
-)
+);
+
+// ✅ Remove the preloader once React is ready
+const preloader = document.getElementById('global-preloader');
+if (preloader) {
+  preloader.style.opacity = '0';
+  setTimeout(() => {
+    preloader.remove();
+  }, 400); // Matches transition time
+}

@@ -2,14 +2,66 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <!-- <link rel="icon" type="image/svg+xml" href="/vite.svg" /> -->
+     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/9618/9618187.png" />
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React</title>
+    <title>JUSTIFY - Lawyer Platform</title>
+
+    <!-- Bootstrap + Razorpay Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <!-- Preloader Styles -->
+    <style>
+      #global-preloader {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw; height: 100vh;
+        background-color: #f9f9f9;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        transition: opacity 0.4s ease;
+      }
+
+      #global-preloader .logo {
+        font-size: 2.5rem;
+        font-family: 'Georgia', serif;
+        font-weight: bold;
+        color: #0091FF;
+        margin-bottom: 1rem;
+        letter-spacing: 2px;
+      }
+
+      #global-preloader .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #ccc;
+        border-top: 4px solid #2c3e50;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    </style>
   </head>
+
   <body>
+    <!-- ✅ Preloader that shows immediately -->
+    <div id="global-preloader">
+      <div class="logo">JUSTIFI</div>
+      <div class="spinner"></div>
+    </div>
+
+    <!-- Your React app will load here -->
     <div id="root"></div>
+
+    <!-- Load your React app via Vite -->
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

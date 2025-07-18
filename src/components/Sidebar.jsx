@@ -36,9 +36,9 @@ const Sidebar = ({ open }) => {
       roles: ["admin", "superadmin"],
     },
     // {
-    //   text: "Ticket History",
+    //   text: "Profile",
     //   icon: <HistoryIcon className="me-2" />,
-    //   path: "/dashboard/history",
+    //   path: "/profile",
     //   roles: ["admin", "superadmin", "user"],
     // },
   ];

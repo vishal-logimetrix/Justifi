@@ -1,44 +1,66 @@
-
-import { Navigate, Route, Router, Routes } from 'react-router-dom';
-import './App.css'
+import React, { useState, useEffect } from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
+import './App.css';
 import Layout from './Layout/Layout';
 import Login from './Pages/Login';
 import LawyerRegistration from './Pages/LawyerRegistration';
-import { ToastContainer } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Dashboard from './Pages/Dashboard';
 import Register from './Pages/Register';
 import Home from './Pages/Home';
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
 import PageNotFound from './Pages/PageNotFound';
 import Call from './components/Dashboard/Call';
 import AboutUs from './Pages/About-us';
 import AskQuery from './Pages/AskQuery';
+import OfflinePage from './Pages/OfflinePage';
+
 
 function App() {
-  const isLoggedIn = localStorage.getItem('token');
-  
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      toast.success("You're back online!");
+    };
+
+    const handleOffline = () => {
+      setIsOnline(false);
+      toast.error("You're offline. Check your internet connection.");
+    };
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
   return (
     <>
-     <ToastContainer position="top-right" autoClose={3000} />
-      <Routes>
-      <Route path="/" element={<Navigate to="/home" />} />
-      <Route path="/home" element={<Home />} />
-      <Route path="/about-us" element={<AboutUs />} />
-      <Route path="/ask-query" element={<AskQuery />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path='' element={<Layout />}>
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/call" element={<Call />} />
-      </Route>
-      
-      <Route path="*" element={<PageNotFound />} />
-    </Routes>
+      <ToastContainer position="top-right" autoClose={3000} />
+      {!isOnline ? (
+        <OfflinePage /> // 👈 Show offline screen if no internet
+      ) : (
+        <Routes>
+          <Route path="/" element={<Navigate to="/home" />} />
+          <Route path="/home" element={<Home />} />
+          <Route path="/about-us" element={<AboutUs />} />
+          <Route path="/ask-query" element={<AskQuery />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path='' element={<Layout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/call" element={<Call />} />
+          </Route>
+          <Route path="*" element={<PageNotFound />} />
+        </Routes>
+      )}
     </>
-  )
+  );
 }
 
-export default App
+export default App;

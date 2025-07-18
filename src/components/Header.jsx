@@ -1,14 +1,23 @@
 import { useState } from "react";
 import { Scale, Menu, X } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import logo from "../assets/images/logo2.jpeg";
 
 const Header = () => {
   const [showOffcanvas, setShowOffcanvas] = useState(false);
+  const { pathname } = useLocation();
 
   const toggleOffcanvas = () => {
     setShowOffcanvas(!showOffcanvas);
   };
+
+  const navLinks = [
+    { to: "/home", label: "Home" },
+    { to: "/about-us", label: "About" },
+    { to: "/ask-query", label: "Ask Query" },
+    { to: "/login", label: "Login" },
+    { to: "/register", label: "Register" },
+  ];
 
   return (
     <>
@@ -22,7 +31,6 @@ const Header = () => {
               <span className="fw-bold">
                 <img src={logo} alt="logo" style={{ height: "50px" }} />
               </span>
-              {/* <span className="fw-bold">JUSTIFI</span> */}
             </Link>
             <button
               className="navbar-toggler d-lg-none"
@@ -33,34 +41,16 @@ const Header = () => {
             </button>
             <div className="collapse navbar-collapse d-none d-lg-flex">
               <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
-                <li className="nav-item mx-2">
-                  <Link className="nav-link fw-medium" to="/home">
-                    Home
-                  </Link>
-                </li>
-                {/* 
-                <li className="nav-item mx-2"><Link className="nav-link fw-medium" to="/find-lawyer">Find Lawyer</Link></li>
-                <li className="nav-item mx-2"><Link className="nav-link fw-medium" to="/for-advocates">For Advocates</Link></li>*/}
-                <li className="nav-item mx-2">
-                  <Link className="nav-link fw-medium" to="/about-us">
-                    About
-                  </Link>
-                </li>
-                <li className="nav-item mx-2">
-                  <Link className="nav-link fw-medium" to="/ask-query">
-                    Ask Query
-                  </Link>
-                </li>
-                <li className="nav-item mx-2">
-                  <Link className="nav-link fw-medium" to="/login">
-                    Login
-                  </Link>
-                </li>
-                <li className="nav-item mx-2">
-                  <Link className="nav-link fw-medium" to="/register">
-                    Register
-                  </Link>
-                </li>
+                {navLinks.map((link) => (
+                  <li className="nav-item mx-2" key={link.to}>
+                    <Link
+                      className={`nav-link fw-medium ${pathname === link.to ? "active-link" : ""}`}
+                      to={link.to}
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
@@ -77,81 +67,49 @@ const Header = () => {
       <div className={`custom-offcanvas ${showOffcanvas ? "show" : ""}`}>
         <div className="offcanvas-header border-bottom px-4 py-3 d-flex justify-content-between align-items-center">
           <Link className="navbar-brand d-flex align-items-center" to="/home">
-              <div className="bg-primary p-2 rounded-circle me-2">
-                <Scale size={32} className="text-white" />
-              </div>
-              <span className="fw-bold">
-                <img src={logo} alt="logo" style={{ height: "50px" }} />
-              </span>
-              {/* <span className="fw-bold">JUSTIFI</span> */}
-            </Link>
-          <button type="button" className="btn" onClick={toggleOffcanvas} 
-          style={{
-            border: '1px solid gray', 
-            borderRadius: '50%',
-            height: '40px',
-            width: '40px',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginLeft: '30px'
-          }}
+            <div className="bg-primary p-2 rounded-circle me-2">
+              <Scale size={32} className="text-white" />
+            </div>
+            <span className="fw-bold">
+              <img src={logo} alt="logo" style={{ height: "50px" }} />
+            </span>
+          </Link>
+          <button
+            type="button"
+            className="btn"
+            onClick={toggleOffcanvas}
+            style={{
+              border: "1px solid gray",
+              borderRadius: "50%",
+              height: "40px",
+              width: "40px",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              marginLeft: "30px",
+            }}
           >
             <X size={24} />
           </button>
         </div>
         <div className="offcanvas-body px-4 pt-3">
           <ul className="navbar-nav">
-            <li className="nav-item mb-3">
-              <Link
-                className="nav-link offcanvas-link"
-                to="/home"
-                onClick={toggleOffcanvas}
-              >
-                Home
-              </Link>
-            </li>
-            <li className="nav-item mb-3">
-              <Link
-                className="nav-link offcanvas-link"
-                to="/about-us"
-                onClick={toggleOffcanvas}
-              >
-                About Us
-              </Link>
-            </li>
-            <li className="nav-item mb-3">
-              <Link
-                className="nav-link offcanvas-link"
-                to="/ask-query"
-                onClick={toggleOffcanvas}
-              >
-                Ask Query
-              </Link>
-            </li>
-            <li className="nav-item mb-3">
-              <Link
-                className="nav-link offcanvas-link"
-                to="/login"
-                onClick={toggleOffcanvas}
-              >
-                Login
-              </Link>
-            </li>
-            <li className="nav-item mb-3">
-              <Link
-                className="nav-link offcanvas-link"
-                to="/register"
-                onClick={toggleOffcanvas}
-              >
-                Register
-              </Link>
-            </li>
+            {navLinks.map((link) => (
+              <li className="nav-item mb-3" key={link.to}>
+                <Link
+                  className={`nav-link offcanvas-link ${pathname === link.to ? "active-link" : ""}`}
+                  to={link.to}
+                  onClick={toggleOffcanvas}
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
           </ul>
         </div>
       </div>
 
-      {/* Offcanvas CSS */}
+      {/* Offcanvas & Active Link CSS */}
       <style>{`
         .custom-offcanvas {
           position: fixed;
@@ -197,6 +155,19 @@ const Header = () => {
           background: #f8f9fa;
           color: #0d6efd;
           text-decoration: none;
+        }
+        .active-link {
+          position: relative;
+          color: #0d6efd !important;
+        }
+        .active-link::after {
+          content: "";
+          position: absolute;
+          bottom: -4px;
+          left: 0;
+          width: 100%;
+          height: 2px;
+          background-color: #0d6efd;
         }
       `}</style>
     </>
