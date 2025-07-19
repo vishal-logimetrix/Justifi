@@ -1,4 +1,3 @@
-
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Dashboard as DashboardIcon,
@@ -6,45 +5,61 @@ import {
   PersonAdd as UserAddIcon,
   Logout as LogoutIcon,
   History as HistoryIcon,
+  Gavel as CaseIcon, // You can use any icon here
 } from "@mui/icons-material";
 
-import logo from "../assets/images/logo_t.png"
-
+import logo from "../assets/images/logo_t.png";
+import { useEffect, useState } from "react";
 
 const Sidebar = ({ open }) => {
   const location = useLocation();
+  const [role, setRole] = useState(null);
   const navigate = useNavigate();
-  // Get role from localStorage
+
+  useEffect(() => {
+    const storedRole = localStorage.getItem("userRole");
+    if (storedRole === "admin" || storedRole === "lawyer") {
+      setRole(storedRole);
+    } else {
+      navigate("/login");
+    }
+  }, [navigate]);
 
   const menuItems = [
     {
       text: "Dashboard",
       icon: <DashboardIcon className="me-2" />,
       path: "/dashboard",
-      roles: ["admin", "superadmin", "user"],
+      roles: ["admin", "lawyer"],
     },
     {
-      text: "Call",
-      icon: <AddIcon className="me-2" />,
+      text: "Call History",
+      icon: <HistoryIcon className="me-2" />,
       path: "/call",
-      roles: ["admin", "superadmin"],
+      roles: ["lawyer"],
     },
     {
       text: "Payments",
       icon: <UserAddIcon className="me-2" />,
       path: "/dashboard/payments",
-      roles: ["admin", "superadmin"],
+      roles: ["admin"],
     },
-    // {
-    //   text: "Profile",
-    //   icon: <HistoryIcon className="me-2" />,
-    //   path: "/profile",
-    //   roles: ["admin", "superadmin", "user"],
-    // },
+    {
+      text: "Case Details",
+      icon: <CaseIcon className="me-2" />,
+      path: "/dashboard/cases",
+      roles: ["lawyer"],
+    },
+    {
+      text: "Profile",
+      icon: <AddIcon className="me-2" />,
+      path: "/profile",
+      roles: ["admin", "lawyer"],
+    },
   ];
 
   const handleLogout = () => {
-    localStorage.clear(); 
+    localStorage.clear();
     navigate("/");
   };
 
@@ -69,7 +84,7 @@ const Sidebar = ({ open }) => {
           <div className="flex-grow-1 px-3 py-2">
             <ul className="list-unstyled mb-2">
               {menuItems
-                // .filter((item) => item.roles.includes(role))
+                .filter((item) => item.roles.includes(role))
                 .map((item) => (
                   <li key={item.text} className="mb-1 p-1">
                     <Link
@@ -134,12 +149,13 @@ const Sidebar = ({ open }) => {
               className="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
               style={{ width: 40, height: 40 }}
             >
-              {/* {user?.fullname?.charAt(0).toUpperCase() || "U"} */}
               U
             </div>
             <div>
-              <div className="fw-semibold text-capitalize">User</div>
-              <small className="text-muted">User</small>
+              <div className="fw-semibold text-capitalize">
+                {role === "admin" ? "Admin" : "Lawyer"}
+              </div>
+              <small className="text-muted">{role}</small>
             </div>
           </div>
         </div>

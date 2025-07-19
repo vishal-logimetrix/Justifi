@@ -61,7 +61,7 @@ const Register = () => {
             ></div>
 
             <div className="position-relative z-1">
-              <div className="d-flex align-items-center mt-5">
+              <div className="d-flex align-items-center mb-4 mt-5">
                 <div className="bg-primary p-3 rounded-circle d-flex align-items-center justify-content-center me-3">
                   <Scale size={36} className="text-white" />
                 </div>

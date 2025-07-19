@@ -366,7 +366,7 @@ const AboutUs = () => {
             </div>
             <div className="col-md-3">
               <h2 className="fw-bold display-4" style={{ color: "#000080" }}>
-                28+
+                28
               </h2>
               <p className="text-muted">States Covered</p>
             </div>

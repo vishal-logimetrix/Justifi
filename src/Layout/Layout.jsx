@@ -89,7 +89,9 @@ const DashboardLayout = () => {
           }}
         >
           <Typography variant="body2" color="textSecondary">
-            © {new Date().getFullYear()} Ticket System. All rights reserved.
+            © {new Date().getFullYear()} Justifi System. All rights reserved.
+            <br />
+            <i className="text-secondary">India's fastest-growing legal assistance platform</i>
           </Typography>
         </Box>
       </Box>

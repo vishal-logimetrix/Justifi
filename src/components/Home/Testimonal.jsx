@@ -2,8 +2,10 @@ import React, { useEffect } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import { Quote } from "lucide-react";
-// import AOS from "aos";
-// import "aos/dist/aos.css";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+
 
 const testimonials = [
   {
@@ -29,10 +31,6 @@ const testimonials = [
 ];
 
 const Testimonial = () => {
-
-//   useEffect(() => {
-//     AOS.init({ duration: 600, once: true });
-//   }, []);
 
   return (
     <section

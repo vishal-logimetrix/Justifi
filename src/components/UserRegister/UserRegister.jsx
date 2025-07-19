@@ -14,7 +14,9 @@ import {
   Building,
 } from 'lucide-react';
 import { toast } from 'react-toastify';
-import { postRequest } from '../../api/httpService';
+import userRegisterApi from '../../api/userRegisterApi';
+
+
 
 const UserRegister = () => {
   const [accountType, setAccountType] = useState('personal');
@@ -59,7 +61,8 @@ const UserRegister = () => {
     setLoading(true);
 
     try {
-      const res = await postRequest('/users/register/user', form);
+      console.log("----",form)
+      const res = await userRegisterApi.post('/users/register/user', form);
       toast.success('User registered successfully');
       console.log('Response:', res);
       setForm({ ...initialForm, account_type: accountType });

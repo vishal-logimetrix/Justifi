@@ -16,6 +16,13 @@ const Login = () => {
     console.log('Login attempt with:', { email, password, rememberMe });
     // In a real application, you would handle authentication here
     if (email === "admin@justifi.com" && password === "admin123") {
+      const role = "admin"
+      localStorage.setItem("userRole", role);
+      navigate('/dashboard')
+    }
+    else if(email === "lawyer@justifi.com" && password === "lawyer123"){
+      const role = "lawyer"
+      localStorage.setItem("userRole", role);
       navigate('/dashboard')
     }
     else{
