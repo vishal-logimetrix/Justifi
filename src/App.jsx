@@ -14,6 +14,7 @@ import Call from './components/Dashboard/Call';
 import AboutUs from './Pages/About-us';
 import AskQuery from './Pages/AskQuery';
 import OfflinePage from './Pages/OfflinePage';
+import { CallProvider } from './Context/CallContext';
 
 
 function App() {
@@ -37,10 +38,11 @@ function App() {
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
     };
-  }, []);
+  }, [isOnline]);
 
   return (
     <>
+    <CallProvider>
       <ToastContainer position="top-right" autoClose={3000} />
       {!isOnline ? (
         <OfflinePage /> // 👈 Show offline screen if no internet
@@ -59,6 +61,7 @@ function App() {
           <Route path="*" element={<PageNotFound />} />
         </Routes>
       )}
+      </CallProvider>
     </>
   );
 }

@@ -5,19 +5,18 @@ import { useNavigate } from "react-router-dom";
 import { getRequest } from "../api/httpService";
 
 const AdminDashboard = () => {
-    const [lawyers, setLawyers] = useState([]);
-      const [showAddLawyer, setShowAddLawyer] = useState(false);
-      const [searchTerm, setSearchTerm] = useState("");
-      const [currentPage, setCurrentPage] = useState(1);
-      const itemsPerPage = 10;
-      const navigate = useNavigate();
+  const [lawyers, setLawyers] = useState([]);
+  const [showAddLawyer, setShowAddLawyer] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const navigate = useNavigate();
 
-        useEffect(() => {
+  useEffect(() => {
     getLawyerData();
   }, []);
 
-
-    const getLawyerData = async () => {
+  const getLawyerData = async () => {
     try {
       const data = await getRequest("/lawyers/get-lawyers");
       setLawyers(data);
@@ -26,7 +25,7 @@ const AdminDashboard = () => {
     }
   };
 
-    const filteredLawyers = lawyers.filter(
+  const filteredLawyers = lawyers.filter(
     (lawyer) =>
       (lawyer.lawyer_name || "")
         .toLowerCase()
@@ -39,20 +38,18 @@ const AdminDashboard = () => {
         .includes(searchTerm.toLowerCase())
   );
 
-    const onLawyerRegister = () => {
+  const onLawyerRegister = () => {
     setShowAddLawyer(false);
     getLawyerData();
   };
 
-
-    const onProfile = () => {};
+  const onProfile = () => {};
 
   const onLogout = () => {
     navigate("/login");
   };
 
-
-    const totalPages = Math.ceil(filteredLawyers.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredLawyers.length / itemsPerPage);
   const startIdx = (currentPage - 1) * itemsPerPage;
   const paginatedLawyers = filteredLawyers.slice(
     startIdx,
@@ -63,10 +60,8 @@ const AdminDashboard = () => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
 
-
-
   return (
-      <div
+    <div
       className="container-fluid p-0 bg-light"
       style={{ minHeight: "100vh" }}
     >
@@ -262,7 +257,7 @@ const AdminDashboard = () => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default AdminDashboard
+export default AdminDashboard;

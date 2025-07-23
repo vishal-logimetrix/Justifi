@@ -16,14 +16,41 @@ const Login = () => {
     console.log('Login attempt with:', { email, password, rememberMe });
     // In a real application, you would handle authentication here
     if (email === "admin@justifi.com" && password === "admin123") {
-      const role = "admin"
-      localStorage.setItem("userRole", role);
-      navigate('/dashboard')
+      const user = {
+        id: "admin-001",
+        fullname: "Admin User",
+        email,
+        role: "admin",
+        avatar: "/default-avatar.png"
+      };
+      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("userRole", "admin");
+      navigate('/dashboard');
+
     }
     else if(email === "lawyer@justifi.com" && password === "lawyer123"){
-      const role = "lawyer"
-      localStorage.setItem("userRole", role);
-      navigate('/dashboard')
+      const user = {
+        id: "lawyer-001",
+        fullname: "Lawyer User",
+        email,
+        role: "lawyer",
+        avatar: "/lawyer-avatar.png"
+      };
+      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("userRole", "lawyer");
+      navigate('/dashboard');
+    }
+    else if(email === "user@justifi.com" && password === "user123"){
+      const user = {
+        id: "user-001",
+        fullname: "User",
+        email,
+        role: "user",
+        avatar: "/lawyer-avatar.png"
+      };
+      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("userRole", "user");
+      navigate('/dashboard');
     }
     else{
       toast.error("Invalid Credentials");

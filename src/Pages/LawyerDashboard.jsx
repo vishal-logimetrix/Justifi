@@ -1,26 +1,14 @@
 // src/pages/LawyerDashboard.jsx
 import { useEffect, useState } from "react";
-import {
-  Gavel,
-  TaskAlt,
-  PendingActions,
-  Lock
-} from "@mui/icons-material";
-import {
-  Box,
-  Button,
-  Typography,
-  CircularProgress,
-  Skeleton,
-} from "@mui/material";
+import { Gavel, TaskAlt, PendingActions, Lock, Circle } from "@mui/icons-material";
+import { Box, Button, Typography, CircularProgress, Skeleton, Tooltip, IconButton } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-// import { getRequest } from "../api/httpService";
 import { toast } from "react-toastify";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import CaseStatusChart from "../components/Dashboard/CaseStatusChart";
 import CaseTypeChart from "../components/Dashboard/CaseTypeChart";
-// import CaseStatusChart from "../components/CaseStatusChart";
-// import CaseTypeChart from "../components/CaseTypeChart";
+import { connectSocket, getSocket, disconnectSocket } from "../Socket/socket";
+
 
 const getGreeting = () => {
   const hour = new Date().getHours();
@@ -45,6 +33,8 @@ const LawyerDashboard = () => {
   });
   const [loading, setLoading] = useState(true);
   const [chartLoading, setChartLoading] = useState(true);
+  const [socketConnected, setSocketConnected] = useState(false);
+
 
   const user = JSON.parse(localStorage.getItem("user")) || { 
     fullname: "John Doe" 
@@ -53,7 +43,48 @@ const LawyerDashboard = () => {
 
   useEffect(() => {
     fetchCases();
+    initSocket();
+    
+    return () => {
+      // Clean up socket connection on unmount
+      const socket = getSocket();
+      if (socket) {
+        socket.off('connect');
+        socket.off('disconnect');
+      }
+    };
   }, []);
+
+
+    const initSocket = () => {
+    try {
+      // Connect to socket with authentication token
+      const token = localStorage.getItem('token');
+      connectSocket(token);
+      
+      const socket = getSocket();
+      
+      if (socket) {
+        // Set up connection status handlers
+        socket.on('connect', () => {
+          console.log('Socket connected');
+          setSocketConnected(true);
+        });
+        
+        socket.on('disconnect', () => {
+          console.log('Socket disconnected');
+          setSocketConnected(false);
+        });
+        
+        // Set initial connection status
+        setSocketConnected(socket.connected);
+      }
+    } catch (err) {
+      console.error('Socket connection error:', err);
+      toast.error('Failed to connect to real-time service');
+    }
+  };
+
 
   const fetchCases = async () => {
     setLoading(true);
@@ -170,6 +201,16 @@ const LawyerDashboard = () => {
     </div>
   );
 
+  
+  // Reconnect socket if disconnected
+  const handleReconnectSocket = () => {
+    if (!socketConnected) {
+      disconnectSocket();
+      initSocket();
+    }
+  };
+
+
   return (
     <div className="container-fluid">
       {/* Welcome Banner */}
@@ -189,10 +230,34 @@ const LawyerDashboard = () => {
           color: "white",
         }}
       >
-        {greeting}{" "}
-        <span className="text-warning text-capitalize fs-5">
-          {user?.fullname?.split(" ")[0] || "Counsel"} 👋
-        </span>
+        <div>
+          {greeting}{" "}
+          <span className="text-warning text-capitalize fs-5">
+            {user?.fullname?.split(" ")[0] || "Counsel"} 👋
+          </span>
+        </div>
+
+        <Tooltip 
+          title={socketConnected 
+            ? "Connected to real-time service" 
+            : "Disconnected from real-time service"
+          }
+          placement="left"
+        >
+          <IconButton 
+            onClick={handleReconnectSocket}
+            size="small"
+            sx={{ 
+              color: socketConnected ? 'limegreen' : 'error.main',
+              '&:hover': {
+                backgroundColor: 'rgba(255,255,255,0.1)'
+              }
+            }}
+          >
+            <Circle fontSize="small" />
+          </IconButton>
+        </Tooltip>
+        
       </Box>
 
       <div className="d-flex justify-content-between align-items-center mb-3">

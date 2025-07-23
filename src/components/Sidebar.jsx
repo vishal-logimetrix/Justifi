@@ -10,15 +10,18 @@ import {
 
 import logo from "../assets/images/logo_t.png";
 import { useEffect, useState } from "react";
+import { useCallContext } from "../Context/CallContext";
+import { disconnectSocket } from "../Socket/socket";
 
 const Sidebar = ({ open }) => {
   const location = useLocation();
   const [role, setRole] = useState(null);
   const navigate = useNavigate();
+  const { socket, setSocket } = useCallContext();
 
   useEffect(() => {
     const storedRole = localStorage.getItem("userRole");
-    if (storedRole === "admin" || storedRole === "lawyer") {
+    if (storedRole === "admin" || storedRole === "lawyer" || storedRole === "user") {
       setRole(storedRole);
     } else {
       navigate("/login");
@@ -56,9 +59,23 @@ const Sidebar = ({ open }) => {
       path: "/profile",
       roles: ["admin", "lawyer"],
     },
+    {
+      text: "Lawyers",
+      icon: <AddIcon className="me-2" />,
+      path: "/profile",
+      roles: ["user"],
+    },
+    {
+      text: "AI ChatBot",
+      icon: <AddIcon className="me-2" />,
+      path: "/profile",
+      roles: ["user"],
+    },
   ];
 
   const handleLogout = () => {
+    disconnectSocket();
+    setSocket(null)
     localStorage.clear();
     navigate("/");
   };

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   User,
   Calendar,
@@ -15,7 +15,8 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import userRegisterApi from '../../api/userRegisterApi';
-
+// import axios from 'axios';
+// axios.defaults.baseURL = import.meta.env.VITE_API_URL_USER;
 
 
 const UserRegister = () => {
@@ -44,6 +45,9 @@ const UserRegister = () => {
 
   const [form, setForm] = useState(initialForm);
 
+  useEffect(()=>{
+    
+  }, [])
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -62,7 +66,7 @@ const UserRegister = () => {
 
     try {
       console.log("----",form)
-      const res = await userRegisterApi.post('/users/register/user', form);
+      const res = await userRegisterApi.post(`users/register/user`, form);
       toast.success('User registered successfully');
       console.log('Response:', res);
       setForm({ ...initialForm, account_type: accountType });
