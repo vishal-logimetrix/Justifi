@@ -15,6 +15,7 @@ import AboutUs from './Pages/About-us';
 import AskQuery from './Pages/AskQuery';
 import OfflinePage from './Pages/OfflinePage';
 import { CallProvider } from './Context/CallContext';
+import ChatBot from './Pages/ChatBot';
 
 
 function App() {
@@ -57,6 +58,7 @@ function App() {
           <Route path='' element={<Layout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/call" element={<Call />} />
+            <Route path="/chat-bot" element={<ChatBot />} />
           </Route>
           <Route path="*" element={<PageNotFound />} />
         </Routes>

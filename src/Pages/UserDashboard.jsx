@@ -1,12 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  User,
-  Search,
-  Plus,
-  ChevronDown,
-  Scale,
-  Phone,
-} from "lucide-react";
+import { User, Search, Plus, ChevronDown, Scale, Phone } from "lucide-react";
 import LawyerRegistration from "./LawyerRegistration";
 import { useNavigate } from "react-router-dom";
 import { getRequest } from "../api/httpService";
@@ -20,8 +13,19 @@ import {
   IconButton,
   Typography,
   CircularProgress,
+  Tooltip,
 } from "@mui/material";
 import PhoneInTalkIcon from "@mui/icons-material/PhoneInTalk";
+// import { connectSocket, getSocket } from "../Socket/socket";
+import { Circle } from "@mui/icons-material";
+import { useCallContext } from "../Context/CallContext";
+
+const getGreeting = () => {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good Morning";
+  if (hour < 17) return "Good Afternoon";
+  return "Good Evening";
+};
 
 const UserDashboard = () => {
   const [lawyers, setLawyers] = useState([]);
@@ -32,9 +36,38 @@ const UserDashboard = () => {
   const navigate = useNavigate();
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedLawyer, setSelectedLawyer] = useState(null);
+  const [socketConnected, setSocketConnected] = useState(false);
+  const {
+    isConnected,
+    initializeSocket,
+    callLawyer,
+    currentCall,
+    incomingCall,
+    acceptCall,
+    rejectCall,
+    endCall,
+  } = useCallContext();
+
+  const userRole = localStorage.getItem("userRole")
+  const user = JSON.parse(localStorage.getItem("user")) || {
+    fullname: "John Doe",
+  };
+
+  const greeting = `${getGreeting()}`;
 
   useEffect(() => {
     getLawyerData();
+    
+    // Only try to initialize if not connected AND Dashboard didn't already initialize
+    // if (!isConnected) {
+    //   const token = localStorage.getItem("token");
+    //   if (token) {
+    //     console.log("🔌 Initializing socket in UserDashboard (fallback)");
+    //     initializeSocket(token);
+    //   } else {
+    //     console.warn("⚠️ No token available for socket connection");
+    //   }
+    // }
   }, []);
 
   const getLawyerData = async () => {
@@ -86,20 +119,53 @@ const UserDashboard = () => {
   };
 
   return (
-    <div className="container-fluid p-0 bg-light" style={{ minHeight: "100vh" }}>
+    <div
+      className="container-fluid p-0 bg-light"
+      style={{ minHeight: "100vh" }}
+    >
+      <Box
+        className="ps-3 mb-4"
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1.5,
+          background: "linear-gradient(135deg, #1976d2, #0d47a1)",
+          borderRadius: "8px",
+          px: 3,
+          py: 2,
+          boxShadow: "0 4px 12px rgba(25, 118, 210, 0.2)",
+          fontSize: { xs: "1.1rem", md: "1.25rem" },
+          fontWeight: 600,
+          color: "white",
+        }}
+      >
+        <div>
+          {greeting}{" "}
+          <span className="text-warning text-capitalize fs-5">
+            {user?.fullname?.split(" ")[0] || "Counsel"} 👋
+          </span>
+        </div>
+      </Box>
+
       <div className="container py-4">
         <div className="d-flex justify-content-between align-items-center mb-4">
           <div>
             <h2 className="h4 fw-bold mb-0">Lawyer Management</h2>
-            <p className="text-muted mb-0">Manage all registered lawyers in your system</p>
+            <p className="text-muted mb-0">
+              Manage all registered lawyers in your system
+            </p>
           </div>
-          <button
+          {
+            userRole==="admin" &&
+            <button
             className="btn btn-primary d-flex align-items-center"
             onClick={() => setShowAddLawyer(true)}
           >
             <Plus size={18} className="me-2" />
             Add New Lawyer
           </button>
+          }
+          
         </div>
 
         <div className="card border-0 shadow-sm">
@@ -146,7 +212,17 @@ const UserDashboard = () => {
                           <td>
                             <IconButton
                               color="primary"
-                              onClick={() => handleViewDetails(lawyer)}
+                              onClick={() => {
+                                console.log(
+                                  "📞 Calling lawyer:",
+                                  lawyer.lawyer_name,
+                                  "ID:",
+                                  lawyer.id
+                                );
+                                callLawyer(lawyer.id, "audio");
+                                handleViewDetails(lawyer);
+                              }}
+                              disabled={currentCall}
                             >
                               <Phone />
                             </IconButton>
@@ -168,24 +244,45 @@ const UserDashboard = () => {
 
           <div className="card-footer bg-white d-flex justify-content-between align-items-center">
             <div className="small text-muted">
-              Showing {paginatedLawyers.length} of {filteredLawyers.length} lawyers
+              Showing {paginatedLawyers.length} of {filteredLawyers.length}{" "}
+              lawyers
             </div>
             <nav>
               <ul className="pagination pagination-sm mb-0">
-                <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-                  <button className="page-link" onClick={() => changePage(currentPage - 1)}>
+                <li
+                  className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
+                >
+                  <button
+                    className="page-link"
+                    onClick={() => changePage(currentPage - 1)}
+                  >
                     Previous
                   </button>
                 </li>
                 {[...Array(totalPages)].map((_, i) => (
-                  <li key={i} className={`page-item ${currentPage === i + 1 ? "active" : ""}`}>
-                    <button className="page-link" onClick={() => changePage(i + 1)}>
+                  <li
+                    key={i}
+                    className={`page-item ${
+                      currentPage === i + 1 ? "active" : ""
+                    }`}
+                  >
+                    <button
+                      className="page-link"
+                      onClick={() => changePage(i + 1)}
+                    >
                       {i + 1}
                     </button>
                   </li>
                 ))}
-                <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
-                  <button className="page-link" onClick={() => changePage(currentPage + 1)}>
+                <li
+                  className={`page-item ${
+                    currentPage === totalPages ? "disabled" : ""
+                  }`}
+                >
+                  <button
+                    className="page-link"
+                    onClick={() => changePage(currentPage + 1)}
+                  >
                     Next
                   </button>
                 </li>
@@ -236,34 +333,62 @@ const UserDashboard = () => {
         }}
       >
         <DialogTitle sx={{ fontWeight: "bold", fontSize: "1.25rem" }}>
-          Calling Lawyer...
+          {currentCall ? "Ongoing Call" : "Calling Lawyer..."}
         </DialogTitle>
 
         <DialogContent>
-          <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
-            <Avatar sx={{ bgcolor: "#1976d2", width: 72, height: 72 }}>
-              <PhoneInTalkIcon sx={{ fontSize: 40 }} />
-            </Avatar>
-
-            <CircularProgress color="primary" />
-
-            <Typography variant="h6" fontWeight="bold">
-              {selectedLawyer?.lawyer_name}
-            </Typography>
-
-            <Typography>Email: {selectedLawyer?.email_id}</Typography>
-            <Typography>Phone: {selectedLawyer?.contact_no}</Typography>
-            <Typography>Bar Council No: {selectedLawyer?.bar_council_reg_no}</Typography>
-            <Typography>State Reg No: {selectedLawyer?.state_council_reg_no}</Typography>
-
-            <Box display="flex" gap={2} mt={3}>
-              <Button variant="contained" color="error" onClick={handleClose}>
-                Cancel
-              </Button>
-              <Button variant="contained" color="primary" onClick={() => console.log("Call Started")}>
-                Connect
-              </Button>
-            </Box>
+          <Box
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            gap={2}
+          >
+            {currentCall ? (
+              <>
+                <Avatar sx={{ bgcolor: "green", width: 72, height: 72 }}>
+                  <PhoneInTalkIcon sx={{ fontSize: 40 }} />
+                </Avatar>
+                <Typography variant="h6" fontWeight="bold">
+                  Call Connected
+                </Typography>
+                <Typography>With: {selectedLawyer?.lawyer_name}</Typography>
+                <Button
+                  variant="contained"
+                  color="error"
+                  onClick={() => {
+                    console.log(
+                      "📴 Ending call with",
+                      selectedLawyer.lawyer_name
+                    );
+                    endCall();
+                    handleClose();
+                  }}
+                >
+                  End Call
+                </Button>
+              </>
+            ) : (
+              <>
+                <CircularProgress color="primary" />
+                <Typography variant="h6" fontWeight="bold">
+                  Calling {selectedLawyer?.lawyer_name}
+                </Typography>
+                <Typography>Connecting to lawyer...</Typography>
+                <Button
+                  variant="contained"
+                  color="error"
+                  onClick={() => {
+                    console.log(
+                      "❌ Canceling call to",
+                      selectedLawyer.lawyer_name
+                    );
+                    handleClose();
+                  }}
+                >
+                  Cancel Call
+                </Button>
+              </>
+            )}
           </Box>
         </DialogContent>
       </Dialog>

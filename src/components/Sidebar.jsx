@@ -11,17 +11,17 @@ import {
 import logo from "../assets/images/logo_t.png";
 import { useEffect, useState } from "react";
 import { useCallContext } from "../Context/CallContext";
-import { disconnectSocket } from "../Socket/socket";
+
 
 const Sidebar = ({ open }) => {
   const location = useLocation();
   const [role, setRole] = useState(null);
   const navigate = useNavigate();
-  const { socket, setSocket } = useCallContext();
+  const { disconnectSocket } = useCallContext();
 
   useEffect(() => {
     const storedRole = localStorage.getItem("userRole");
-    if (storedRole === "admin" || storedRole === "lawyer" || storedRole === "user") {
+    if (storedRole === "admin" || storedRole === "lawyer" || storedRole === "business_owner") {
       setRole(storedRole);
     } else {
       navigate("/login");
@@ -60,22 +60,22 @@ const Sidebar = ({ open }) => {
       roles: ["admin", "lawyer"],
     },
     {
-      text: "Lawyers",
+      text: "All Lawyers",
       icon: <AddIcon className="me-2" />,
-      path: "/profile",
-      roles: ["user"],
+      path: "/dashboard",
+      roles: ["business_owner"],//add here one more role for personal use
     },
     {
       text: "AI ChatBot",
       icon: <AddIcon className="me-2" />,
-      path: "/profile",
-      roles: ["user"],
+      path: "/chat-bot",
+      roles: ["business_owner"],//add here one more role for personal use
     },
   ];
 
   const handleLogout = () => {
-    disconnectSocket();
-    setSocket(null)
+    disconnectSocket();   // 👈 Disconnect the socket
+    // setSocket(null);
     localStorage.clear();
     navigate("/");
   };

@@ -4,13 +4,13 @@ import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useNavigate } from "react-router-dom";
-import { disconnectSocket } from "../Socket/socket";
 import { useCallContext } from "../Context/CallContext";
+
 
 const Navbar = ({ toggleSidebar }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const navigate = useNavigate();
-  const { socket, setSocket } = useCallContext();
+  const { disconnectSocket, setSocket } = useCallContext();
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -21,8 +21,8 @@ const Navbar = ({ toggleSidebar }) => {
   };
 
   const handleLogout = () => {
-    disconnectSocket();
-    setSocket(null); 
+    disconnectSocket();   // 👈 Disconnect the socket
+    // setSocket(null);
     localStorage.clear();
     navigate("/");
     handleMenuClose();

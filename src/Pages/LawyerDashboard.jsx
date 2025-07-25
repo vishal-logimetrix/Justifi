@@ -7,7 +7,8 @@ import { toast } from "react-toastify";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import CaseStatusChart from "../components/Dashboard/CaseStatusChart";
 import CaseTypeChart from "../components/Dashboard/CaseTypeChart";
-import { connectSocket, getSocket, disconnectSocket } from "../Socket/socket";
+import { useCallContext } from "../Context/CallContext";
+// import { connectSocket, getSocket, disconnectSocket } from "../Socket/socket";
 
 
 const getGreeting = () => {
@@ -34,6 +35,16 @@ const LawyerDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [chartLoading, setChartLoading] = useState(true);
   const [socketConnected, setSocketConnected] = useState(false);
+    const {
+      isConnected,
+      initializeSocket,
+      callLawyer,
+      currentCall,
+      incomingCall,
+      acceptCall,
+      rejectCall,
+      endCall,
+    } = useCallContext();
 
 
   const user = JSON.parse(localStorage.getItem("user")) || { 
@@ -41,49 +52,50 @@ const LawyerDashboard = () => {
   };
   const greeting = `${getGreeting()}`;
 
-  useEffect(() => {
-    fetchCases();
-    initSocket();
-    
-    return () => {
-      // Clean up socket connection on unmount
-      const socket = getSocket();
-      if (socket) {
-        socket.off('connect');
-        socket.off('disconnect');
-      }
-    };
-  }, []);
+    useEffect(() => {
+      fetchCases();
+      
+      // Only try to initialize if not connected AND Dashboard didn't already initialize
+      // if (!isConnected) {
+      //   const token = localStorage.getItem("token");
+      //   if (token) {
+      //     console.log("🔌 Initializing socket in UserDashboard (fallback)");
+      //     initializeSocket(token);
+      //   } else {
+      //     console.warn("⚠️ No token available for socket connection");
+      //   }
+      // }
+    }, []);
 
 
-    const initSocket = () => {
-    try {
-      // Connect to socket with authentication token
-      const token = localStorage.getItem('token');
-      connectSocket(token);
+  //   const initSocket = () => {
+  //   try {
+  //     // Connect to socket with authentication token
+  //     const token = localStorage.getItem('token');
+  //     connectSocket(token);
       
-      const socket = getSocket();
+  //     const socket = getSocket();
       
-      if (socket) {
-        // Set up connection status handlers
-        socket.on('connect', () => {
-          console.log('Socket connected');
-          setSocketConnected(true);
-        });
+  //     if (socket) {
+  //       // Set up connection status handlers
+  //       socket.on('connect', () => {
+  //         console.log('Socket connected');
+  //         setSocketConnected(true);
+  //       });
         
-        socket.on('disconnect', () => {
-          console.log('Socket disconnected');
-          setSocketConnected(false);
-        });
+  //       socket.on('disconnect', () => {
+  //         console.log('Socket disconnected');
+  //         setSocketConnected(false);
+  //       });
         
-        // Set initial connection status
-        setSocketConnected(socket.connected);
-      }
-    } catch (err) {
-      console.error('Socket connection error:', err);
-      toast.error('Failed to connect to real-time service');
-    }
-  };
+  //       // Set initial connection status
+  //       setSocketConnected(socket.connected);
+  //     }
+  //   } catch (err) {
+  //     console.error('Socket connection error:', err);
+  //     toast.error('Failed to connect to real-time service');
+  //   }
+  // };
 
 
   const fetchCases = async () => {
@@ -203,12 +215,12 @@ const LawyerDashboard = () => {
 
   
   // Reconnect socket if disconnected
-  const handleReconnectSocket = () => {
-    if (!socketConnected) {
-      disconnectSocket();
-      initSocket();
-    }
-  };
+  // const handleReconnectSocket = () => {
+  //   if (!socketConnected) {
+  //     disconnectSocket();
+  //     initSocket();
+  //   }
+  // };
 
 
   return (
@@ -245,7 +257,7 @@ const LawyerDashboard = () => {
           placement="left"
         >
           <IconButton 
-            onClick={handleReconnectSocket}
+            // onClick={handleReconnectSocket}
             size="small"
             sx={{ 
               color: socketConnected ? 'limegreen' : 'error.main',
