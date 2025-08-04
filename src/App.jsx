@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import './App.css';
 import Layout from './Layout/Layout';
 import Login from './Pages/Login';
-import LawyerRegistration from './Pages/LawyerRegistration';
+// import LawyerRegistration from './Pages/LawyerRegistration';
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Dashboard from './Pages/Dashboard';
@@ -16,6 +16,17 @@ import AskQuery from './Pages/AskQuery';
 import OfflinePage from './Pages/OfflinePage';
 import { CallProvider } from './Context/CallContext';
 import ChatBot from './Pages/ChatBot';
+import SupremeCourt from './Pages/SupremeCourt';
+import HighCourt from './Pages/HighCourt';
+import DistrictCourt from './Pages/DistrictCourt';
+import UserRegister from './Pages/UserRegister';
+import ChatHistory from './Pages/ChatHistory';
+import LawyerList from './Pages/LawyerList';
+import LawyerOptions from './Pages/LawyerOptions';
+import LawyerCaseDetails from './components/Dashboard/LawyerCaseDetails';
+import LawyerCasesList from './components/Dashboard/LawyerCaseList';
+import LawyerProfile from './Pages/LawyerProfile';
+
 
 
 function App() {
@@ -55,10 +66,20 @@ function App() {
           <Route path="/ask-query" element={<AskQuery />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/register/supreme-court" element={<SupremeCourt />} />
+          <Route path="/register/high-court" element={<HighCourt />} />
+          <Route path="/register/district-court" element={<DistrictCourt />} />
+          <Route path="/register/user" element={<UserRegister />} />
+          <Route path="/register/lawyer-options" element={<LawyerOptions />} />
           <Route path='' element={<Layout />}>
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/lawyer-list" element={<LawyerList />} />
             <Route path="/call" element={<Call />} />
+            <Route path="/case-list" element={<LawyerCasesList />} />
+            <Route path="/cases/:id" element={<LawyerCaseDetails />} />
             <Route path="/chat-bot" element={<ChatBot />} />
+            <Route path="/chat-history" element={<ChatHistory />} />
+            <Route path="/lawyer-profile" element={<LawyerProfile />} />
           </Route>
           <Route path="*" element={<PageNotFound />} />
         </Routes>

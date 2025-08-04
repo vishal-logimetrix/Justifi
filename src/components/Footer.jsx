@@ -25,10 +25,10 @@ const Footer = () => {
             <h6 className="text-uppercase fw-semibold mb-3">Quick Links</h6>
             <ul className="list-unstyled small">
               <li><Link to="/" className="text-white text-decoration-none">Home</Link></li>
-              <li><Link to="/find-lawyer" className="text-white text-decoration-none">Find a Lawyer</Link></li>
               <li><Link to="/ask-query" className="text-white text-decoration-none">Ask a Query</Link></li>
-              <li><Link to="/for-advocates" className="text-white text-decoration-none">For Advocates</Link></li>
+              {/* <li><Link to="/for-advocates" className="text-white text-decoration-none">For Advocates</Link></li> */}
               <li><Link to="/about" className="text-white text-decoration-none">About Us</Link></li>
+              <li><Link to="/register" className="text-white text-decoration-none">Register</Link></li>
             </ul>
           </div>
 

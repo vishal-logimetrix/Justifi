@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LawyerBasicForm from "../components/LawyerRegistration/LawyerBasicForm";
 import LawyerDocsForm from "../components/LawyerRegistration/LawyerDocsForm";
-import bgImg from "../assets/images/img1.png";
+// import bgImg from "../assets/images/img1.png";
 
 const LawyerRegistration = ({onDocsSuccess}) => {
   const navigate = useNavigate();

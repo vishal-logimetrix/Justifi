@@ -45,32 +45,44 @@ const AboutUs = () => {
       setTeamMembers([
         {
           id: 1,
-          name: "Raj Sharma",
-          role: "Founder & CEO",
-          bio: "Former corporate lawyer with 15+ years experience in commercial litigation.",
-          img: "https://randomuser.me/api/portraits/men/32.jpg",
+          name: "Rohit Patt",
+          role: "CEO",
+          bio: "With a strategic vision and analytical mindset, Rohit drives innovation and growth at Justifi.",
+          img: "https://randomuser.me/api/portraits/women/68.jpg",
+          linkedIn: "https://www.linkedin.com/in/rohit-patt-16a2a331/",
         },
         {
           id: 2,
-          name: "Priya Patel",
+          name: "Sandipan Basu",
           role: "CTO",
-          bio: "Tech entrepreneur with expertise in legal tech platforms and AI solutions.",
-          img: "https://randomuser.me/api/portraits/women/44.jpg",
+          bio: "Sandipan brings a wealth of experience in architecting and developing scalable, high-performance technology solutions.",
+          img: "https://randomuser.me/api/portraits/men/32.jpg",
+          linkedIn: "https://www.linkedin.com/in/sandipan-basu-b67323335/",
         },
         {
           id: 3,
-          name: "Arjun Mehta",
-          role: "Head of Legal Network",
-          bio: "Managed legal networks across India for over a decade.",
-          img: "https://randomuser.me/api/portraits/men/67.jpg",
+          name: "Avinash Acharya",
+          role: "CLO",
+          bio: "A seasoned advocate at the Rajasthan High Court, Avinash brings deep expertise in constitutional and corporate law.",
+          img: "https://randomuser.me/api/portraits/women/44.jpg",
+          linkedIn: "https://www.linkedin.com/in/avinash-acharya-6202a461/",
         },
         {
           id: 4,
-          name: "Ananya Singh",
-          role: "Customer Success",
-          bio: "Dedicated to ensuring every client has a seamless experience.",
-          img: "https://randomuser.me/api/portraits/women/68.jpg",
+          name: "Richa Rai",
+          role: "CXO",
+          bio: "Former Deloitte principal consultant leveraging finance and business leadership to enhance customer experience.",
+          img: "https://randomuser.me/api/portraits/men/67.jpg",
+          linkedIn: "https://www.linkedin.com/in/richa-rai-94036123/",
         },
+        // {
+        //   id: 5,
+        //   name: "Neha Verma",
+        //   role: "Advisory Board",
+        //   bio: "Neha brings strategic insight and expertise across legal, tech, and business domains to the advisory board.",
+        //   img: "https://randomuser.me/api/portraits/women/12.jpg",
+        //   linkedIn: "https://www.linkedin.com/in/neha-verma-0423/",
+        // },
       ]);
 
       setLoading(false);
@@ -155,7 +167,12 @@ const AboutUs = () => {
                 <div className="flex-shrink-0">
                   <div
                     className="rounded-circle d-flex align-items-center justify-content-center"
-                    style={{ width: "60px", height: "60px", background:'linear-gradient(135deg, #007bff 0%, #00c6ff 100%)' }}
+                    style={{
+                      width: "60px",
+                      height: "60px",
+                      background:
+                        "linear-gradient(135deg, #007bff 0%, #00c6ff 100%)",
+                    }}
                   >
                     <BarChart className="text-white" size={24} />
                   </div>
@@ -258,10 +275,12 @@ const AboutUs = () => {
                 <div key={value.id} className="col-md-6 col-lg-3">
                   <div className="card h-100 border-0 shadow-sm">
                     <div className="card-body p-4 text-center">
-                      <div className="icon-md rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
-                      style={{
-                        background:'linear-gradient(135deg, #007bff 0%, #00c6ff 100%)'
-                      }}
+                      <div
+                        className="icon-md rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                        style={{
+                          background:
+                            "linear-gradient(135deg, #007bff 0%, #00c6ff 100%)",
+                        }}
                       >
                         {/* Replaced Bootstrap icons with Lucide icons */}
                         {value.icon === "bi bi-globe" && (
@@ -315,31 +334,47 @@ const AboutUs = () => {
 
           <div className="row g-4 justify-content-center">
             {teamMembers.map((member) => (
-              <div key={member.id} className="col-md-6 col-lg-3">
-                <div className="card h-100 border-0 shadow-sm team-card">
+              <div key={member.id} className="col-sm-6 col-lg-4 col-xl-3">
+                <div className="card h-100 shadow-sm">
                   <img
                     src={member.img}
                     className="card-img-top"
                     alt={member.name}
                     style={{ height: "250px", objectFit: "cover" }}
                   />
-                  <div className="card-body text-center p-4">
+                  <div className="card-body d-flex flex-column">
                     <h5
-                      className="card-title fw-bold mb-1"
+                      className="card-title text-center fw-bold"
                       style={{ color: "#000080" }}
                     >
                       {member.name}
                     </h5>
-                    <p className="text-primary mb-3">{member.role}</p>
-                    <p className="card-text">{member.bio}</p>
-                    <div className="mt-3">
-                      <a href="#" className="text-decoration-none me-2">
-                        <i className="bi bi-linkedin text-muted"></i>
-                      </a>
-                      <a href="#" className="text-decoration-none">
-                        <i className="bi bi-twitter text-muted"></i>
-                      </a>
-                    </div>
+                    <p className="text-center text-primary fw-semibold mb-2">
+                      {member.role}
+                    </p>
+                    <p
+                      className="card-text text-muted flex-grow-1"
+                      style={{
+                        display: "-webkit-box",
+                        WebkitLineClamp: 4,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                      }}
+                    >
+                      {member.bio}
+                    </p>
+                    {member.linkedIn && (
+                      <div className="text-center mt-3">
+                        <a
+                          href={member.linkedIn}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn btn-outline-primary btn-sm"
+                        >
+                          <i className="bi bi-linkedin me-1"></i> LinkedIn
+                        </a>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

@@ -1,216 +1,204 @@
-import React, { useState } from "react";
-import {
-  Scale,
-  Briefcase,
-  FileText,
-  Calendar,
-  BarChart2,
-  ShieldCheck,
-} from "lucide-react";
+import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
-import LawyerRegistration from "./LawyerRegistration";
+import {
+  User,
+  Scale,
+  ChevronRight,
+  Shield,
+  BookOpen,
+  Users,
+  Briefcase,
+} from "lucide-react";
 import Header from "../components/Header";
-import UserRegister from "../components/UserRegister/UserRegister";
-import logo from "../assets/images/logo_t.png"
+import Footer from "../components/Footer";
 
 const Register = () => {
-  const [activeTab, setActiveTab] = useState("lawyer");
   const navigate = useNavigate();
 
-  const onRegisterSuccess = () => {
-    toast.success("Registration Success");
-    navigate("/login");
-  };
+  const registrationOptions = [
+    {
+      id: "user",
+      name: "General User",
+      description:
+        "Access legal services, track cases, find professionals, and manage documents",
+      icon: <User size={48} className="text-primary" />,
+      color: "bg-primary",
+      route: "/register/user",
+      features: [
+        "Case status tracking",
+        "Document templates",
+        "Legal professional directory",
+        "Resource library access",
+      ],
+      buttonText: "Register as User",
+    },
+    {
+      id: "lawyer",
+      name: "Legal Professional",
+      description:
+        "Access case management tools, legal resources, and professional networking",
+      icon: <Scale size={48} className="text-primary" />,
+      color: "bg-info",
+      route: "/register/lawyer-options",
+      features: [
+        "Case management dashboard",
+        "Legal research tools",
+        "Document automation",
+        "Client management",
+      ],
+      buttonText: "Proceed as Lawyer",
+    },
+  ];
 
   return (
     <>
       <Header />
-      <div className="container-fluid vh-100 p-0">
-        <div className="row g-0 h-100">
-          {/* Left Side - Info */}
-          <div
-            className="col-lg-7 p-4 p-lg-5 d-flex flex-column justify-content-center text-white position-relative overflow-hidden"
-            style={{
-              background: "linear-gradient(to right, #007bff, #0056b3)",
-            }}
-          >
-            <div
-              className="position-absolute top-0 end-0 bg-warning opacity-10 rounded-circle"
-              style={{
-                width: "300px",
-                height: "300px",
-                transform: "translate(150px, -150px)",
-              }}
-            ></div>
-            <div
-              className="position-absolute bottom-0 start-0 bg-success opacity-10 rounded-circle"
-              style={{
-                width: "400px",
-                height: "400px",
-                transform: "translate(-200px, 200px)",
-              }}
-            ></div>
-            <div
-              className="position-absolute top-50 start-0 bg-info opacity-10"
-              style={{
-                width: "150px",
-                height: "150px",
-                transform: "translate(-50%, -50%) rotate(45deg)",
-              }}
-            ></div>
-
-            <div className="position-relative z-1">
-              <div className="d-flex align-items-center mb-4 mt-5">
-                <div className="bg-primary p-3 rounded-circle d-flex align-items-center justify-content-center me-3">
-                  <Scale size={36} className="text-white" />
-                </div>
-                <h1 className="display-4 fw-bold mb-0">
-                  <img src={logo} alt="logo" />
-                </h1>
-                {/* <h1 className="display-4 fw-bold mb-0">JUSTIFI</h1> */}
-              </div>
-
-              <p className="lead mb-5 text-light opacity-75">
-                The premier platform for legal professionals to manage cases,
-                clients, and credentials with unparalleled efficiency.
-              </p>
-
-              <div className="row g-4 mb-5">
-                <div className="col-md-6">
-                  <div className="d-flex align-items-start">
-                    <div className="bg-primary p-2 rounded-circle d-flex align-items-center justify-content-center me-3 mt-1">
-                      <Briefcase size={20} className="text-white" />
-                    </div>
-                    <div>
-                      <h5 className="fw-bold">Case Management</h5>
-                      <p className="small mb-0">
-                        Organize and track all your cases with intuitive tools
-                        designed for legal workflows.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="col-md-6">
-                  <div className="d-flex align-items-start">
-                    <div className="bg-primary p-2 rounded-circle d-flex align-items-center justify-content-center me-3 mt-1">
-                      <FileText size={20} className="text-white" />
-                    </div>
-                    <div>
-                      <h5 className="fw-bold">Document Automation</h5>
-                      <p className="small mb-0">
-                        Generate legal documents in seconds with our AI-powered
-                        templates.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="col-md-6">
-                  <div className="d-flex align-items-start">
-                    <div className="bg-primary p-2 rounded-circle d-flex align-items-center justify-content-center me-3 mt-1">
-                      <Calendar size={20} className="text-white" />
-                    </div>
-                    <div>
-                      <h5 className="fw-bold">Calendar & Docketing</h5>
-                      <p className="small mb-0">
-                        Never miss a deadline with automated court date tracking
-                        and reminders.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="col-md-6">
-                  <div className="d-flex align-items-start">
-                    <div className="bg-primary p-2 rounded-circle d-flex align-items-center justify-content-center me-3 mt-1">
-                      <BarChart2 size={20} className="text-white" />
-                    </div>
-                    <div>
-                      <h5 className="fw-bold">Billing & Accounting</h5>
-                      <p className="small mb-0">
-                        Streamline time tracking, invoicing, and financial
-                        reporting.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="border border-light border-opacity-10 p-4 rounded-3 shadow-lg">
-                <div className="d-flex align-items-center mb-2">
-                  <ShieldCheck className="me-2 text-primary" size={20} />
-                  <h5 className="fw-bold mb-0">Bar Association Verified</h5>
-                </div>
-                <p className="mb-0 small opacity-75">
-                  Trusted by over 25,000 legal professionals across 42 states.
-                  Compliant with ABA standards and state bar requirements.
+      <div className="bg-light min-vh-100" style={{ marginTop: "100px" }}>
+        <section
+          className="hero-section py-5"
+          style={{
+            background:
+              "linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1507679799987-c73779587ccf?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80') no-repeat center center / cover",
+            color: "white",
+            marginTop: "80px",
+          }}
+        >
+          <div className="container py-5">
+            <div className="row justify-content-center">
+              <div className="col-lg-8 text-center">
+                <h1 className="display-4 fw-bold mb-4">Register</h1>
+                <p className="lead mb-5">
+                  Transforming access to justice in India through innovation,
+                  technology, and a nationwide network of legal professionals.
                 </p>
+                {/* <a href="#our-story" className="btn btn-success btn-lg me-2">Our Story</a>
+              <a href="#our-team" className="btn btn-outline-light btn-lg">Meet Our Team</a> */}
               </div>
             </div>
           </div>
+        </section>
 
-          {/* Right Side - Toggle Registration */}
-          <div
-            className="col-lg-5 d-flex align-items-center justify-content-center p-4 p-md-3 bg-light"
-            style={{ overflowX: "scroll" }}
-          >
-            <div className="w-100" style={{ height: "90vh" }}>
-              <div className="text-center mt-5">
-                <div className="d-flex justify-content-center mb-3">
-                  <div className="bg-primary p-3 rounded-circle d-flex align-items-center justify-content-center">
-                    <Scale size={32} className="text-white" />
+        {/* Hero Section */}
+        <div className="py-6 py-md-8 bg-white mt-5 mb-5">
+          <div className="container">
+            <div className="row align-items-center">
+              <div className="col-lg-6 text-center text-lg-start mb-5 mb-lg-0">
+                <h1 className="display-5 fw-bold mb-3">
+                  Join Our Legal Network
+                </h1>
+                <p className="lead text-muted mb-4">
+                  Register as a legal professional or general user to access our
+                  comprehensive legal platform designed for all participants in
+                  the judicial system.
+                </p>
+                <div className="d-flex flex-wrap gap-2 mb-4">
+                  <div className="d-flex align-items-center me-4">
+                    <Shield className="text-primary me-2" size={20} />
+                    <span>Secure Platform</span>
+                  </div>
+                  <div className="d-flex align-items-center me-4">
+                    <BookOpen className="text-success me-2" size={20} />
+                    <span>Legal Resources</span>
+                  </div>
+                  <div className="d-flex align-items-center">
+                    <Users className="text-info me-2" size={20} />
+                    <span>Professional Network</span>
                   </div>
                 </div>
-                <h2 className="fw-bold text-dark">Create Your Account</h2>
-                <p className="text-muted">
-                  Join our network of legal professionals
-                </p>
               </div>
-
-              <div className="d-flex justify-content-center mb-3">
-                <button
-                  className={`btn me-2 ${
-                    activeTab === "lawyer"
-                      ? "btn-primary"
-                      : "btn-outline-primary"
-                  }`}
-                  onClick={() => setActiveTab("lawyer")}
-                >
-                  Lawyer Registration
-                </button>
-                <button
-                  className={`btn ${
-                    activeTab === "user" ? "btn-primary" : "btn-outline-primary"
-                  }`}
-                  onClick={() => setActiveTab("user")}
-                >
-                  User Registration
-                </button>
-              </div>
-
-              <div className="">
-                {activeTab === "lawyer" ? (
-                  <LawyerRegistration onDocsSuccess={onRegisterSuccess} />
-                ) : (
-                  <UserRegister onSuccess={onRegisterSuccess} />
-                )}
-              </div>
-
-              <div className="text-center pt-3 border-top border-dark border-opacity-10">
-                <p className="text-dark mb-2">Already have an account?</p>
-                <Link
-                  to="/login"
-                  className="text-muted"
-                  style={{ textDecoration: "none" }}
-                >
-                  Login
-                </Link>
+              <div className="col-lg-6 mb-3">
+                <div className="bg-primary text-white rounded-3 p-4 p-lg-5 shadow mt-3 mb-5">
+                  <div className="d-flex align-items-center mb-4">
+                    <div className="bg-white p-3 rounded-circle me-3">
+                      <Scale size={32} className="text-primary" />
+                    </div>
+                    <h2 className="mb-0">Account Registration</h2>
+                  </div>
+                  <p className="mb-4">
+                    Select your registration type to begin. Each registration
+                    provides access to specialized tools and resources designed
+                    for your specific needs within the legal ecosystem.
+                  </p>
+                  <div className="bg-white bg-opacity-25 p-3 rounded">
+                    <div className="d-flex align-items-center mb-2">
+                      <Briefcase className="me-2" size={20} />
+                      <strong>Already registered?</strong>
+                    </div>
+                    <Link
+                      to="/login"
+                      className="text-white d-flex align-items-center"
+                    >
+                      Sign in to your account{" "}
+                      <ChevronRight className="ms-1" size={18} />
+                    </Link>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Registration Options */}
+        <div className="py-5 py-md-7">
+          <div className="container">
+            <div className="text-center mb-5">
+              <span className="badge bg-primary bg-opacity-10 text-primary py-2 px-3 mb-3">
+                Registration Portal
+              </span>
+              <h2 className="fw-bold mb-3">How Would You Like to Register?</h2>
+              <p className="text-muted mx-auto" style={{ maxWidth: "600px" }}>
+                Choose the registration path that matches your relationship with
+                India's legal system
+              </p>
+            </div>
+
+            <div className="row justify-content-center g-4">
+              {registrationOptions.map((option) => (
+                <div key={option.id} className="col-lg-5 col-md-8">
+                  <div className="card h-100 border-0 shadow-sm">
+                    <div
+                      className={`${option.color} text-white py-4 px-4 text-center`}
+                    >
+                      <div className="bg-white bg-opacity-25 p-3 rounded-circle d-inline-flex">
+                        {option.icon}
+                      </div>
+                      <h3 className="mt-3 mb-0">{option.name}</h3>
+                    </div>
+                    <div className="card-body">
+                      <p className="text-muted mb-4">{option.description}</p>
+
+                      <div className="mb-4">
+                        <h6 className="fw-bold mb-3">Key Features:</h6>
+                        <ul className="list-unstyled">
+                          {option.features.map((feature, idx) => (
+                            <li key={idx} className="d-flex mb-2">
+                              <span
+                                className="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center me-3"
+                                style={{ width: "24px", height: "24px" }}
+                              >
+                                <ChevronRight size={14} />
+                              </span>
+                              <span>{feature}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <button
+                        onClick={() => navigate(option.route)}
+                        className={`btn ${option.color} text-white w-100 d-flex align-items-center justify-content-center`}
+                      >
+                        {option.buttonText}{" "}
+                        <ChevronRight className="ms-2" size={16} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <Footer />
       </div>
     </>
   );

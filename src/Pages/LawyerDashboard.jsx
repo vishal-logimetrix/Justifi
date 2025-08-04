@@ -1,15 +1,24 @@
-// src/pages/LawyerDashboard.jsx
 import { useEffect, useState } from "react";
-import { Gavel, TaskAlt, PendingActions, Lock, Circle } from "@mui/icons-material";
-import { Box, Button, Typography, CircularProgress, Skeleton, Tooltip, IconButton } from "@mui/material";
+import {
+  Gavel,
+  TaskAlt,
+  PendingActions,
+  Lock,
+  Circle,
+} from "@mui/icons-material";
+import {
+  Button,
+  CircularProgress,
+  Skeleton,
+  Tooltip,
+  IconButton,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import CaseStatusChart from "../components/Dashboard/CaseStatusChart";
 import CaseTypeChart from "../components/Dashboard/CaseTypeChart";
 import { useCallContext } from "../Context/CallContext";
-// import { connectSocket, getSocket, disconnectSocket } from "../Socket/socket";
-
+import IndiaStateMap from "../components/IndiaStateMap";
 
 const getGreeting = () => {
   const hour = new Date().getHours();
@@ -34,81 +43,49 @@ const LawyerDashboard = () => {
   });
   const [loading, setLoading] = useState(true);
   const [chartLoading, setChartLoading] = useState(true);
-  const [socketConnected, setSocketConnected] = useState(false);
-    const {
-      isConnected,
-      initializeSocket,
-      callLawyer,
-      currentCall,
-      incomingCall,
-      acceptCall,
-      rejectCall,
-      endCall,
-    } = useCallContext();
+  const { isConnected } = useCallContext();
 
+  const [stateData, setStateData] = useState({});
 
-  const user = JSON.parse(localStorage.getItem("user")) || { 
-    fullname: "John Doe" 
+  const user = JSON.parse(localStorage.getItem("user")) || {
+    fullname: "John Doe",
   };
   const greeting = `${getGreeting()}`;
 
-    useEffect(() => {
-      fetchCases();
-      
-      // Only try to initialize if not connected AND Dashboard didn't already initialize
-      // if (!isConnected) {
-      //   const token = localStorage.getItem("token");
-      //   if (token) {
-      //     console.log("🔌 Initializing socket in UserDashboard (fallback)");
-      //     initializeSocket(token);
-      //   } else {
-      //     console.warn("⚠️ No token available for socket connection");
-      //   }
-      // }
-    }, []);
+  useEffect(() => {
+    fetchCases();
+  }, []);
 
+  useEffect(() => {
+    const dummyData = [
+      { state_name: "Maharashtra", active_cases: 12, closed_cases: 30 },
+      { state_name: "Karnataka", active_cases: 7, closed_cases: 20 },
+      { state_name: "Andhra Pradesh", active_cases: 15, closed_cases: 25 },
+    ];
 
-  //   const initSocket = () => {
-  //   try {
-  //     // Connect to socket with authentication token
-  //     const token = localStorage.getItem('token');
-  //     connectSocket(token);
-      
-  //     const socket = getSocket();
-      
-  //     if (socket) {
-  //       // Set up connection status handlers
-  //       socket.on('connect', () => {
-  //         console.log('Socket connected');
-  //         setSocketConnected(true);
-  //       });
-        
-  //       socket.on('disconnect', () => {
-  //         console.log('Socket disconnected');
-  //         setSocketConnected(false);
-  //       });
-        
-  //       // Set initial connection status
-  //       setSocketConnected(socket.connected);
-  //     }
-  //   } catch (err) {
-  //     console.error('Socket connection error:', err);
-  //     toast.error('Failed to connect to real-time service');
-  //   }
-  // };
+    const mapped = {};
+    dummyData.forEach((item) => {
+      mapped[item.state_name] = {
+        active: item.active_cases,
+        closed: item.closed_cases,
+      };
+    });
 
+    setStateData(mapped);
+  }, []);
+
+  const handleStateClick = (name, data) => {
+    alert(`Clicked state: ${name}`);
+    console.log("Clicked State:", name, data);
+  };
 
   const fetchCases = async () => {
     setLoading(true);
     setChartLoading(true);
 
     try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Dummy data - replace with actual API call when ready
-      // const data = await getRequest("/cases/dashboard");
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       const dummyData = {
         recentCases: [
           {
@@ -119,7 +96,11 @@ const LawyerDashboard = () => {
             type: "civil",
             createdAt: "2023-10-15",
             updatedAt: "2023-11-20",
-            client: { name: "Acme Corp", mobile: "8272374673", email: 'Acme@gmail.com' }
+            client: {
+              name: "Acme Corp",
+              mobile: "8272374673",
+              email: "Acme@gmail.com",
+            },
           },
           {
             _id: "2",
@@ -129,7 +110,11 @@ const LawyerDashboard = () => {
             type: "civil",
             createdAt: "2023-11-01",
             updatedAt: "2023-11-18",
-            client: { name: "Jane Smith", mobile: "7652374673", email: 'Jane@gmail.com'  }
+            client: {
+              name: "Jane Smith",
+              mobile: "7652374673",
+              email: "Jane@gmail.com",
+            },
           },
           {
             _id: "3",
@@ -139,7 +124,11 @@ const LawyerDashboard = () => {
             type: "criminal",
             createdAt: "2023-09-10",
             updatedAt: "2023-11-15",
-            client: { name: "John Doe", mobile: "9862374673", email: 'John@gmail.com'  }
+            client: {
+              name: "John Doe",
+              mobile: "9862374673",
+              email: "John@gmail.com",
+            },
           },
           {
             _id: "4",
@@ -149,7 +138,11 @@ const LawyerDashboard = () => {
             type: "family",
             createdAt: "2023-11-05",
             updatedAt: "2023-11-17",
-            client: { name: "Robert Johnson", mobile: "5672374673", email: 'robert@gmail.com'  }
+            client: {
+              name: "Robert Johnson",
+              mobile: "5672374673",
+              email: "robert@gmail.com",
+            },
           },
           {
             _id: "5",
@@ -159,8 +152,12 @@ const LawyerDashboard = () => {
             type: "civil",
             createdAt: "2023-10-25",
             updatedAt: "2023-11-16",
-            client: { name: "Tech Innovations Ltd", mobile: "7864374673", email: 'techInnovation@gmail.com'  }
-          }
+            client: {
+              name: "Tech Innovations Ltd",
+              mobile: "7864374673",
+              email: "techInnovation@gmail.com",
+            },
+          },
         ],
         totalCases: 24,
         active: 8,
@@ -168,13 +165,14 @@ const LawyerDashboard = () => {
         closed: 6,
         civil: 12,
         criminal: 7,
-        family: 5
+        family: 5,
       };
+
 
       const sorted = [...dummyData.recentCases]
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
         .slice(0, 5);
-      
+
       setCases(sorted);
       setTotalCounts({
         totalCases: dummyData.totalCases,
@@ -199,194 +197,121 @@ const LawyerDashboard = () => {
 
   const { totalCases, active, pending, closed } = totalCounts;
 
-  // Card skeleton loader
   const CardSkeleton = () => (
-    <div className="custom-card flex-fill cursor-pointer">
-      <div className="card-body">
-        <Skeleton variant="circular" width={60} height={90} />
-        <div className="flex-grow-1 ms-3">
-          <Skeleton variant="text" width="60%" height={40} />
-          <Skeleton variant="text" width="40%" height={50} />
-          <Skeleton variant="text" width="80%" height={30} />
+    <div className="card border-0 shadow-sm h-100">
+      <div className="card-body d-flex align-items-center">
+        <Skeleton variant="circular" width={40} height={40} />
+        <div className="ms-3">
+          <Skeleton variant="text" width={100} height={24} />
+          <Skeleton variant="text" width={60} height={32} />
         </div>
       </div>
     </div>
   );
 
-  
-  // Reconnect socket if disconnected
-  // const handleReconnectSocket = () => {
-  //   if (!socketConnected) {
-  //     disconnectSocket();
-  //     initSocket();
-  //   }
-  // };
-
-
   return (
-    <div className="container-fluid">
-      {/* Welcome Banner */}
-      <Box
-        className="ps-3 mb-4"
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 1.5,
-          background: "linear-gradient(135deg, #1976d2, #0d47a1)",
-          borderRadius: "8px",
-          px: 3,
-          py: 2,
-          boxShadow: "0 4px 12px rgba(25, 118, 210, 0.2)",
-          fontSize: { xs: "1.1rem", md: "1.25rem" },
-          fontWeight: 600,
-          color: "white",
-        }}
-      >
+    <div className="container-fluid px-4 py-3">
+      {/* Header Section */}
+      <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
-          {greeting}{" "}
-          <span className="text-warning text-capitalize fs-5">
-            {user?.fullname?.split(" ")[0] || "Counsel"} 👋
-          </span>
+          <h2 className="mb-1">Legal Case Management</h2>
+          <p className="text-muted mb-0">
+            {greeting}, <span className="text-primary">{user?.fullname?.split(" ")[0] || "Counsel"}</span>
+          </p>
         </div>
-
-        <Tooltip 
-          title={socketConnected 
-            ? "Connected to real-time service" 
-            : "Disconnected from real-time service"
-          }
-          placement="left"
-        >
-          <IconButton 
-            // onClick={handleReconnectSocket}
-            size="small"
-            sx={{ 
-              color: socketConnected ? 'limegreen' : 'error.main',
-              '&:hover': {
-                backgroundColor: 'rgba(255,255,255,0.1)'
-              }
-            }}
+        <div className="d-flex align-items-center">
+          {/* <Tooltip
+            title={
+              isConnected
+                ? "Connected to real-time service"
+                : "Disconnected from real-time service"
+            }
           >
-            <Circle fontSize="small" />
-          </IconButton>
-        </Tooltip>
-        
-      </Box>
-
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <Typography variant="h5" fontWeight={700}>
-          Legal Case Management Dashboard
-        </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={fetchCases}
-          disabled={loading}
-        >
-          Refresh Data
-        </Button>
+            <IconButton className="me-3">
+              <Circle style={{ color: isConnected ? "#28a745" : "#dc3545" }} />
+            </IconButton>
+          </Tooltip> */}
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={fetchCases}
+            disabled={loading}
+            size="small"
+            className="shadow-sm"
+          >
+            Refresh Data
+          </Button>
+        </div>
       </div>
 
-      <hr className="mb-4" />
-
-      {/* Cards Row */}
+      {/* Stats Cards */}
       <div className="row g-4 mb-4">
-        {/* Total Cases */}
-        <div className="col-12 col-md-3 d-flex">
+        <div className="col-md-6 col-lg-3">
           {loading ? (
             <CardSkeleton />
           ) : (
-            <div
-              className="custom-card bg-gradient-primary flex-fill cursor-pointer"
-              style={{ minHeight: "150px" }}
-            >
-              <div className="card-body">
-                <div
-                  className="custom-card-icon"
-                  style={{ color: "var(--bs-primary)" }}
-                >
-                  <Gavel fontSize="large" />
+            <div className="card border-0 shadow-sm h-100">
+              <div className="card-body d-flex align-items-center">
+                <div className="bg-primary bg-opacity-10 p-3 rounded-circle me-3">
+                  <Gavel className="text-primary" />
                 </div>
                 <div>
-                  <p>Total Cases</p>
-                  <h5>{totalCases}</h5>
-                  <small className="text-muted">
-                    Overall case portfolio.
-                  </small>
+                  <h6 className="text-muted mb-1">Total Cases</h6>
+                  <h3 className="mb-0">{totalCases}</h3>
                 </div>
               </div>
             </div>
           )}
         </div>
 
-        {/* Active Cases */}
-        <div className="col-12 col-md-3 d-flex">
+        <div className="col-md-6 col-lg-3">
           {loading ? (
             <CardSkeleton />
           ) : (
-            <div className="custom-card bg-gradient-success flex-fill cursor-pointer">
-              <div className="card-body">
-                <div
-                  className="custom-card-icon"
-                  style={{ color: "var(--bs-success)" }}
-                >
-                  <TaskAlt fontSize="large" />
+            <div className="card border-0 shadow-sm h-100">
+              <div className="card-body d-flex align-items-center">
+                <div className="bg-success bg-opacity-10 p-3 rounded-circle me-3">
+                  <TaskAlt className="text-success" />
                 </div>
                 <div>
-                  <p>Active Cases</p>
-                  <h5>{active}</h5>
-                  <small className="text-muted">
-                    Currently being litigated.
-                  </small>
+                  <h6 className="text-muted mb-1">Active Cases</h6>
+                  <h3 className="mb-0">{active}</h3>
                 </div>
               </div>
             </div>
           )}
         </div>
 
-        {/* Pending Cases */}
-        <div className="col-12 col-md-3 d-flex">
+        <div className="col-md-6 col-lg-3">
           {loading ? (
             <CardSkeleton />
           ) : (
-            <div className="custom-card bg-gradient-warning flex-fill cursor-pointer">
-              <div className="card-body">
-                <div
-                  className="custom-card-icon"
-                  style={{ color: "var(--bs-warning)" }}
-                >
-                  <PendingActions fontSize="large" />
+            <div className="card border-0 shadow-sm h-100">
+              <div className="card-body d-flex align-items-center">
+                <div className="bg-warning bg-opacity-10 p-3 rounded-circle me-3">
+                  <PendingActions className="text-warning" />
                 </div>
                 <div>
-                  <p>Pending Cases</p>
-                  <h5>{pending}</h5>
-                  <small className="text-muted">
-                    Awaiting court action.
-                  </small>
+                  <h6 className="text-muted mb-1">Pending Cases</h6>
+                  <h3 className="mb-0">{pending}</h3>
                 </div>
               </div>
             </div>
           )}
         </div>
 
-        {/* Closed Cases */}
-        <div className="col-12 col-md-3 d-flex">
+        <div className="col-md-6 col-lg-3">
           {loading ? (
             <CardSkeleton />
           ) : (
-            <div className="custom-card bg-gradient-danger flex-fill cursor-pointer">
-              <div className="card-body">
-                <div
-                  className="custom-card-icon"
-                  style={{ color: "var(--bs-danger)" }}
-                >
-                  <Lock fontSize="large" />
+            <div className="card border-0 shadow-sm h-100">
+              <div className="card-body d-flex align-items-center">
+                <div className="bg-danger bg-opacity-10 p-3 rounded-circle me-3">
+                  <Lock className="text-danger" />
                 </div>
                 <div>
-                  <p>Closed Cases</p>
-                  <h5>{closed}</h5>
-                  <small className="text-muted">
-                    Resolved or dismissed.
-                  </small>
+                  <h6 className="text-muted mb-1">Closed Cases</h6>
+                  <h3 className="mb-0">{closed}</h3>
                 </div>
               </div>
             </div>
@@ -396,54 +321,45 @@ const LawyerDashboard = () => {
 
       {/* Charts Section */}
       <div className="row g-4 mb-4">
-        {/* Case Status Chart */}
-        <div className="col-lg-6">
-          <div className="card h-100 shadow-sm border-0 rounded-1">
+        <div className="col-lg-7">
+          <div className="card border-0 shadow-sm h-100">
             <div className="card-header bg-white border-bottom py-3">
-              <h6 className="mb-0 fw-bold">Case Status Distribution</h6>
+              <h5 className="mb-0">Case Distribution by State</h5>
             </div>
-            <div className="card-body d-flex justify-content-center align-items-center position-relative">
+            <div className="card-body">
               {chartLoading ? (
-                <div className="d-flex flex-column align-items-center justify-content-center h-100">
-                  <CircularProgress color="primary" />
-                  <p className="mt-3 text-muted">Loading case data...</p>
+                <div className="d-flex justify-content-center align-items-center" style={{ height: '400px' }}>
+                  <CircularProgress />
                 </div>
-              ) : active > 0 || pending > 0 || closed > 0 ? (
-                <CaseStatusChart
-                  active={active}
-                  pending={pending}
-                  closed={closed}
-                />
               ) : (
-                <div className="d-flex flex-column align-items-center justify-content-center h-100">
-                  <p className="text-muted">No case data available</p>
+                <div style={{ height: '400px' }}>
+                  <IndiaStateMap
+                    districtData={stateData}
+                    onDistrictClick={handleStateClick}
+                  />
                 </div>
               )}
             </div>
           </div>
         </div>
 
-        {/* Case Type Chart */}
-        <div className="col-lg-6">
-          <div className="card h-100 shadow-sm border-0 rounded-1">
+        <div className="col-lg-5">
+          <div className="card border-0 shadow-sm h-100">
             <div className="card-header bg-white border-bottom py-3">
-              <h6 className="mb-0 fw-bold">Case Type Distribution</h6>
+              <h5 className="mb-0">Case Type Distribution</h5>
             </div>
-            <div className="card-body d-flex justify-content-center align-items-center position-relative">
+            <div className="card-body">
               {chartLoading ? (
-                <div className="d-flex flex-column align-items-center justify-content-center h-100">
-                  <CircularProgress color="primary" />
-                  <p className="mt-3 text-muted">Loading case types...</p>
+                <div className="d-flex justify-content-center align-items-center" style={{ height: '400px' }}>
+                  <CircularProgress />
                 </div>
-              ) : caseTypes.civil > 0 || caseTypes.criminal > 0 || caseTypes.family > 0 ? (
-                <CaseTypeChart
-                  civil={caseTypes.civil}
-                  criminal={caseTypes.criminal}
-                  family={caseTypes.family}
-                />
               ) : (
-                <div className="d-flex flex-column align-items-center justify-content-center h-100">
-                  <p className="text-muted">No case type data available</p>
+                <div style={{ height: '400px' }}>
+                  <CaseTypeChart
+                    civil={caseTypes.civil}
+                    criminal={caseTypes.criminal}
+                    family={caseTypes.family}
+                  />
                 </div>
               )}
             </div>
@@ -451,61 +367,53 @@ const LawyerDashboard = () => {
         </div>
       </div>
 
-      {/* Recent Cases Table */}
-      <div className="card shadow border rounded-0">
-        <div className="card-header d-flex justify-content-between align-items-center p-3 bg-white">
-          <h6 className="mb-0 fw-bold">Recent Cases</h6>
-          <div className="d-flex align-items-center">
-            {loading && <CircularProgress size={20} className="me-2" />}
-            <span className="text-muted small">Latest {cases.length} records</span>
+      {/* Recent Cases */}
+      <div className="card border-0 shadow-sm">
+        <div className="card-header bg-white border-bottom py-3">
+          <div className="d-flex justify-content-between align-items-center">
+            <h5 className="mb-0">Recent Cases</h5>
+            <span className="text-muted small">
+              {loading ? <CircularProgress size={20} /> : `Showing ${cases.length} records`}
+            </span>
           </div>
         </div>
         <div className="card-body p-0">
           <div className="table-responsive">
-            <table className="table table-hover mb-0">
+            <table className="table table-hover align-middle">
               <thead className="table-light">
                 <tr>
-                  <th className="px-4">Case ID</th>
-                  <th>Case Title</th>
+                  <th>Case ID</th>
+                  <th>Title</th>
                   <th>Status</th>
                   <th>Type</th>
-                  <th>Open Date</th>
-                  <th>Last Update</th>
                   <th>Client</th>
-                  <th>Mobile</th>
-                  <th>Email</th>
-                  {/* <th className="text-end px-4">Action</th> */}
+                  <th>Opened</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="8" className="text-center py-5">
-                      <CircularProgress color="primary" />
+                    <td colSpan="6" className="text-center py-5">
+                      <CircularProgress />
                       <p className="mt-2 text-muted">Loading cases...</p>
                     </td>
                   </tr>
-                ) : (
+                ) : cases.length > 0 ? (
                   cases.map((caseItem) => (
-                    <tr key={caseItem._id} className="align-middle">
-                      <td className="px-4 fw-medium">{caseItem.caseId}</td>
-                      <td
-                        className="text-truncate"
-                        style={{ maxWidth: "250px" }}
-                        title={caseItem.title}
-                      >
-                        {caseItem.title}
+                    <tr key={caseItem._id}>
+                      <td className="fw-medium">{caseItem.caseId}</td>
+                      <td>
+                        <div className="d-flex flex-column">
+                          <span className="fw-medium">{caseItem.title}</span>
+                          <small className="text-muted">{caseItem.client?.email}</small>
+                        </div>
                       </td>
                       <td>
-                        <span
-                          className={`badge rounded-pill ${
-                            caseItem.status === "closed"
-                              ? "bg-success"
-                              : caseItem.status === "pending"
-                              ? "bg-warning text-dark"
-                              : "bg-primary"
-                          }`}
-                        >
+                        <span className={`badge rounded-pill ${
+                          caseItem.status === "closed" ? "bg-success" :
+                          caseItem.status === "pending" ? "bg-warning" :
+                          "bg-primary"
+                        }`}>
                           {caseItem.status.charAt(0).toUpperCase() + caseItem.status.slice(1)}
                         </span>
                       </td>
@@ -515,41 +423,22 @@ const LawyerDashboard = () => {
                         </span>
                       </td>
                       <td>
+                        <div className="d-flex flex-column">
+                          <span>{caseItem.client?.name || "Unassigned"}</span>
+                          <small className="text-muted">{caseItem.client?.mobile}</small>
+                        </div>
+                      </td>
+                      <td>
                         {new Date(caseItem.createdAt).toLocaleDateString("en-US", {
                           month: "short",
                           day: "numeric",
-                          year: "numeric"
                         })}
                       </td>
-                      <td>
-                        {new Date(caseItem.updatedAt).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric"
-                        })}
-                      </td>
-                      <td>{caseItem.client?.name || "Unassigned"}</td>
-                      <td>{caseItem.client?.mobile || "Unassigned"}</td>
-                      <td>{caseItem.client?.email || "Unassigned"}</td>
-                      {/* <td>
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          onClick={() =>
-                            navigate(`/dashboard/case/${caseItem._id}`)
-                          }
-                          startIcon={<VisibilityIcon />}
-                          className="shadow-sm"
-                        >
-                          View
-                        </Button>
-                      </td> */}
                     </tr>
                   ))
-                )}
-                {cases.length === 0 && !loading && (
+                ) : (
                   <tr>
-                    <td colSpan="8" className="text-center py-4 text-muted">
+                    <td colSpan="6" className="text-center py-4 text-muted">
                       No cases found
                     </td>
                   </tr>

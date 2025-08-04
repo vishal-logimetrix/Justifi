@@ -1,121 +1,195 @@
 import { useState } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Paper, IconButton, Dialog, Avatar, Typography, Box, DialogContent, DialogTitle, Button
-} from '@mui/material';
-import PersonIcon from '@mui/icons-material/Person';
-import InfoIcon from '@mui/icons-material/Info';
-
-// Dummy data: received call logs
-const receivedCalls = [
-  {
-    id: 1,
-    name: "John Doe",
-    email: "john@example.com",
-    phone: "1234567890",
-    time: "2025-07-18 14:32",
-    duration: 125, // in seconds
-  },
-  {
-    id: 2,
-    name: "Jane Smith",
-    email: "jane@example.com",
-    phone: "9876543210",
-    time: "2025-07-17 10:12",
-    duration: 235,
-  },
-  {
-    id: 3,
-    name: "Alice Johnson",
-    email: "alice@example.com",
-    phone: "5551234567",
-    time: "2025-07-16 16:45",
-    duration: 80,
-  },
-];
-
-const formatTime = (seconds) => {
-  const m = String(Math.floor(seconds / 60)).padStart(2, '0');
-  const s = String(seconds % 60).padStart(2, '0');
-  return `${m}:${s}`;
-};
+import { format } from 'date-fns';
+import Modal from '@mui/material/Modal';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 
 const Call = () => {
-  const [openDialog, setOpenDialog] = useState(false);
+  const receivedCalls = [
+    {
+      id: 1,
+      name: "John Doe",
+      email: "john@example.com",
+      phone: "1234567890",
+      time: "2025-07-18T14:32:00",
+      duration: 125,
+      caseReference: "CASE-1001",
+      status: "Completed"
+    },
+    {
+      id: 2,
+      name: "Jane Smith",
+      email: "jane@example.com",
+      phone: "9876543210",
+      time: "2025-07-17T10:12:00",
+      duration: 235,
+      caseReference: "CASE-1002",
+      status: "Missed"
+    },
+    {
+      id: 3,
+      name: "Alice Johnson",
+      email: "alice@example.com",
+      phone: "5551234567",
+      time: "2025-07-16T16:45:00",
+      duration: 80,
+      caseReference: "CASE-1003",
+      status: "Completed"
+    },
+  ];
+
   const [selectedCall, setSelectedCall] = useState(null);
 
-  const handleViewDetails = (call) => {
-    setSelectedCall(call);
-    setOpenDialog(true);
+  const formatTime = (seconds) => {
+    const m = String(Math.floor(seconds / 60)).padStart(2, '0');
+    const s = String(seconds % 60).padStart(2, '0');
+    return `${m}:${s}`;
   };
 
-  const handleClose = () => {
-    setOpenDialog(false);
-    setSelectedCall(null);
+  const getStatusBadge = (status) => {
+    const classes = {
+      Completed: "bg-success",
+      Missed: "bg-danger",
+      Scheduled: "bg-warning text-dark"
+    };
+    return <span className={`badge ${classes[status] || 'bg-secondary'} rounded-pill`}>{status}</span>;
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <Typography variant="h5" gutterBottom>Received Calls</Typography>
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead sx={{ backgroundColor: "#f5f5f5" }}>
-            <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Phone</TableCell>
-              <TableCell>Time</TableCell>
-              <TableCell>Duration</TableCell>
-              <TableCell>Details</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {receivedCalls.map((call) => (
-              <TableRow key={call.id}>
-                <TableCell>{call.name}</TableCell>
-                <TableCell>{call.email}</TableCell>
-                <TableCell>{call.phone}</TableCell>
-                <TableCell>{call.time}</TableCell>
-                <TableCell>{formatTime(call.duration)}</TableCell>
-                <TableCell>
-                  <IconButton color="primary" onClick={() => handleViewDetails(call)}>
-                    <InfoIcon />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+    <div className="container-fluid py-4">
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2 className="mb-0">Call History</h2>
+        <div className="d-flex">
+          <button className="btn btn-outline-secondary me-2">
+            <i className="bi bi-filter me-1"></i> Filter
+          </button>
+          <button className="btn btn-primary">
+            <i className="bi bi-download me-1"></i> Export
+          </button>
+        </div>
+      </div>
 
-      {/* Details Dialog */}
-      <Dialog
-        open={openDialog}
-        onClose={handleClose}
-        PaperProps={{
-          sx: { borderRadius: 3, minWidth: 350, p: 2, textAlign: 'center' },
-        }}
+      <div className="card shadow-sm border-0">
+        <div className="card-body p-0">
+          <div className="table-responsive">
+            <table className="table table-hover align-middle mb-0">
+              <thead className="table-light">
+                <tr>
+                  <th width="180px">Call Time</th>
+                  <th>Client</th>
+                  <th>Case Reference</th>
+                  <th>Duration</th>
+                  <th>Status</th>
+                  <th width="100px" className="text-end">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {receivedCalls.map((call) => (
+                  <tr key={call.id}>
+                    <td>
+                      <div className="d-flex flex-column">
+                        <span className="fw-medium">{format(new Date(call.time), 'MMM d, yyyy')}</span>
+                        <small className="text-muted">{format(new Date(call.time), 'h:mm a')}</small>
+                      </div>
+                    </td>
+                    <td>
+                      <div className="d-flex align-items-center">
+                        <div
+                          className="me-2 d-flex align-items-center justify-content-center bg-primary text-white rounded-circle"
+                          style={{ width: '32px', height: '32px', fontSize: '14px' }}
+                        >
+                          {call.name.charAt(0)}
+                        </div>
+                        <div>
+                          <div className="fw-medium">{call.name}</div>
+                          <small className="text-muted">{call.phone}</small>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="text-primary">{call.caseReference}</td>
+                    <td>{formatTime(call.duration)}</td>
+                    <td>{getStatusBadge(call.status)}</td>
+                    <td className="text-end">
+                      <button
+                        className="btn btn-sm btn-outline-primary"
+                        onClick={() => setSelectedCall(call)}
+                      >
+                        <i className="bi bi-eye"></i> View
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* MUI Modal */}
+      <Modal
+        open={!!selectedCall}
+        onClose={() => setSelectedCall(null)}
+        aria-labelledby="call-details-modal"
       >
-        <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.2rem' }}>
-          Call Details
-        </DialogTitle>
-        <DialogContent>
-          <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
-            <Avatar sx={{ bgcolor: "#1976d2", width: 72, height: 72 }}>
-              <PersonIcon sx={{ fontSize: 40 }} />
-            </Avatar>
-            <Typography variant="h6" fontWeight="bold">
-              {selectedCall?.name}
-            </Typography>
-            <Typography>Email: {selectedCall?.email}</Typography>
-            <Typography>Phone: {selectedCall?.phone}</Typography>
-            <Typography>Time: {selectedCall?.time}</Typography>
-            <Typography>Duration: {formatTime(selectedCall?.duration || 0)}</Typography>
-            <Button variant="contained" sx={{ mt: 2 }} onClick={handleClose}>
-              Close
-            </Button>
-          </Box>
-        </DialogContent>
-      </Dialog>
+        <Box
+          sx={{
+            maxWidth: 500,
+            bgcolor: 'background.paper',
+            p: 4,
+            mx: 'auto',
+            mt: '10%',
+            borderRadius: 2,
+            boxShadow: 24,
+          }}
+        >
+          {selectedCall && (
+            <>
+              <div className="text-center mb-4">
+                <div
+                  className="mx-auto mb-3 d-flex align-items-center justify-content-center bg-primary text-white rounded-circle"
+                  style={{ width: '64px', height: '64px', fontSize: '24px' }}
+                >
+                  {selectedCall.name.charAt(0)}
+                </div>
+                <h5 className="mb-1">{selectedCall.name}</h5>
+                <p className="text-muted mb-3">{selectedCall.email}</p>
+              </div>
+
+              <ul className="list-group list-group-flush">
+                <li className="list-group-item d-flex justify-content-between">
+                  <span className="text-muted">Phone</span>
+                  <span className="fw-medium">{selectedCall.phone}</span>
+                </li>
+                <li className="list-group-item d-flex justify-content-between">
+                  <span className="text-muted">Call Time</span>
+                  <span className="fw-medium">
+                    {format(new Date(selectedCall.time), 'MMM d, yyyy h:mm a')}
+                  </span>
+                </li>
+                <li className="list-group-item d-flex justify-content-between">
+                  <span className="text-muted">Duration</span>
+                  <span className="fw-medium">{formatTime(selectedCall.duration)}</span>
+                </li>
+                <li className="list-group-item d-flex justify-content-between">
+                  <span className="text-muted">Case Reference</span>
+                  <span className="fw-medium text-primary">{selectedCall.caseReference}</span>
+                </li>
+                <li className="list-group-item d-flex justify-content-between">
+                  <span className="text-muted">Status</span>
+                  {getStatusBadge(selectedCall.status)}
+                </li>
+              </ul>
+
+              <div className="mt-4 d-flex justify-content-end gap-2">
+                <Button variant="outlined" onClick={() => setSelectedCall(null)}>Close</Button>
+                <Button variant="contained" startIcon={<i className="bi bi-telephone"></i>}>
+                  Call Back
+                </Button>
+              </div>
+            </>
+          )}
+        </Box>
+      </Modal>
     </div>
   );
 };

@@ -13,96 +13,95 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Header from "../components/Header";
 import logo from "../assets/images/logo_t.png";
+import bgImage from "../assets/images/12.jpg";
 import axios from "axios";
 
-axios.defaults.baseURL = import.meta.env.VITE_API_URL_USER
+axios.defaults.baseURL = import.meta.env.VITE_API_URL_USER;
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
- 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  console.log("Login attempt with:", { email, password, rememberMe });
 
-  // Static Admin Login
-  if (email === "admin@justifi.com" && password === "admin123") {
-    const user = {
-      id: "admin-001",
-      fullname: "Admin User",
-      email,
-      role: "admin",
-      avatar: "/default-avatar.png",
-    };
-    localStorage.setItem("user", JSON.stringify(user));
-    localStorage.setItem("userRole", "admin");
-    setTimeout(() => {
-      navigate("/dashboard");
-    }, 50);
-    return;
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    console.log("Login attempt with:", { email, password, rememberMe });
 
-  // Static Lawyer Login
-  if (email === "lawyer@justifi.com" && password === "lawyer123") {
-    const user = {
-      id: "lawyer-001",
-      fullname: "Lawyer User",
-      email,
-      role: "lawyer",
-      avatar: "/lawyer-avatar.png",
-    };
-    localStorage.setItem("user", JSON.stringify(user));
-    localStorage.setItem("userRole", "lawyer");
-    setTimeout(() => {
-      navigate("/dashboard");
-    }, 50);
-    return;
-  }
+    // Static Admin Login
+    if (email === "admin@justifi.com" && password === "admin123") {
+      const user = {
+        id: "admin-001",
+        fullname: "Admin User",
+        email,
+        role: "admin",
+        avatar: "/default-avatar.png",
+      };
+      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("userRole", "admin");
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 50);
+      return;
+    }
 
-  // Dynamic API Login for other users
-  try {
-    const response = await axios.post("users/user/login", {
-      email,
-      password,
-    });
+    // Static Lawyer Login
+    if (email === "lawyer@justifi.com" && password === "lawyer123") {
+      const user = {
+        id: "lawyer-001",
+        fullname: "Lawyer User",
+        email,
+        role: "lawyer",
+        avatar: "/lawyer-avatar.png",
+      };
+      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("userRole", "lawyer");
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 50);
+      return;
+    }
 
-    const { token, user } = response.data;
+    // Dynamic API Login for other users
+    try {
+      const response = await axios.post("users/user/login", {
+        email,
+        password,
+      });
 
-    const fullUser = {
-      id: user.user_id,
-      fullname: `${user.first_name} ${user.last_name}`,
-      email: user.email,
-      role: user.user_type, // e.g., "business_owner"
-      avatar: "/default-avatar.png", // Placeholder; update if available from API
-      token,
-    };
+      const { token, user } = response.data;
 
-    localStorage.setItem("user", JSON.stringify(fullUser));
-    localStorage.setItem("userRole", user.user_type); // e.g., "business_owner"
-    localStorage.setItem("authToken", token);
-    localStorage.setItem("token", token);
+      const fullUser = {
+        id: user.user_id,
+        fullname: `${user.first_name} ${user.last_name}`,
+        email: user.email,
+        role: user.user_type, // e.g., "business_owner"
+        avatar: "/default-avatar.png", // Placeholder; update if available from API
+        token,
+      };
 
+      localStorage.setItem("user", JSON.stringify(fullUser));
+      localStorage.setItem("userRole", user.user_type); // e.g., "business_owner"
+      localStorage.setItem("authToken", token);
+      localStorage.setItem("token", token);
 
-    toast.success("Login successful!");
-    setTimeout(() => {
-      navigate("/dashboard");
-    }, 100);
-
-  } catch (error) {
-    console.error("Login API Error:", error);
-    toast.error(
-      error.response?.data?.message || "Login failed. Please check credentials."
-    );
-  }
-};
-
+      toast.success("Login successful!");
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 100);
+    } catch (error) {
+      console.error("Login API Error:", error);
+      toast.error(
+        error.response?.data?.message ||
+          "Login failed. Please check credentials."
+      );
+    }
+  };
 
   return (
     <>
       <Header />
-      <div className="container-fluid vh-100 p-0">
+      <div className="container-fluid vh-100 p-0 " style={{marginTop: '50px'}}>
         <div className="row g-0 h-100">
           {/* Left Side - Enhanced Lawyer Info */}
           <div
@@ -139,7 +138,7 @@ const handleSubmit = async (e) => {
 
             {/* Content */}
             <div className="position-relative z-1">
-              <div className="d-flex align-items-center mb-4 mt-5">
+              <div className="d-flex align-items-center mb-4">
                 <div className="bg-primary p-3 rounded-circle d-flex align-items-center justify-content-center me-3">
                   <Scale size={36} className="text-white" />
                 </div>
@@ -232,13 +231,21 @@ const handleSubmit = async (e) => {
           </div>
 
           {/* Right Side - Enhanced Login Form */}
-          <div className="col-lg-5 d-flex align-items-center justify-content-center p-4 p-md-5 bg-light">
+          <div
+            className="col-lg-5 d-flex align-items-center justify-content-center p-4 p-md-5 position-relative"
+            style={{
+              background: `linear-gradient(rgba(151, 149, 149, 0.9), rgba(255,255,255,0.9)), url(${bgImage})`,
+              backgroundSize: "contain",
+              backgroundPosition: "center",
+              backgroundRepeat: 'no-repeat',
+            }}
+          >
             <div className="w-100" style={{ maxWidth: "450px" }}>
-              <div className="text-center mb-5 mt-5">
+              <div className="text-center">
                 <div className="d-flex justify-content-center mb-3">
-                  <div className="bg-primary p-3 rounded-circle d-flex align-items-center justify-content-center">
+                  {/* <div className="bg-primary p-3 rounded-circle d-flex align-items-center justify-content-center">
                     <Scale size={32} className="text-white" />
-                  </div>
+                  </div> */}
                 </div>
                 <h2 className="fw-bold text-dark">JUSTIFI</h2>
                 <p className="text-muted">Justice... Simplified.</p>
@@ -292,8 +299,8 @@ const handleSubmit = async (e) => {
                 >
                   Login
                 </button>
-                <div className="text-center mt-4 pt-3 border-top border-dark border-opacity-10">
-                  <p className="text-dark mb-2">New to JUSTIFI?</p>
+                <div className="text-center mt-2 pt-2 border-top border-dark border-opacity-10">
+                  <p className="text-dark">New to JUSTIFI?</p>
                   <Link
                     to="/register"
                     className="btn btn-outline-dark btn-lg w-100"

@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import SendIcon from "@mui/icons-material/Send";
 import CallIcon from "@mui/icons-material/Call";
 import chatBotApi from "../api/chatBotApi";
+import bgImage from "../assets/images/12.jpg";
+
 const ChatBot = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -18,57 +20,49 @@ const ChatBot = () => {
 
   const getBubbleColor = (sensitivity) => {
     switch (sensitivity) {
-      case "Red": return "#ffebee"; // Light red
-      case "Amber": return "#fff8e1"; // Light amber
-      case "Green": return "#e8f5e9"; // Light green
-      default: return "#f0f0f0"; // Default light gray
+      case "Red": return "#ffebee";
+      case "Amber": return "#fff8e1";
+      case "Green": return "#e8f5e9";
+      default: return "#f0f0f0";
     }
   };
 
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
     const userMessage = input.trim();
-    
-    // Add user message
-    const newMessage = { sender: "user", text: userMessage };
-    setMessages((prev) => [...prev, newMessage]);
+
+    setMessages((prev) => [...prev, { sender: "user", text: userMessage }]);
     setInput("");
     setIsLoading(true);
 
     try {
-      // Send to API with correct body format
       const response = await chatBotApi.post(`/chat`, { query: userMessage });
       const botResponse = response.data;
-      
-      // Clean the response text by removing the sensitivity lines
+
       const cleanedResponse = botResponse.response
-        .split('\n')
-        .filter(line => 
-          !line.includes('Case Sensitivity Level:') && 
-          !line.includes('Legal Category:') && 
-          !line.includes('Need Lawyer:')
+        .split("\n")
+        .filter(
+          (line) =>
+            !line.includes("Case Sensitivity Level:") &&
+            !line.includes("Legal Category:") &&
+            !line.includes("Need Lawyer:")
         )
-        .join('\n')
+        .join("\n")
         .trim();
-      
-      // Add bot response with all data
+
       setMessages((prev) => [
-        ...prev, 
-        { 
-          sender: "bot", 
-          text: cleanedResponse,
-          data: botResponse
-        }
+        ...prev,
+        { sender: "bot", text: cleanedResponse, data: botResponse },
       ]);
     } catch (error) {
       console.error("Error:", error);
       setMessages((prev) => [
         ...prev,
-        { 
-          sender: "bot", 
+        {
+          sender: "bot",
           text: "Sorry, I'm having trouble connecting. Please try again later.",
-          isError: true
-        }
+          isError: true,
+        },
       ]);
     } finally {
       setIsLoading(false);
@@ -84,14 +78,10 @@ const ChatBot = () => {
 
   const renderBotResponse = (message) => {
     const { data, text } = message;
-    const sensitivity = data?.case_sensitivity || "";
-    
     return (
       <div style={{ width: "100%" }}>
-        {/* Main response text */}
         <div>{text}</div>
-        
-        {/* Relevant sections table */}
+
         {data?.relevant_sections?.length > 0 && (
           <div style={{ marginTop: 15 }}>
             <div style={{ fontWeight: "bold", marginBottom: 8 }}>Relevant Sections:</div>
@@ -111,8 +101,7 @@ const ChatBot = () => {
             </div>
           </div>
         )}
-        
-        {/* Lawyer suggestions */}
+
         {data?.lawyer_suggestions?.length > 0 && (
           <div style={{ marginTop: 15 }}>
             <div style={{ fontWeight: "bold", marginBottom: 8 }}>Recommended Lawyers:</div>
@@ -135,7 +124,11 @@ const ChatBot = () => {
   return (
     <div style={styles.chatContainer}>
       <div style={styles.chatBox}>
-        <div style={styles.chatHeader}>Chat with LegalBot 🤖</div>
+        {/* ✅ Overlay to blur background inside chat box */}
+        <div style={styles.chatOverlay}></div>
+
+        <div style={styles.chatHeader}>Chat with Rylaw </div>
+        {/* 🤖 */}
         <div style={styles.chatMessages}>
           {messages.map((msg, i) => (
             <div
@@ -148,9 +141,10 @@ const ChatBot = () => {
               <div
                 style={{
                   ...styles.chatBubble,
-                  backgroundColor: msg.sender === "user" 
-                    ? "#d1eaff" 
-                    : getBubbleColor(msg.data?.case_sensitivity),
+                  backgroundColor:
+                    msg.sender === "user"
+                      ? "#d1eaff"
+                      : getBubbleColor(msg.data?.case_sensitivity),
                   borderBottomRightRadius: msg.sender === "user" ? 4 : 20,
                   borderBottomLeftRadius: msg.sender === "bot" ? 4 : 20,
                 }}
@@ -159,8 +153,7 @@ const ChatBot = () => {
               </div>
             </div>
           ))}
-          
-          {/* WhatsApp-style typing indicator */}
+
           {isLoading && (
             <div style={{ ...styles.chatMessage, justifyContent: "flex-start" }}>
               <div style={styles.typingIndicator}>
@@ -170,9 +163,10 @@ const ChatBot = () => {
               </div>
             </div>
           )}
-          
+
           <div ref={messagesEndRef} />
         </div>
+
         <div style={styles.inputContainer}>
           <textarea
             style={styles.textarea}
@@ -183,12 +177,12 @@ const ChatBot = () => {
             rows={1}
             disabled={isLoading}
           />
-          <button 
-            style={{ 
-              ...styles.sendButton, 
+          <button
+            style={{
+              ...styles.sendButton,
               opacity: isLoading ? 0.7 : 1,
-              cursor: isLoading ? "not-allowed" : "pointer"
-            }} 
+              cursor: isLoading ? "not-allowed" : "pointer",
+            }}
             onClick={sendMessage}
             disabled={isLoading}
           >
@@ -208,31 +202,46 @@ const styles = {
     height: "calc(100vh - 100px)",
     backgroundColor: "#f5f5f5",
     padding: "20px",
-    overflowX: "hidden",
   },
   chatBox: {
     width: "100%",
     height: "80vh",
-    backgroundColor: "#ffffff",
+    position: "relative",
+    // backgroundImage: `url(${bgImage})`,
+    backgroundSize: "contain",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
     display: "flex",
     flexDirection: "column",
     borderRadius: "8px",
     boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
+    overflow: "hidden",
+  },
+  chatOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    background: "rgba(255,255,255,0.3)",
+    backdropFilter: "blur(2px)",
+    zIndex: 0,
   },
   chatHeader: {
     padding: "16px",
     borderBottom: "1px solid #eee",
     fontSize: "18px",
     fontWeight: "bold",
-    backgroundColor: "#f0f0f0",
-    position: "sticky",
-    top: 0,
-    zIndex: 1,
+    backgroundColor: "rgba(255,255,255,0.8)",
+    zIndex: 2,
+    position: "relative",
   },
   chatMessages: {
     flexGrow: 1,
     padding: "16px",
     overflowY: "auto",
+    zIndex: 2,
+    position: "relative",
   },
   chatMessage: {
     display: "flex",
@@ -248,10 +257,10 @@ const styles = {
     wordWrap: "break-word",
     overflowWrap: "break-word",
     boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
+    backgroundColor: "rgba(255,255,255,0.9)",
   },
-  // WhatsApp-style typing indicator
   typingIndicator: {
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "rgba(255,255,255,0.7)",
     padding: "12px 16px",
     borderRadius: "20px",
     display: "flex",
@@ -265,6 +274,7 @@ const styles = {
     backgroundColor: "#a0a0a0",
     borderRadius: "50%",
     display: "inline-block",
+    animation: "typingAnimation 1.4s infinite ease-in-out both",
   },
   sectionTable: {
     border: "1px solid #e0e0e0",
@@ -275,9 +285,6 @@ const styles = {
   tableRow: {
     display: "flex",
     borderBottom: "1px solid #e0e0e0",
-    "&:last-child": {
-      borderBottom: "none",
-    },
   },
   tableCell: {
     padding: "8px 12px",
@@ -301,9 +308,10 @@ const styles = {
     display: "flex",
     borderTop: "1px solid #ddd",
     padding: "12px",
-    backgroundColor: "#fff",
+    backgroundColor: "rgba(255,255,255,0.9)",
     position: "sticky",
     bottom: 0,
+    zIndex: 2,
   },
   textarea: {
     flexGrow: 1,
@@ -328,38 +336,22 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    transition: "background-color 0.2s",
-    "&:hover": {
-      backgroundColor: "#0069d9",
-    },
   },
 };
 
-// Add CSS for typing animation
+// Typing animation CSS
 const addStyles = () => {
-  const style = document.createElement('style');
+  const style = document.createElement("style");
   style.textContent = `
     @keyframes typingAnimation {
       0%, 80%, 100% { transform: scale(0); }
       40% { transform: scale(1.0); }
     }
-    
-    .typing-dot {
-      animation: typingAnimation 1.4s infinite ease-in-out both;
-    }
-    
-    .typing-dot:nth-child(1) {
-      animation-delay: -0.32s;
-    }
-    
-    .typing-dot:nth-child(2) {
-      animation-delay: -0.16s;
-    }
+    .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+    .typing-dot:nth-child(2) { animation-delay: -0.16s; }
   `;
   document.head.appendChild(style);
 };
-
-// Inject the styles when component mounts
 addStyles();
 
 export default ChatBot;
