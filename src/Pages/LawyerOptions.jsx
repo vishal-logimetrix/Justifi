@@ -14,17 +14,17 @@ const LawyerOptions = () => {
   const navigate = useNavigate();
 
   const lawyerOptions = [
-    {
-      id: "supreme",
-      name: "Supreme Court",
-      description:
-        "Practice at India's highest judicial authority and constitutional court",
-      icon: <Landmark size={48} className="text-primary" />,
-      color: "bg-primary",
-      route: "/register/supreme-court",
-      jurisdiction: "National Jurisdiction",
-      cases: "Constitutional Matters, Civil & Criminal Appeals",
-    },
+    // {
+    //   id: "supreme",
+    //   name: "Supreme Court",
+    //   description:
+    //     "Practice at India's highest judicial authority and constitutional court",
+    //   icon: <Landmark size={48} className="text-primary" />,
+    //   color: "bg-primary",
+    //   route: "/register/supreme-court",
+    //   jurisdiction: "National Jurisdiction",
+    //   cases: "Constitutional Matters, Civil & Criminal Appeals",
+    // },
     {
       id: "high",
       name: "High Court",

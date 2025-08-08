@@ -168,7 +168,6 @@ const LawyerDashboard = () => {
         family: 5,
       };
 
-
       const sorted = [...dummyData.recentCases]
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
         .slice(0, 5);
@@ -368,7 +367,7 @@ const LawyerDashboard = () => {
       </div>
 
       {/* Recent Cases */}
-      <div className="card border-0 shadow-sm">
+      {/* <div className="card border-0 shadow-sm">
         <div className="card-header bg-white border-bottom py-3">
           <div className="d-flex justify-content-between align-items-center">
             <h5 className="mb-0">Recent Cases</h5>
@@ -447,7 +446,7 @@ const LawyerDashboard = () => {
             </table>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

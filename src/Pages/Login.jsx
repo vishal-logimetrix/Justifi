@@ -8,12 +8,15 @@ import {
   BarChart2,
   FileText,
   Calendar,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Header from "../components/Header";
 import logo from "../assets/images/logo_t.png";
-import bgImage from "../assets/images/12.jpg";
+import bgImage from "../assets/images/img1.png";
+// import bgImage from "../assets/images/12.jpg";
 import axios from "axios";
 
 axios.defaults.baseURL = import.meta.env.VITE_API_URL_USER;
@@ -23,6 +26,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -35,6 +39,7 @@ const Login = () => {
         fullname: "Admin User",
         email,
         role: "admin",
+
         avatar: "/default-avatar.png",
       };
       localStorage.setItem("user", JSON.stringify(user));
@@ -68,7 +73,7 @@ const Login = () => {
         email,
         password,
       });
-
+      console.log(response.data, "**logged in user");
       const { token, user } = response.data;
 
       const fullUser = {
@@ -78,6 +83,9 @@ const Login = () => {
         role: user.user_type, // e.g., "business_owner"
         avatar: "/default-avatar.png", // Placeholder; update if available from API
         token,
+        states: user.states,
+        districts: user.districts,
+
       };
 
       localStorage.setItem("user", JSON.stringify(fullUser));
@@ -101,7 +109,10 @@ const Login = () => {
   return (
     <>
       <Header />
-      <div className="container-fluid vh-100 p-0 " style={{marginTop: '50px'}}>
+      <div
+        className="container-fluid vh-100 p-0 "
+        style={{ marginTop: "50px" }}
+      >
         <div className="row g-0 h-100">
           {/* Left Side - Enhanced Lawyer Info */}
           <div
@@ -234,10 +245,26 @@ const Login = () => {
           <div
             className="col-lg-5 d-flex align-items-center justify-content-center p-4 p-md-5 position-relative"
             style={{
-              background: `linear-gradient(rgba(151, 149, 149, 0.9), rgba(255,255,255,0.9)), url(${bgImage})`,
+              backgroundImage: `url(${bgImage})`,
               backgroundSize: "contain",
               backgroundPosition: "center",
-              backgroundRepeat: 'no-repeat',
+              backgroundRepeat: "no-repeat",
+              backgroundBlendMode: "overlay",
+              backgroundColor: "rgba(255, 255, 255, 0.9)",
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundImage: `url(${bgImage})`,
+                backgroundSize: "contain",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+                opacity: 0.3,
+                zIndex: -1,
+              },
             }}
           >
             <div className="w-100" style={{ maxWidth: "450px" }}>
@@ -272,7 +299,7 @@ const Login = () => {
                     required
                   />
                 </div>
-                <div className="mb-4">
+                <div className="mb-4 position-relative">
                   <label
                     htmlFor="password"
                     className="form-label fw-medium text-dark"
@@ -282,17 +309,26 @@ const Login = () => {
                       Password
                     </div>
                   </label>
-                  <input
-                    type="password"
-                    className="form-control form-control-lg border-1 border-dark border-opacity-10"
-                    id="password"
-                    placeholder="********"
-                    // placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
+                  <div className="position-relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      className="form-control form-control-lg border-1 border-dark border-opacity-10 pe-5"
+                      id="password"
+                      placeholder="********"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                    <span
+                      className="position-absolute top-50 end-0 translate-middle-y me-3 cursor-pointer"
+                      onClick={() => setShowPassword(!showPassword)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </span>
+                  </div>
                 </div>
+
                 <button
                   type="submit"
                   className="btn btn-primary btn-lg w-100 mb-3 fw-bold shadow"

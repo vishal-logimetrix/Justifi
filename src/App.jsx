@@ -76,7 +76,7 @@ function App() {
             <Route path="/lawyer-list" element={<LawyerList />} />
             <Route path="/call" element={<Call />} />
             <Route path="/case-list" element={<LawyerCasesList />} />
-            <Route path="/cases/:id" element={<LawyerCaseDetails />} />
+            <Route path="/cases/:caseId" element={<LawyerCaseDetails />} />
             <Route path="/chat-bot" element={<ChatBot />} />
             <Route path="/chat-history" element={<ChatHistory />} />
             <Route path="/lawyer-profile" element={<LawyerProfile />} />

@@ -41,6 +41,12 @@ const Sidebar = ({ open }) => {
       path: "/dashboard",
       roles: ["admin", "lawyer", "business_owner"],
     },
+        {
+      text: "Case Details",
+      icon: <CaseIcon />,
+      path: "/case-list",
+      roles: ["lawyer"],
+    },
     {
       text: "Call History",
       icon: <HistoryIcon />,
@@ -53,12 +59,7 @@ const Sidebar = ({ open }) => {
       path: "/dashboard/payments",
       roles: ["admin"],
     },
-    {
-      text: "Case Details",
-      icon: <CaseIcon />,
-      path: "/case-list",
-      roles: ["lawyer"],
-    },
+
     {
       text: "All Lawyers",
       icon: <PeopleIcon />,
@@ -71,12 +72,12 @@ const Sidebar = ({ open }) => {
       path: "/chat-history",
       roles: ["business_owner"],
     },
-    {
-      text: "Chat With Rylaw",
-      icon: <BotIcon />,
-      path: "/chat-bot",
-      roles: ["business_owner", "lawyer"],
-    },
+    // {
+    //   text: "Chat With Rylaw",
+    //   icon: <BotIcon />,
+    //   path: "/chat-bot",
+    //   roles: ["business_owner", "lawyer"],
+    // },
     {
       text: "Profile",
       icon: <CaseIcon />,

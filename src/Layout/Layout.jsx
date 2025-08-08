@@ -29,6 +29,8 @@ import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 import { keyframes } from "@emotion/react";
 import chatBotApi from "../api/chatBotApi";
+import bgImg from "../assets/images/img1.png";
+// import bgImg from "../assets/images/img2.png";
 
 // --- Animation Keyframes ---
 const bounce = keyframes`
@@ -51,6 +53,7 @@ const glow = keyframes`
     box-shadow: 0 0 0px rgba(0, 123, 255, 0.4);
   }
 `;
+
 
 const typingAnimation = keyframes`
   0%, 80%, 100% { 
@@ -120,9 +123,9 @@ const DashboardLayout = () => {
             <div style={{ fontWeight: "bold", marginBottom: 8 }}>
               Relevant Sections:
             </div>
-            <TableContainer 
-              sx={{ 
-                maxWidth: "100%", 
+            <TableContainer
+              sx={{
+                maxWidth: "100%",
                 overflowX: "auto",
                 border: "1px solid #e0e0e0",
                 borderRadius: "8px",
@@ -133,7 +136,9 @@ const DashboardLayout = () => {
                   <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
                     <TableCell sx={{ fontWeight: "bold" }}>Section</TableCell>
                     <TableCell sx={{ fontWeight: "bold" }}>Offense</TableCell>
-                    <TableCell sx={{ fontWeight: "bold" }}>Punishment</TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>
+                      Punishment
+                    </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -175,7 +180,13 @@ const DashboardLayout = () => {
                 />
                 <div style={{ overflow: "hidden" }}>
                   <div style={{ fontWeight: "bold" }}>{lawyer.name}</div>
-                  <div style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  <div
+                    style={{
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
                     {lawyer.specialization}
                   </div>
                   <div>{lawyer.phone}</div>
@@ -280,7 +291,9 @@ const DashboardLayout = () => {
             borderRadius: "50%",
             display: "inline-block",
             animation: `${typingAnimation} 1.4s infinite ease-in-out both`,
-            animationDelay: `${index === 0 ? "-0.32s" : index === 1 ? "-0.16s" : "0s"}`,
+            animationDelay: `${
+              index === 0 ? "-0.32s" : index === 1 ? "-0.16s" : "0s"
+            }`,
             margin: "0 3px",
           }}
         />
@@ -295,6 +308,7 @@ const DashboardLayout = () => {
         minHeight: "100vh",
         backgroundColor: theme.palette.background.default,
         transition: sidebarTransition,
+        position: "relative",
       }}
     >
       {renderSidebar()}
@@ -314,9 +328,16 @@ const DashboardLayout = () => {
             p: { xs: 2, md: 3 },
             backgroundColor: theme.palette.background.default,
             minHeight: "calc(100vh - 64px)",
+            overflowX: "hidden",
+            width: "100%",
           }}
         >
-          <Outlet />
+          <main
+            className="outlet-container"
+            style={{ width: "100%", overflowX: "hidden" }}
+          >
+            <Outlet />
+          </main>
         </Box>
 
         {/* Footer */}
@@ -340,25 +361,41 @@ const DashboardLayout = () => {
         </Box>
 
         {/* Chatbot Floating Icon with Animation */}
-        {!chatOpen && (
-          <IconButton
-            onClick={() => setChatOpen(true)}
+        {/* {!chatOpen && ( */}
+        <IconButton
+          onClick={() => setChatOpen(true)}
+          sx={{
+            position: "fixed",
+            bottom: 24,
+            right: 24,
+            zIndex: 1300,
+            backgroundColor: theme.palette.primary.main,
+            color: "#fff",
+            animation: `${bounce} 1.8s infinite, ${glow} 3s infinite`,
+            "&:hover": {
+              backgroundColor: theme.palette.primary.dark,
+            },
+          }}
+          title="Chat With Rylaw"
+        >
+          <ChatIcon fontSize="medium" />
+        </IconButton>
+        {/* )} */}
+
+        {/* Fullscreen Chat Backdrop */}
+        {chatOpen && chatFullscreen && (
+          <Backdrop
+            open={true}
             sx={{
+              zIndex: 1399,
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
               position: "fixed",
-              bottom: 24,
-              right: 24,
-              zIndex: 1300,
-              backgroundColor: theme.palette.primary.main,
-              color: "#fff",
-              animation: `${bounce} 1.8s infinite, ${glow} 3s infinite`,
-              "&:hover": {
-                backgroundColor: theme.palette.primary.dark,
-              },
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
             }}
-            title="Chat With Rylaw"
-          >
-            <ChatIcon fontSize="medium" />
-          </IconButton>
+          />
         )}
 
         {/* Chatbot Window */}
@@ -370,7 +407,7 @@ const DashboardLayout = () => {
               bottom: chatFullscreen ? "50%" : 80,
               right: chatFullscreen ? "50%" : 24,
               transform: chatFullscreen ? "translate(50%, 50%)" : "none",
-              width: chatFullscreen ? "75vw" : 320,
+              width: chatFullscreen ? "60vw" : 320,
               height: chatFullscreen ? "85vh" : 400,
               zIndex: 1400,
               display: "flex",
@@ -378,6 +415,27 @@ const DashboardLayout = () => {
               borderRadius: 2,
               overflow: "hidden",
               transition: "all 0.3s ease-in-out",
+              // Add background image with low opacity
+              backgroundImage: `url(${bgImg})`,
+              backgroundSize: "contain",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
+              backgroundBlendMode: "overlay",
+              backgroundColor: "rgba(255, 255, 255, 0.9)",
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundImage: `url(${bgImg})`,
+                backgroundSize: "contain",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+                opacity: 0.3,
+                zIndex: -1,
+              },
             }}
           >
             {/* Header */}
@@ -389,6 +447,8 @@ const DashboardLayout = () => {
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
+                position: "relative", // Ensure it's above the background
+                zIndex: 1, // Keep header above background
               }}
             >
               <Typography variant="subtitle1">Chat with Rylaw</Typography>
@@ -426,9 +486,11 @@ const DashboardLayout = () => {
                 flex: 1,
                 p: 2,
                 overflowY: "auto",
-                backgroundColor: "#fafafa",
+                backgroundColor: "rgba(250, 250, 250, 0.7)",
                 display: "flex",
                 flexDirection: "column",
+                position: "relative", // Ensure content is above background
+                zIndex: 1, // Keep content above background
               }}
             >
               {messages.length === 0 && (
@@ -512,6 +574,8 @@ const DashboardLayout = () => {
                 display: "flex",
                 gap: 1,
                 backgroundColor: "white",
+                position: "relative", // Ensure it's above the background
+                zIndex: 1, // Keep input area above background
               }}
             >
               <TextField
@@ -540,7 +604,7 @@ const DashboardLayout = () => {
                 sx={{
                   minWidth: "auto",
                   alignSelf: "flex-end",
-                  height: "40px",
+                  height: "32px",
                 }}
               >
                 {isLoading ? (

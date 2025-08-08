@@ -1,287 +1,999 @@
-import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+import { axiosState } from "../../api/axios";
 
 const LawyerCaseDetails = () => {
   const { caseId } = useParams();
-  const [activeTab, setActiveTab] = useState('overview');
+  const [caseDetails, setCaseDetails] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState("overview");
+  const [showDocumentModal, setShowDocumentModal] = useState(false);
+  const [currentDocument, setCurrentDocument] = useState(null);
+  const [documentLoadError, setDocumentLoadError] = useState(false);
+  const [documentHTML, setDocumentHTML] = useState(null);
+  const [pdfBlobUrl, setPdfBlobUrl] = useState(null);
+  const [showPdfModal, setShowPdfModal] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const [pdfLoadError, setPdfLoadError] = useState(false);
+  const [pdfTitle, setPdfTitle] = useState("PDF Preview");
 
-  // Dummy case data - in real app this would come from API
-  const caseData = {
-    id: caseId || "CASE-1001",
-    title: "Breach of Contract",
-    status: "Active",
-    type: "Civil",
-    priority: "High",
-    client: {
-      name: "John Doe",
-      email: "john@example.com",
-      phone: "1234567890",
-      address: "123 Main St, New York, NY 10001"
-    },
-    openedDate: "2025-06-15",
-    lastUpdated: "2025-07-18",
-    description: "The client alleges that the opposing party failed to fulfill contractual obligations regarding software development services.",
-    documents: [
-      { id: 1, name: "Contract Agreement.pdf", date: "2025-06-10", size: "2.4 MB" },
-      { id: 2, name: "Email Correspondence.zip", date: "2025-06-18", size: "1.2 MB" },
-      { id: 3, name: "Meeting Notes.docx", date: "2025-07-05", size: "0.5 MB" }
-    ],
-    timeline: [
-      { id: 1, date: "2025-06-15", event: "Case Opened", description: "Initial consultation with client" },
-      { id: 2, date: "2025-06-20", event: "Documents Submitted", description: "Client provided all required documents" },
-      { id: 3, date: "2025-07-10", event: "Court Filing", description: "Filed complaint in district court" }
-    ],
-    notes: [
-      { id: 1, author: "You", date: "2025-07-15", content: "Client confirmed receipt of initial documents. Waiting for additional evidence." },
-      { id: 2, author: "John Smith", date: "2025-07-10", content: "Prepared court filing documents for review." }
-    ]
-  };
+  useEffect(() => {
+    const fetchDetails = async () => {
+      try {
+        setLoading(true);
+        const response = await axiosState.get(
+          `${import.meta.env.VITE_API_URL_STATE}/api/get-districts-cases/${caseId}`
+        );
+        if (response.data?.status) {
+          setCaseDetails(response.data.data);
+        } else {
+          setError("Case details not found");
+        }
+      } catch (err) {
+        console.error("Error fetching case details:", err);
+        setError("Failed to load case details. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDetails();
+  }, [caseId]);
 
   const getStatusBadge = (status) => {
     const classes = {
+      Win: "bg-success",
+      Lost: "bg-danger",
+      Pending: "bg-warning text-dark",
       Active: "bg-primary",
-      Closed: "bg-success",
-      Pending: "bg-warning text-dark"
+      Closed: "bg-secondary",
     };
-    return <span className={`badge ${classes[status] || 'bg-secondary'} rounded-pill`}>{status}</span>;
+    return (
+      <span
+        className={`badge ${
+          classes[status] || "bg-secondary"
+        } rounded-pill px-3 py-2 fw-medium`}
+      >
+        {status}
+      </span>
+    );
   };
 
-  const getPriorityBadge = (priority) => {
-    const classes = {
-      High: "bg-danger",
-      Medium: "bg-warning text-dark",
-      Low: "bg-secondary"
-    };
-    return <span className={`badge ${classes[priority] || 'bg-light text-dark'} rounded-pill`}>{priority}</span>;
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+
+    // Create a new Date object from the string.
+    // The 'T' in the string indicates it's an ISO 8601 format,
+    // so JavaScript correctly parses it as UTC.
+    const date = new Date(dateString);
+
+    // Check if the date is valid.
+    if (isNaN(date.getTime())) return "Invalid Date";
+
+    // Format the date using UTC methods to prevent timezone conversion.
+    const year = date.getUTCFullYear();
+    const month = date.toLocaleString("en-IN", {
+      month: "short",
+      timeZone: "UTC",
+    });
+    const day = date.getUTCDate();
+
+    return `${day} ${month} ${year}`;
   };
+
+  const openDocumentModal = async (document) => {
+    setCurrentDocument(document);
+    setShowDocumentModal(true);
+    setDocumentLoadError(false);
+    setDocumentHTML(null);
+    setPdfBlobUrl(null);
+
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL_STATE}/fetch/file-data`,
+        { url: document.url },
+        { responseType: "arraybuffer" }
+      );
+
+      const buffer = response.data;
+      const uintArray = new Uint8Array(buffer);
+
+      // Convert first 4–5 bytes to check for %PDF
+      const firstFewBytes = String.fromCharCode(...uintArray.slice(0, 4));
+      console.log("🧪 Magic header:", firstFewBytes);
+
+      if (firstFewBytes === "%PDF") {
+        // ✅ It's a PDF
+        const blob = new Blob([buffer], { type: "application/pdf" });
+        const blobUrl = URL.createObjectURL(blob);
+        setPdfBlobUrl(blobUrl);
+      } else {
+        // 🟡 Try decoding as text/html fallback
+        const decodedText = new TextDecoder("utf-8").decode(buffer);
+
+        // Optional: verify if it looks like HTML (starts with <!DOCTYPE or <html etc.)
+        if (decodedText.trim().startsWith("<")) {
+          setDocumentHTML(decodedText);
+        } else {
+          throw new Error("Unsupported file content");
+        }
+      }
+    } catch (error) {
+      console.error("❌ Error loading document:", error);
+      setDocumentLoadError(true);
+    }
+  };
+
+  const previewPdfBlob = async (document) => {
+    setPdfLoading(true);
+    setPdfBlobUrl(null);
+    setPdfLoadError(false);
+    setPdfTitle(document.name || "PDF Preview");
+    setShowPdfModal(true);
+
+    try {
+      const response = await axios.get(document.url, {
+        responseType: "blob",
+      });
+
+      const contentType = response.headers["content-type"];
+      if (contentType.includes("application/pdf")) {
+        const blob = new Blob([response.data], { type: "application/pdf" });
+        const blobUrl = URL.createObjectURL(blob);
+        setPdfBlobUrl(blobUrl);
+      } else {
+        setPdfLoadError(true);
+      }
+    } catch (error) {
+      console.error("Error loading PDF:", error);
+      setPdfLoadError(true);
+    } finally {
+      setPdfLoading(false);
+    }
+  };
+
+  const closeDocumentModal = () => {
+    setShowDocumentModal(false);
+    setCurrentDocument(null);
+    setDocumentLoadError(false);
+  };
+
+  const back_fun = () => {
+    setShowDocumentModal(false);
+    setCurrentDocument(null);
+    setDocumentLoadError(false);
+  };
+
+  const handleDocumentLoadError = () => {
+    setDocumentLoadError(true);
+  };
+
+  if (loading) {
+    return (
+      <div className="container-fluid py-5">
+        <div
+          className="d-flex flex-column justify-content-center align-items-center"
+          style={{ minHeight: "60vh" }}
+        >
+          <div
+            className="spinner-border text-primary"
+            style={{ width: "3rem", height: "3rem" }}
+            role="status"
+          >
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          <span className="mt-3 fs-5">Loading case details...</span>
+          <p className="text-muted mt-2">
+            Please wait while we fetch the case information
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container-fluid py-5">
+        <div
+          className="alert alert-danger d-flex align-items-center"
+          role="alert"
+        >
+          <i className="bi bi-exclamation-triangle-fill me-3 fs-3"></i>
+          <div>
+            <h5 className="alert-heading">Error Loading Case Details</h5>
+            <p className="mb-0">{error}</p>
+            <button
+              className="btn btn-outline-danger mt-3"
+              onClick={() => window.location.reload()}
+            >
+              <i className="bi bi-arrow-repeat me-2"></i>Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!caseDetails) {
+    return (
+      <div className="container-fluid py-5">
+        <div
+          className="alert alert-warning d-flex align-items-center"
+          role="alert"
+        >
+          <i className="bi bi-exclamation-circle-fill me-3 fs-3"></i>
+          <div>
+            <h5 className="alert-heading">Case Details Not Available</h5>
+            <p className="mb-0">
+              The requested case could not be found or is unavailable at this
+              time.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container-fluid py-4">
+      {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <h2 className="mb-1">Case Details</h2>
-          <nav aria-label="breadcrumb">
-            <ol className="breadcrumb mb-0">
-              <li className="breadcrumb-item"><Link to="/dashboard">Dashboard</Link></li>
-              <li className="breadcrumb-item"><Link to="/cases">Cases</Link></li>
-              <li className="breadcrumb-item active" aria-current="page">{caseData.id}</li>
-            </ol>
-          </nav>
-        </div>
-        <div>
-          <button className="btn btn-outline-secondary me-2">
-            <i className="bi bi-download me-1"></i> Export
-          </button>
-          <button className="btn btn-primary">
-            <i className="bi bi-pencil-square me-1"></i> Edit Case
-          </button>
+          <h1 className="h2 mb-0">Case Details</h1>
         </div>
       </div>
 
-      <div className="card shadow-sm border-0 mb-4">
-        <div className="card-body">
+      {/* Case Summary Card */}
+      <div className="card border-0 shadow-sm mb-4">
+        <div className="card-body p-4">
           <div className="d-flex flex-column flex-md-row align-items-md-center">
             <div className="flex-grow-1 mb-3 mb-md-0">
-              <div className="d-flex align-items-center mb-2">
-                <h3 className="mb-0 me-3">{caseData.title}</h3>
-                {getStatusBadge(caseData.status)}
-                <span className="ms-3">{getPriorityBadge(caseData.priority)}</span>
+              <div className="d-flex flex-wrap align-items-center mb-2">
+                <h2 className="h3 mb-0 me-3">{caseDetails.title}</h2>
+                {getStatusBadge(caseDetails.case_status)}
               </div>
-              <div className="text-muted">
-                <span className="me-3"><i className="bi bi-folder me-1"></i> {caseData.type} Case</span>
-                <span className="me-3"><i className="bi bi-calendar me-1"></i> Opened: {caseData.openedDate}</span>
-                <span><i className="bi bi-arrow-clockwise me-1"></i> Last Updated: {caseData.lastUpdated}</span>
+              <div className="d-flex flex-wrap gap-2 mt-3">
+                <span className="badge bg-light text-dark rounded-pill px-3 py-2">
+                  <i className="bi bi-folder me-1"></i>{" "}
+                  {caseDetails.details?.type || "N/A"}
+                </span>
+                <span className="badge bg-light text-dark rounded-pill px-3 py-2">
+                  <i className="bi bi-calendar me-1"></i> Filed:{" "}
+                  {formatDate(caseDetails.details?.filingDate)}
+                </span>
+                <span className="badge bg-light text-dark rounded-pill px-3 py-2">
+                  <i className="bi bi-arrow-clockwise me-1"></i> Updated:{" "}
+                  {formatDate(caseDetails.updatedAt)}
+                </span>
+                <span className="badge bg-light text-dark rounded-pill px-3 py-2">
+                  <i className="bi bi-123 me-1"></i> CNR:{" "}
+                  {caseDetails.cnr || "N/A"}
+                </span>
               </div>
-            </div>
-            <div className="d-flex">
-              <button className="btn btn-outline-danger me-2">
-                <i className="bi bi-trash me-1"></i> Close Case
-              </button>
-              <button className="btn btn-success">
-                <i className="bi bi-telephone me-1"></i> Call Client
-              </button>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="row">
-        <div className="col-lg-4">
-          <div className="card shadow-sm border-0 mb-4">
-            <div className="card-header bg-white border-bottom">
-              <h5 className="mb-0">Client Information</h5>
-            </div>
-            <div className="card-body">
-              <div className="d-flex align-items-center mb-4">
-                <div className="avatar avatar-xl bg-primary text-white rounded-circle me-3">
-                  {caseData.client.name.charAt(0)}
-                </div>
-                <div>
-                  <h5 className="mb-1">{caseData.client.name}</h5>
-                  <p className="text-muted mb-0">{caseData.client.email}</p>
-                </div>
-              </div>
-              
-              <div className="list-group list-group-flush">
-                <div className="list-group-item d-flex justify-content-between align-items-center px-0">
-                  <span className="text-muted">Phone</span>
-                  <span className="fw-medium">{caseData.client.phone}</span>
-                </div>
-                <div className="list-group-item d-flex justify-content-between align-items-center px-0">
-                  <span className="text-muted">Address</span>
-                  <span className="fw-medium text-end">{caseData.client.address}</span>
-                </div>
-              </div>
-            </div>
-          </div>
+      {/* Tab Navigation */}
+      <div className="card border-0 shadow-sm mb-4">
+        <div className="card-header bg-white border-bottom p-0">
+          <ul className="nav nav-tabs nav-tabs-custom" role="tablist">
+            <li className="nav-item" role="presentation">
+              <button
+                className={`nav-link ${
+                  activeTab === "overview" ? "active" : ""
+                }`}
+                onClick={() => setActiveTab("overview")}
+              >
+                <i className="bi bi-info-circle me-2"></i>Overview
+              </button>
+            </li>
+            <li className="nav-item" role="presentation">
+              <button
+                className={`nav-link ${
+                  activeTab === "parties" ? "active" : ""
+                }`}
+                onClick={() => setActiveTab("parties")}
+              >
+                <i className="bi bi-people me-2"></i>Parties
+              </button>
+            </li>
+            <li className="nav-item" role="presentation">
+              <button
+                className={`nav-link ${
+                  activeTab === "timeline" ? "active" : ""
+                }`}
+                onClick={() => setActiveTab("timeline")}
+              >
+                <i className="bi bi-clock-history me-2"></i>Timeline
+              </button>
+            </li>
+            <li className="nav-item" role="presentation">
+              <button
+                className={`nav-link ${
+                  activeTab === "documents" ? "active" : ""
+                }`}
+                onClick={() => setActiveTab("documents")}
+              >
+                <i className="bi bi-folder me-2"></i>Documents
+              </button>
+            </li>
+            <li className="nav-item" role="presentation">
+              <button
+                className={`nav-link ${activeTab === "status" ? "active" : ""}`}
+                onClick={() => setActiveTab("status")}
+              >
+                <i className="bi bi-clipboard-data me-2"></i>Status
+              </button>
+            </li>
+          </ul>
+        </div>
 
-          <div className="card shadow-sm border-0 mb-4">
-            <div className="card-header bg-white border-bottom">
-              <h5 className="mb-0">Case Documents</h5>
+        {/* Tab Content */}
+        <div className="card-body p-4">
+          {/* Overview Tab */}
+          {activeTab === "overview" && (
+            <div className="row">
+              <div className="col-lg-6 mb-4">
+                <div className="card h-100 border-0">
+                  <div className="card-header bg-white border-bottom-0 pb-0">
+                    <h5 className="card-title mb-0">Case Summary</h5>
+                  </div>
+                  <div className="card-body">
+                    <dl className="row mb-0">
+                      <dt className="col-sm-5 fw-normal text-muted">
+                        CNR Number
+                      </dt>
+                      <dd className="col-sm-7 mb-2">
+                        {caseDetails.cnr || "N/A"}
+                      </dd>
+
+                      <dt className="col-sm-5 fw-normal text-muted">
+                        Case Type
+                      </dt>
+                      <dd className="col-sm-7 mb-2">
+                        {caseDetails.details?.type || "N/A"}
+                      </dd>
+
+                      <dt className="col-sm-5 fw-normal text-muted">
+                        Filing Number
+                      </dt>
+                      <dd className="col-sm-7 mb-2">
+                        {caseDetails.details?.filingNumber || "N/A"}
+                      </dd>
+
+                      <dt className="col-sm-5 fw-normal text-muted">
+                        Registration Number
+                      </dt>
+                      <dd className="col-sm-7 mb-2">
+                        {caseDetails.details?.registrationNumber || "N/A"}
+                      </dd>
+
+                      <dt className="col-sm-5 fw-normal text-muted">
+                        Filing Date
+                      </dt>
+                      <dd className="col-sm-7 mb-2">
+                        {formatDate(caseDetails.details?.filingDate)}
+                      </dd>
+
+                      <dt className="col-sm-5 fw-normal text-muted">
+                        Registration Date
+                      </dt>
+                      <dd className="col-sm-7 mb-0">
+                        {formatDate(caseDetails.details?.registrationDate)}
+                      </dd>
+                    </dl>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-lg-6 mb-4">
+                <div className="card h-100 border-0">
+                  <div className="card-header bg-white border-bottom-0 pb-0">
+                    <h5 className="card-title mb-0">Legal Framework</h5>
+                  </div>
+                  <div className="card-body">
+                    <dl className="row mb-0">
+                      <dt className="col-sm-5 fw-normal text-muted">Acts</dt>
+                      <dd className="col-sm-7 mb-2">
+                        {caseDetails.actsAndSections?.acts || "N/A"}
+                      </dd>
+
+                      <dt className="col-sm-5 fw-normal text-muted">
+                        Sections
+                      </dt>
+                      <dd className="col-sm-7 mb-2">
+                        {caseDetails.actsAndSections?.sections || "N/A"}
+                      </dd>
+
+                      <dt className="col-sm-5 fw-normal text-muted">
+                        FIR Details
+                      </dt>
+                      <dd className="col-sm-7 mb-2">
+                        {caseDetails.firstInformationReport
+                          ? `${caseDetails.firstInformationReport.firNumber}/${caseDetails.firstInformationReport.year} at ${caseDetails.firstInformationReport.policeStation}`
+                          : "N/A"}
+                      </dd>
+
+                      <dt className="col-sm-5 fw-normal text-muted">
+                        Nature of Disposal
+                      </dt>
+                      <dd className="col-sm-7 mb-2">
+                        {caseDetails.status?.natureOfDisposal || "N/A"}
+                      </dd>
+
+                      <dt className="col-sm-5 fw-normal text-muted">
+                        Court & Judge
+                      </dt>
+                      <dd className="col-sm-7 mb-0">
+                        {caseDetails.status?.courtNumberAndJudge || "N/A"}
+                      </dd>
+                    </dl>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="card-body">
-              <div className="list-group list-group-flush">
-                {caseData.documents.map(doc => (
-                  <div key={doc.id} className="list-group-item px-0">
-                    <div className="d-flex justify-content-between align-items-center">
-                      <div>
-                        <i className="bi bi-file-earmark-text me-2"></i>
-                        <span className="fw-medium">{doc.name}</span>
-                      </div>
-                      <div className="text-muted small">{doc.size}</div>
+          )}
+
+          {/* Parties Tab */}
+          {activeTab === "parties" && (
+            <div className="row">
+              <div className="col-md-6 mb-4">
+                <div className="card border-0 h-100">
+                  <div className="card-header bg-white border-bottom-0 pb-0">
+                    <h5 className="card-title mb-0">
+                      <i className="bi bi-person-check me-2 text-primary"></i>
+                      Petitioners
+                    </h5>
+                  </div>
+                  <div className="card-body">
+                    <div className="list-group list-group-flush">
+                      {caseDetails.parties?.petitioners?.map(
+                        (petitioner, index) => (
+                          <div
+                            key={index}
+                            className="list-group-item border-0 px-0 py-3"
+                          >
+                            <div className="d-flex align-items-center">
+                              <div className="flex-shrink-0">
+                                <div className="avatar-sm">
+                                  <span className="avatar-title bg-primary-subtle text-primary rounded-circle">
+                                    <i className="bi bi-person"></i>
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="flex-grow-1 ms-3">
+                                <h6 className="mb-1">{petitioner}</h6>
+                                <p className="mb-0 text-muted small">
+                                  Represented by:{" "}
+                                  {caseDetails.parties.petitionerAdvocates[
+                                    index
+                                  ] || "N/A"}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      )}
                     </div>
-                    <div className="text-muted small mt-1">{doc.date}</div>
-                    <div className="mt-2">
-                      <button className="btn btn-sm btn-outline-primary me-2">
-                        <i className="bi bi-download"></i>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-md-6 mb-4">
+                <div className="card border-0 h-100">
+                  <div className="card-header bg-white border-bottom-0 pb-0">
+                    <h5 className="card-title mb-0">
+                      <i className="bi bi-person-x me-2 text-danger"></i>
+                      Respondents
+                    </h5>
+                  </div>
+                  <div className="card-body">
+                    <div className="list-group list-group-flush">
+                      {caseDetails.parties?.respondents?.map(
+                        (respondent, index) => (
+                          <div
+                            key={index}
+                            className="list-group-item border-0 px-0 py-3"
+                          >
+                            <div className="d-flex align-items-center">
+                              <div className="flex-shrink-0">
+                                <div className="avatar-sm">
+                                  <span className="avatar-title bg-danger-subtle text-danger rounded-circle">
+                                    <i className="bi bi-person"></i>
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="flex-grow-1 ms-3">
+                                <h6 className="mb-1">{respondent}</h6>
+                                <p className="mb-0 text-muted small">
+                                  Represented by:{" "}
+                                  {caseDetails.parties.respondentAdvocates[
+                                    index
+                                  ] || "N/A"}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Timeline Tab */}
+          {activeTab === "timeline" && (
+            <div className="timeline">
+              {caseDetails.history?.map((event, index) => (
+                <div key={index} className="timeline-item">
+                  <div className="timeline-badge bg-primary"></div>
+                  <div className="timeline-content card border-0 shadow-sm">
+                    <div className="card-body">
+                      <div className="d-flex justify-content-between align-items-center mb-2">
+                        <h6 className="card-title mb-0">{event.purpose}</h6>
+                        <small className="text-muted">
+                          {formatDate(event.businessDate)}
+                        </small>
+                      </div>
+                      <div className="d-flex justify-content-between">
+                        <p className="card-text mb-1 small">
+                          Judge: {event.judge}
+                        </p>
+                        <p className="card-text small">
+                          Next Date:{" "}
+                          {event.nextDate ? formatDate(event.nextDate) : "N/A"}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-outline-primary"
+                        onClick={() => openDocumentModal(event)}
+                      >
+                        <i className="bi bi-box-arrow-up-right me-1"></i>View
+                        Details
                       </button>
-                      <button className="btn btn-sm btn-outline-secondary">
-                        <i className="bi bi-eye"></i>
-                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Documents Tab */}
+          {activeTab === "documents" && (
+            <div>
+              <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                {caseDetails.orders?.map((order, index) => (
+                  <div key={index} className="col">
+                    <div className="card h-100 border-0 shadow-sm">
+                      <div className="card-body">
+                        <div className="d-flex align-items-start">
+                          <div className="bg-light p-2 rounded me-3">
+                            <i className="bi bi-file-earmark-pdf text-danger fs-4"></i>
+                          </div>
+                          <div className="flex-grow-1">
+                            <h6 className="card-title">
+                              {order.name} {order.number}
+                            </h6>
+                            <p className="card-text text-muted small mb-1">
+                              <i className="bi bi-calendar me-1"></i>{" "}
+                              {formatDate(order.date)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="card-footer bg-white border-0 pt-0">
+                        <button
+                          className="btn btn-outline-primary btn-sm"
+                          onClick={() => previewPdfBlob(order)}
+                        >
+                          <i className="bi bi-eye me-1"></i> Preview
+                        </button>
+                        {/* <a
+                          href={order.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn btn-sm btn-outline-secondary"
+                        >
+                          <i className="bi bi-download me-1"></i> Download
+                        </a> */}
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
-              <button className="btn btn-outline-primary w-100 mt-3">
-                <i className="bi bi-plus me-1"></i> Add Document
-              </button>
+
+              {(!caseDetails.orders || caseDetails.orders.length === 0) && (
+                <div className="text-center py-5">
+                  <i className="bi bi-folder-x text-muted fs-1"></i>
+                  <p className="mt-3 fs-5">
+                    No documents available for this case
+                  </p>
+                  <p className="text-muted">
+                    Upload documents to keep track of all case-related files
+                  </p>
+                </div>
+              )}
             </div>
-          </div>
+          )}
+
+          {/* Status Tab */}
+          {activeTab === "status" && (
+            <div className="row">
+              <div className="col-md-6 mb-4">
+                <div className="card border-0 shadow-sm h-100">
+                  <div className="card-header bg-white border-bottom-0">
+                    <h5 className="card-title mb-0">Case Status</h5>
+                  </div>
+                  <div className="card-body">
+                    <div className="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                      <span className="fw-medium">Current Stage:</span>
+                      <span className="badge bg-primary px-3 py-2">
+                        {caseDetails.status?.caseStage || "N/A"}
+                      </span>
+                    </div>
+
+                    <div className="d-flex justify-content-between mb-3">
+                      <span className="text-muted">Decision Date:</span>
+                      <span>
+                        {formatDate(caseDetails.status?.decisionDate)}
+                      </span>
+                    </div>
+
+                    <div className="d-flex justify-content-between mb-3">
+                      <span className="text-muted">Next Hearing:</span>
+                      <span>
+                        {formatDate(caseDetails.status?.nextHearingDate)}
+                      </span>
+                    </div>
+
+                    <div className="d-flex justify-content-between mb-3">
+                      <span className="text-muted">First Hearing:</span>
+                      <span>
+                        {formatDate(caseDetails.status?.firstHearingDate)}
+                      </span>
+                    </div>
+
+                    <div className="d-flex justify-content-between mb-3">
+                      <span className="text-muted">Nature of Disposal:</span>
+                      <span>
+                        {caseDetails.status?.natureOfDisposal || "N/A"}
+                      </span>
+                    </div>
+
+                    <div className="d-flex justify-content-between">
+                      <span className="text-muted">Court & Judge:</span>
+                      <span className="text-end">
+                        {caseDetails.status?.courtNumberAndJudge || "N/A"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-md-6 mb-4">
+                <div className="card border-0 shadow-sm h-100">
+                  <div className="card-header bg-white border-bottom-0">
+                    <h5 className="card-title mb-0">Case Progress</h5>
+                  </div>
+                  <div className="card-body">
+                    <div className="progress mb-4" style={{ height: "10px" }}>
+                      <div
+                        className="progress-bar bg-success"
+                        role="progressbar"
+                        style={{ width: "75%" }}
+                      ></div>
+                    </div>
+
+                    <div className="d-flex justify-content-between mb-4">
+                      <div className="text-center">
+                        <div className="icon-md bg-primary text-white rounded-circle mb-2 mx-auto d-flex align-items-center justify-content-center">
+                          <i className="bi bi-file-earmark-text"></i>
+                        </div>
+                        <p className="mb-0 small">Filed</p>
+                        <small className="text-muted">
+                          {formatDate(caseDetails.details?.filingDate)}
+                        </small>
+                      </div>
+
+                      <div className="text-center">
+                        <div className="icon-md bg-primary text-white rounded-circle mb-2 mx-auto d-flex align-items-center justify-content-center">
+                          <i className="bi bi-check-circle"></i>
+                        </div>
+                        <p className="mb-0 small">Registered</p>
+                        <small className="text-muted">
+                          {formatDate(caseDetails.details?.registrationDate)}
+                        </small>
+                      </div>
+
+                      <div className="text-center">
+                        <div className="icon-md bg-primary text-white rounded-circle mb-2 mx-auto d-flex align-items-center justify-content-center">
+                          <i className="bi bi-calendar-event"></i>
+                        </div>
+                        <p className="mb-0 small">First Hearing</p>
+                        <small className="text-muted">
+                          {formatDate(caseDetails.status?.firstHearingDate)}
+                        </small>
+                      </div>
+
+                      <div className="text-center">
+                        <div className="icon-md bg-light border text-dark rounded-circle mb-2 mx-auto d-flex align-items-center justify-content-center">
+                          <i className="bi bi-hourglass-split"></i>
+                        </div>
+                        <p className="mb-0 small">Next Hearing</p>
+                        <small className="text-muted">
+                          {formatDate(caseDetails.status?.nextHearingDate)}
+                        </small>
+                      </div>
+                    </div>
+
+                    <div className="alert alert-info mb-0">
+                      <div className="d-flex align-items-center">
+                        <i className="bi bi-info-circle me-2 fs-4"></i>
+                        <div>
+                          <h6 className="alert-heading mb-1">Case Progress</h6>
+                          <p className="mb-0">
+                            This case is 75% complete. Next hearing scheduled
+                            for{" "}
+                            {formatDate(caseDetails.status?.nextHearingDate)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
+      </div>
 
-        <div className="col-lg-8">
-          <div className="card shadow-sm border-0">
-            <div className="card-header bg-white border-bottom">
-              <ul className="nav nav-tabs card-header-tabs">
-                <li className="nav-item">
-                  <button 
-                    className={`nav-link ${activeTab === 'overview' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('overview')}
-                  >
-                    Overview
-                  </button>
-                </li>
-                <li className="nav-item">
-                  <button 
-                    className={`nav-link ${activeTab === 'timeline' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('timeline')}
-                  >
-                    Timeline
-                  </button>
-                </li>
-                <li className="nav-item">
-                  <button 
-                    className={`nav-link ${activeTab === 'notes' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('notes')}
-                  >
-                    Notes
-                  </button>
-                </li>
-              </ul>
+
+      {/* Document Preview Modal */}
+      <div
+        className={`modal fade ${showDocumentModal ? "show" : ""}`}
+        style={{
+          display: showDocumentModal ? "block" : "none",
+          zIndex: "99999",
+        }}
+        tabIndex="-1"
+      >
+        <div className="modal-dialog modal-xl">
+          <div className="modal-content">
+            <div className="modal-header bg-primary text-white">
+              <h5 className="modal-title">
+                {currentDocument?.name || "Document Preview"}
+              </h5>
+              <button
+                type="button"
+                className="btn-close btn-close-white"
+                onClick={closeDocumentModal}
+              ></button>
             </div>
-            <div className="card-body">
-              {activeTab === 'overview' && (
-                <div>
-                  <h5 className="mb-3">Case Description</h5>
-                  <p className="mb-4">{caseData.description}</p>
-                  
-                  <h5 className="mb-3">Case Details</h5>
-                  <div className="table-responsive">
-                    <table className="table table-bordered">
-                      <tbody>
-                        <tr>
-                          <th width="30%">Case Type</th>
-                          <td>{caseData.type}</td>
-                        </tr>
-                        <tr>
-                          <th>Case Status</th>
-                          <td>{getStatusBadge(caseData.status)}</td>
-                        </tr>
-                        <tr>
-                          <th>Priority</th>
-                          <td>{getPriorityBadge(caseData.priority)}</td>
-                        </tr>
-                        <tr>
-                          <th>Date Opened</th>
-                          <td>{caseData.openedDate}</td>
-                        </tr>
-                        <tr>
-                          <th>Last Updated</th>
-                          <td>{caseData.lastUpdated}</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
 
-              {activeTab === 'timeline' && (
-                <div className="timeline">
-                  {caseData.timeline.map(event => (
-                    <div key={event.id} className="timeline-item">
-                      <div className="timeline-badge bg-primary"></div>
-                      <div className="timeline-content">
-                        <div className="d-flex justify-content-between">
-                          <h6 className="mb-1">{event.event}</h6>
-                          <small className="text-muted">{event.date}</small>
-                        </div>
-                        <p className="mb-0">{event.description}</p>
-                      </div>
-                    </div>
-                  ))}
+            <div className="modal-body p-0" style={{ minHeight: "500px" }}>
+              {documentLoadError ? (
+                <div className="d-flex flex-column align-items-center justify-content-center py-5">
+                  <i className="bi bi-exclamation-triangle text-warning fs-1 mb-3"></i>
+                  <h5 className="mb-2">Document Cannot Be Previewed</h5>
+                  <p className="text-muted mb-4 text-center">
+                    This document cannot be previewed due to security
+                    restrictions. Please download the document to view it.
+                  </p>
+                  <a
+                    href={currentDocument?.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-primary"
+                  >
+                    <i className="bi bi-download me-2"></i>Download Document
+                  </a>
+                </div>
+              ) : pdfBlobUrl ? (
+                <iframe
+                  src={pdfBlobUrl}
+                  title="PDF Preview"
+                  width="100%"
+                  height="600px"
+                  style={{ border: "none" }}
+                />
+              ) : documentHTML ? (
+                <div
+                  style={{
+                    padding: "1rem",
+                    overflowY: "auto",
+                    maxHeight: "70vh",
+                  }}
+                  dangerouslySetInnerHTML={{ __html: documentHTML }}
+                />
+              ) : (
+                <div className="text-center py-5">
+                  <div className="spinner-border text-primary" role="status" />
+                  <p className="mt-3">Loading Document...</p>
                 </div>
               )}
+            </div>
 
-              {activeTab === 'notes' && (
-                <div>
-                  <div className="mb-4">
-                    <textarea 
-                      className="form-control" 
-                      rows="4" 
-                      placeholder="Add new case note..."
-                    ></textarea>
-                    <div className="d-flex justify-content-end mt-2">
-                      <button className="btn btn-primary">Save Note</button>
-                    </div>
-                  </div>
-                  
-                  {caseData.notes.map(note => (
-                    <div key={note.id} className="card bg-light mb-3">
-                      <div className="card-body">
-                        <div className="d-flex justify-content-between mb-2">
-                          <strong>{note.author}</strong>
-                          <small className="text-muted">{note.date}</small>
-                        </div>
-                        <p className="mb-0">{note.content}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={closeDocumentModal}
+              >
+                <i className="bi bi-x me-2"></i>Close
+              </button>
+              <a
+                href={currentDocument?.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-primary"
+              >
+                <i className="bi bi-download me-2"></i>Download
+              </a>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Modal Backdrop */}
+      {showDocumentModal && (
+        <div
+          className="modal-backdrop fade show"
+          onClick={closeDocumentModal}
+        ></div>
+      )}
+
+      {showPdfModal && (
+  <>
+    <div
+      className="modal fade show"
+      style={{ display: "block", zIndex: 99999, }}
+      tabIndex="-1"
+    >
+      <div className="modal-dialog modal-xl">
+        <div className="modal-content">
+          <div className="modal-header bg-primary text-white">
+            <h5 className="modal-title">{pdfTitle}</h5>
+            <button
+              type="button"
+              className="btn-close btn-close-white"
+              onClick={() => setShowPdfModal(false)}
+            ></button>
+          </div>
+
+          <div className="modal-body p-0" style={{ minHeight: "500px" }}>
+            {pdfLoadError ? (
+              <div className="text-danger text-center p-4">
+                Failed to load PDF. Please try again later.
+              </div>
+            ) : pdfLoading ? (
+              <div className="text-center py-5">
+                <div className="spinner-border text-primary" role="status" />
+                <p className="mt-3">Loading PDF...</p>
+              </div>
+            ) : pdfBlobUrl ? (
+              <iframe
+                src={pdfBlobUrl}
+                title="PDF Viewer"
+                style={{ width: "100%", height: "70vh", border: "none" }}
+              />
+            ) : null}
+          </div>
+
+          <div className="modal-footer">
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => setShowPdfModal(false)}
+            >
+              Close
+            </button>
+            {pdfBlobUrl && (
+              <a
+                href={pdfBlobUrl}
+                download={`${pdfTitle}.pdf`}
+                className="btn btn-primary"
+              >
+                Download
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {/* Backdrop */}
+    <div
+      className="modal-backdrop fade show"
+      onClick={() => setShowPdfModal(false)}
+    />
+  </>
+)}
+
+
+      <style>{`
+        .nav-tabs-custom .nav-link {
+          padding: 1rem 1.5rem;
+          font-weight: 500;
+          border: none;
+          border-bottom: 3px solid transparent;
+          color: #6c757d;
+        }
+        
+        .nav-tabs-custom .nav-link.active {
+          color: #0d6efd;
+          background: transparent;
+          border-bottom: 3px solid #0d6efd;
+        }
+        
+        .nav-tabs-custom .nav-link i {
+          margin-right: 8px;
+        }
+        
+        .timeline {
+          position: relative;
+          padding-left: 40px;
+        }
+        
+        .timeline::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          width: 2px;
+          background: #e9ecef;
+          left: 20px;
+        }
+        
+        .timeline-item {
+          position: relative;
+          margin-bottom: 30px;
+        }
+        
+        .timeline-badge {
+          position: absolute;
+          left: 10px;
+          top: 0;
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          z-index: 1;
+        }
+        
+        .timeline-content {
+          margin-left: 40px;
+        }
+        
+        .avatar-sm {
+          width: 40px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        
+        .avatar-title {
+          font-size: 1rem;
+        }
+        
+        .icon-md {
+          width: 40px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .modal-backdrop {
+          opacity: 0.5;
+        }
+      `}</style>
     </div>
   );
 };

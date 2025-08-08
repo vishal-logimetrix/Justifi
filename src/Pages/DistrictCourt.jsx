@@ -1,36 +1,28 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import axios from "axios";
-import Select from "react-select";
-import {
-  User,
-  Calendar,
-  MapPin,
-  Phone,
-  Mail,
-  Briefcase,
-  CreditCard,
-  Landmark,
-  Banknote,
-  Languages,
-  Globe,
-  Scale,
-  Upload,
-  FileText,
-  FileCheck2,
-  FileSignature,
-  ChevronLeft,
-  ChevronRight,
-  ShieldCheck,
-  Lock,
-  HelpCircle,
-  Building,
-  Map,
-  Layers,
-  ArrowLeft,
-} from "lucide-react";
+import { ArrowLeft, Scale, ShieldCheck, Lock, HelpCircle } from "lucide-react";
 import Header from "../components/Header";
+import BasicInfoForm from "../components/LawyerRegistration/BasicInfoForm";
+import DocumentUploadForm from "../components/LawyerRegistration/DocumentUploadForm";
+import PaymentForm from "../components/LawyerRegistration/PaymentForm";
+import LocationSelectionForm from "../components/LawyerRegistration/LocationSelectionForm";
+
+// API configuration
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+const fileApi = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+  headers: {
+    "Content-Type": "multipart/form-data",
+  },
+});
 
 const DistrictCourt = () => {
   const navigate = useNavigate();
@@ -38,7 +30,16 @@ const DistrictCourt = () => {
   const [lawyerId, setLawyerId] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Form states
+  // Loading states for dropdowns
+  const [statesLoading, setStatesLoading] = useState(false);
+  const [sendingRegistration, setSendingRegistration] = useState(false);
+
+  // Dropdown data states
+  const [states, setStates] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [allDistricts, setAllDistricts] = useState([]); // Stores all districts from API
+
+  // Form states - Updated structure
   const [formData, setFormData] = useState({
     court_type: "district court",
     lawyer_name: "",
@@ -57,110 +58,99 @@ const DistrictCourt = () => {
     languages_known_indian: "",
     languages_known_international: "",
     international_litigation_experience: "",
-    state: "",
+    // Changed to support multiple states
+    state_ids: [],
     district_ids: [],
-    complex_ids: [],
   });
 
   const [files, setFiles] = useState({});
   const [errors, setErrors] = useState({});
   const formRef = useRef();
 
-  // States and their respective districts and complexes
-  const statesAndDistricts = {
-    "Andhra Pradesh": [
-      { value: "visakhapatnam", label: "Visakhapatnam" },
-      { value: "vijayawada", label: "Vijayawada" },
-      { value: "guntur", label: "Guntur" },
-    ],
-    Assam: [
-      { value: "kamrup", label: "Kamrup" },
-      { value: "dibrugarh", label: "Dibrugarh" },
-    ],
-    Bihar: [
-      { value: "patna", label: "Patna" },
-      { value: "gaya", label: "Gaya" },
-    ],
-    Gujarat: [
-      { value: "ahmedabad", label: "Ahmedabad" },
-      { value: "surat", label: "Surat" },
-    ],
-    Karnataka: [
-      { value: "bangalore", label: "Bangalore" },
-      { value: "mysore", label: "Mysore" },
-    ],
-    Maharashtra: [
-      { value: "mumbai", label: "Mumbai" },
-      { value: "pune", label: "Pune" },
-      { value: "nagpur", label: "Nagpur" },
-    ],
-    "Tamil Nadu": [
-      { value: "chennai", label: "Chennai" },
-      { value: "coimbatore", label: "Coimbatore" },
-    ],
-    "Uttar Pradesh": [
-      { value: "lucknow", label: "Lucknow" },
-      { value: "kanpur", label: "Kanpur" },
-    ],
-    "West Bengal": [
-      { value: "kolkata", label: "Kolkata" },
-      { value: "howrah", label: "Howrah" },
-    ],
+  // Fetch states and districts on component mount
+  useEffect(() => {
+    const fetchData = async () => {
+      setStatesLoading(true);
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL_STATE}/api/get-state-district`
+        );
+        const statesData = response.data.data || [];
+
+        // Use state_id instead of id
+        const mappedStates = statesData.map((state) => ({
+          state_id: state.state_id,
+          name: state.name,
+          districts: state.districts || [],
+        }));
+        setStates(mappedStates);
+
+        // Extract all districts with district_id and own_state_id
+        const districtsData = [];
+        statesData.forEach((state) => {
+          (state.districts || []).forEach((district) => {
+            districtsData.push({
+              district_id: district.district_id,
+              name: district.name,
+              own_state_id: district.own_state_id, // numeric ref to state
+              state_id: state.state_id, // keep reference to state_id string
+            });
+          });
+        });
+        setAllDistricts(districtsData);
+      } catch (error) {
+        console.error("Error fetching states with districts:", error);
+      } finally {
+        setStatesLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Update districts when selected states change
+  useEffect(() => {
+    if (formData.state_ids && formData.state_ids.length > 0) {
+      const filteredDistricts = allDistricts.filter((district) =>
+        formData.state_ids.includes(district.state_id)
+      );
+      setDistricts(filteredDistricts);
+    } else {
+      setDistricts([]);
+    }
+  }, [formData.state_ids, allDistricts]);
+
+  // Send registration data to Bar Council
+  const sendRegistrationToBarCouncil = async (
+    barCouncilId,
+    districtIds,
+    userId
+  ) => {
+    setSendingRegistration(true);
+    try {
+      console.log("user id for bar council id", userId)
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL_STATE}/fetch/cases-barcouncil`,
+        {
+          BarCouncil: barCouncilId,
+          districtIds: districtIds,
+          adv_id: userId,
+        }
+      );
+
+      if (response.data) {
+        toast.success("Registration sent to Bar Council successfully!");
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error sending registration to Bar Council:", error);
+      toast.error("Failed to send registration to Bar Council");
+      return false;
+    } finally {
+      setSendingRegistration(false);
+    }
   };
-
-  const districtComplexes = {
-    visakhapatnam: [
-      { value: "vskp_complex1", label: "Visakhapatnam Complex 1" },
-      { value: "vskp_complex2", label: "Visakhapatnam Complex 2" },
-    ],
-    vijayawada: [
-      { value: "vjw_complex1", label: "Vijayawada Complex 1" },
-      { value: "vjw_complex2", label: "Vijayawada Complex 2" },
-    ],
-    patna: [
-      { value: "pat_complex1", label: "Patna Complex 1" },
-      { value: "pat_complex2", label: "Patna Complex 2" },
-    ],
-    ahmedabad: [
-      { value: "ahm_complex1", label: "Ahmedabad Complex 1" },
-      { value: "ahm_complex2", label: "Ahmedabad Complex 2" },
-    ],
-    bangalore: [
-      { value: "blr_complex1", label: "Bangalore Complex 1" },
-      { value: "blr_complex2", label: "Bangalore Complex 2" },
-    ],
-    mumbai: [
-      { value: "mum_complex1", label: "Mumbai Complex 1" },
-      { value: "mum_complex2", label: "Mumbai Complex 2" },
-    ],
-    chennai: [
-      { value: "chn_complex1", label: "Chennai Complex 1" },
-      { value: "chn_complex2", label: "Chennai Complex 2" },
-    ],
-    lucknow: [
-      { value: "lkw_complex1", label: "Lucknow Complex 1" },
-      { value: "lkw_complex2", label: "Lucknow Complex 2" },
-    ],
-    kolkata: [
-      { value: "kol_complex1", label: "Kolkata Complex 1" },
-      { value: "kol_complex2", label: "Kolkata Complex 2" },
-    ],
-  };
-
-  // API configuration
-  const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
-  const fileApi = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
 
   // Add response interceptors for error handling
   [api, fileApi].forEach((axiosInstance) => {
@@ -178,7 +168,7 @@ const DistrictCourt = () => {
     );
   });
 
-  // Form validation
+  // Form validation functions
   const validateStep1 = () => {
     const newErrors = {};
     if (!formData.lawyer_name.trim())
@@ -209,12 +199,6 @@ const DistrictCourt = () => {
       newErrors.languages_known_international = "Required";
     if (!formData.international_litigation_experience.trim())
       newErrors.international_litigation_experience = "Select a value";
-    if (!formData.state) newErrors.state = "Please select a state";
-    if (formData.district_ids.length === 0)
-      newErrors.district_ids = "Please select at least one district";
-    if (formData.complex_ids.length === 0)
-      newErrors.complex_ids = "Please select at least one complex";
-    if (!formData.plan) newErrors.plan = "Please select a plan";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -241,25 +225,36 @@ const DistrictCourt = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const validateStep4 = () => {
+    const newErrors = {};
+    if (!formData.state_ids || formData.state_ids.length === 0)
+      newErrors.state_ids = "Please select at least one state";
+    if (!formData.district_ids || formData.district_ids.length === 0)
+      newErrors.district_ids = "Please select at least one district";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   // Form handlers
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  const handleFormDataChange = (name, value) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  const handleStateChange = (selectedOption) => {
+  const handleStateChange = (selectedOptions) => {
+    const selectedStates = selectedOptions
+      ? selectedOptions.map((option) => option.value)
+      : [];
     setFormData((prev) => ({
       ...prev,
-      state: selectedOption.value,
+      state_ids: selectedStates,
       district_ids: [],
-      complex_ids: [],
     }));
     setErrors((prev) => ({
       ...prev,
-      state: "",
+      state_ids: "",
       district_ids: "",
-      complex_ids: "",
     }));
   };
 
@@ -270,20 +265,8 @@ const DistrictCourt = () => {
     setFormData((prev) => ({
       ...prev,
       district_ids: selectedDistricts,
-      complex_ids: [], // Reset complexes when districts change
     }));
-    setErrors((prev) => ({ ...prev, district_ids: "", complex_ids: "" }));
-  };
-
-  const handleComplexChange = (selectedOptions) => {
-    const selectedComplexes = selectedOptions
-      ? selectedOptions.map((option) => option.value)
-      : [];
-    setFormData((prev) => ({
-      ...prev,
-      complex_ids: selectedComplexes,
-    }));
-    setErrors((prev) => ({ ...prev, complex_ids: "" }));
+    setErrors((prev) => ({ ...prev, district_ids: "" }));
   };
 
   const handleFileChange = (e) => {
@@ -297,7 +280,6 @@ const DistrictCourt = () => {
   };
 
   const nextStep = () => {
-    if (step === 1 && !validateStep1()) return;
     setStep(step + 1);
   };
 
@@ -306,24 +288,24 @@ const DistrictCourt = () => {
   };
 
   // Step 1: Submit basic info
-  const handleBasicInfoSubmit = async (e) => {
-    e.preventDefault();
+  const handleBasicInfoSubmit = async () => {
     if (!validateStep1()) return;
 
     setLoading(true);
     try {
       const payload = {
         ...formData,
-        age: parseInt(formData.age), // Ensure age is a number
-        district_ids: formData.district_ids,
-        complex_ids: formData.complex_ids,
+        age: parseInt(formData.age),
+        // Don't include location data in basic info
+        state_ids: null,
+        district_ids: null,
       };
 
       const res = await api.post("lawyers/basic", payload);
       if (res.data.status === "pending_docs") {
         toast.success("Basic info submitted. Please upload documents.");
         setLawyerId(res.data.lawyer_id);
-        setStep(2); // Move to document upload step
+        nextStep();
       }
     } catch (error) {
       console.error("Basic info submission error:", error);
@@ -334,8 +316,7 @@ const DistrictCourt = () => {
   };
 
   // Step 2: Submit documents
-  const handleDocumentUpload = async (e) => {
-    e.preventDefault();
+  const handleDocumentUpload = async () => {
     if (!validateStep2() || !lawyerId) return;
 
     setLoading(true);
@@ -350,9 +331,9 @@ const DistrictCourt = () => {
         formDataPayload
       );
 
-      if (response.data.success) {
+      if (response.data) {
         toast.success("Documents uploaded successfully!");
-        setStep(3); // Move to payment step
+        nextStep(); // Move to payment step
       }
     } catch (error) {
       console.error("Document upload error:", error);
@@ -362,8 +343,13 @@ const DistrictCourt = () => {
     }
   };
 
-  // Step 3: Process payment
+  // Step 3: Process payment (now mandatory)
   const handlePayment = async () => {
+    if (!formData.plan) {
+      toast.error("Please select a plan to proceed.");
+      return;
+    }
+
     setLoading(true);
     try {
       const options = {
@@ -379,17 +365,11 @@ const DistrictCourt = () => {
         },
         handler: async (response) => {
           try {
-            // Payment succeeded
             toast.success("Payment processed successfully!");
-            // Complete registration
-            const res = await api.post(`lawyers/complete/${lawyerId}`);
-            if (res.data.success) {
-              toast.success("Registration completed successfully!");
-              setStep(4); // Move to success step
-            }
+            nextStep(); // Move to location selection
           } catch (error) {
             toast.error(
-              "Payment succeeded but registration completion failed. Contact support."
+              "Payment succeeded but there was an error. Contact support."
             );
           } finally {
             setLoading(false);
@@ -416,106 +396,59 @@ const DistrictCourt = () => {
     }
   };
 
-  // Form fields configuration
-  const basicInfoFields = [
-    ["Full Name", "lawyer_name", <User />, "text", "John Doe"],
-    ["Age", "age", <Calendar />, "number", "30"],
-    ["Address", "address", <MapPin />, "text", "Pune, Maharashtra"],
-    ["Contact Number", "contact_no", <Phone />, "text", "9876543210"],
-    ["Email", "email_id", <Mail />, "email", "john@example.com"],
-    [
-      "Bar Council ID",
-      "bar_council_reg_no",
-      <Briefcase />,
-      "text",
-      "MAH/123/2025",
-    ],
-    [
-      "State Council ID",
-      "state_council_reg_no",
-      <Briefcase />,
-      "text",
-      "SCR54321",
-    ],
-    ["PAN Number", "pan_number", <CreditCard />, "text", "ABCDE1234F"],
-    [
-      "Aadhar Number",
-      "aadhar_number",
-      <CreditCard />,
-      "text",
-      "1234 5678 9012",
-    ],
-    [
-      "Bank Account Number",
-      "bank_account_number",
-      <Landmark />,
-      "text",
-      "123456789012",
-    ],
-    ["IFSC Code", "ifsc_code", <Landmark />, "text", "SBIN0001234"],
-    ["UPI ID", "upi_id", <Banknote />, "text", "john@upi"],
-    [
-      "Languages Known (Indian)",
-      "languages_known_indian",
-      <Languages />,
-      "text",
-      "Marathi, Tamil",
-    ],
-    [
-      "Languages Known (International)",
-      "languages_known_international",
-      <Globe />,
-      "text",
-      "English, French",
-    ],
-  ];
+  // Step 4: Update location, send to Bar Council, and complete registration
+  const handleLocationUpdate = async () => {
+    if (!validateStep4() || !lawyerId) return;
 
-  const documentTypes = [
-    {
-      label: "Bar Council Certificate",
-      name: "bar_council_certificate",
-      icon: <FileText />,
-    },
-    {
-      label: "State Council Certificate",
-      name: "state_council_certificate",
-      icon: <FileText />,
-    },
-    {
-      label: "Certificate for Practice",
-      name: "certificate_for_practice",
-      icon: <FileCheck2 />,
-    },
-    {
-      label: "Legal Undertaking",
-      name: "legal_undertaking",
-      icon: <FileSignature />,
-    },
-  ];
+    setLoading(true);
+    try {
+      // Update location data using PUT API
+      const Payload = {
+        state_ids: formData.state_ids,
+        district_ids: formData.district_ids,
+        lawyer_id: lawyerId,
+      };
+
+      const updateResponse = await api.post(`lawyers/basic`, Payload);
+
+      if (updateResponse.data) {
+        // Send registration to Bar Council after location is set
+        const barCouncilSuccess = await sendRegistrationToBarCouncil(
+          formData.bar_council_reg_no,
+          formData.district_ids,
+          lawyerId
+        );
+
+        if (barCouncilSuccess) {
+          // const completeResponse = await api.post(`lawyers/complete/${lawyerId}`);
+
+          // if (completeResponse.data.success) {
+          toast.success("Registration completed successfully!");
+          nextStep();
+          // alert("succces, will move on login page");
+          // setTimeout(() => {
+          //   navigate("/login");
+          // }, 20000);
+
+          // }
+        }
+      }
+    } catch (error) {
+      console.error("Location update error:", error);
+      toast.error("Failed to update location. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Step progress
   const getProgressWidth = () => {
-    if (step === 1) return "25%";
-    if (step === 2) return "50%";
-    if (step === 3) return "75%";
+    if (step === 1) return "20%";
+    if (step === 2) return "40%";
+    if (step === 3) return "60%";
+    if (step === 4) return "80%";
     return "100%";
   };
-
-  // Prepare state options for react-select
-  const stateOptions = Object.keys(statesAndDistricts).map((state) => ({
-    value: state,
-    label: state,
-  }));
-
-  // Prepare district options based on selected state
-  const districtOptions = formData.state
-    ? statesAndDistricts[formData.state]
-    : [];
-
-  // Prepare complex options based on selected districts
-  const complexOptions = formData.district_ids.flatMap(
-    (district) => districtComplexes[district] || []
-  );
 
   return (
     <>
@@ -617,6 +550,23 @@ const DistrictCourt = () => {
                         >
                           4
                         </div>
+                        Location
+                      </div>
+                      <div
+                        className={`text-center ${
+                          step >= 5 ? "text-primary fw-bold" : "text-muted"
+                        }`}
+                      >
+                        <div
+                          className={`mx-auto rounded-circle ${
+                            step >= 5
+                              ? "bg-primary text-white"
+                              : "bg-light border"
+                          } d-flex align-items-center justify-content-center mb-1`}
+                          style={{ width: "36px", height: "36px" }}
+                        >
+                          5
+                        </div>
                         Complete
                       </div>
                     </div>
@@ -626,397 +576,57 @@ const DistrictCourt = () => {
                 <div className="card-body p-4 p-md-5">
                   {/* Step 1: Basic Information */}
                   {step === 1 && (
-                    <form onSubmit={handleBasicInfoSubmit}>
-                      <h3 className="mb-4 text-primary">
-                        Personal & Professional Information
-                      </h3>
-                      <div className="row g-3">
-                        {basicInfoFields.map(
-                          ([label, name, Icon, type, placeholder], i) => (
-                            <div className="col-md-6" key={i}>
-                              <label className="form-label fw-semibold">
-                                {label}
-                              </label>
-                              <div className="input-group mb-1">
-                                <span className="input-group-text bg-white">
-                                  {React.cloneElement(Icon, {
-                                    size: 18,
-                                    className: "text-muted",
-                                  })}
-                                </span>
-                                <input
-                                  name={name}
-                                  type={type}
-                                  className={`form-control ${
-                                    errors[name] ? "is-invalid" : ""
-                                  }`}
-                                  placeholder={placeholder}
-                                  value={formData[name]}
-                                  onChange={handleChange}
-                                />
-                              </div>
-                              {errors[name] && (
-                                <div className="text-danger small mt-1">
-                                  {errors[name]}
-                                </div>
-                              )}
-                            </div>
-                          )
-                        )}
-
-                        {/* State Selection */}
-                        <div className="col-md-6">
-                          <label className="form-label fw-semibold">
-                            State
-                          </label>
-                          <div className="input-group mb-1">
-                            <span className="input-group-text bg-white">
-                              <Building size={18} className="text-muted" />
-                            </span>
-                            <Select
-                              options={stateOptions}
-                              value={
-                                formData.state
-                                  ? {
-                                      value: formData.state,
-                                      label: formData.state,
-                                    }
-                                  : null
-                              }
-                              onChange={handleStateChange}
-                              className={`basic-single ${
-                                errors.state ? "is-invalid" : ""
-                              }`}
-                              classNamePrefix="select"
-                              placeholder="Select State"
-                            />
-                          </div>
-                          {errors.state && (
-                            <div className="text-danger small mt-1">
-                              {errors.state}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* District IDs Selection */}
-                        {formData.state && (
-                          <div className="col-md-6">
-                            <label className="form-label fw-semibold">
-                              District IDs
-                            </label>
-                            <div className="input-group mb-1">
-                              <span className="input-group-text bg-white">
-                                <Map size={18} className="text-muted" />
-                              </span>
-                              <Select
-                                isMulti
-                                options={districtOptions}
-                                value={districtOptions.filter((option) =>
-                                  formData.district_ids.includes(option.value)
-                                )}
-                                onChange={handleDistrictChange}
-                                className={`basic-multi-select ${
-                                  errors.district_ids ? "is-invalid" : ""
-                                }`}
-                                classNamePrefix="select"
-                                placeholder="Select Districts"
-                              />
-                            </div>
-                            {errors.district_ids && (
-                              <div className="text-danger small mt-1">
-                                {errors.district_ids}
-                              </div>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Complex IDs Selection */}
-                        {formData.district_ids.length > 0 && (
-                          <div className="col-md-6">
-                            <label className="form-label fw-semibold">
-                              Complex IDs
-                            </label>
-                            <div className="input-group mb-1">
-                              <span className="input-group-text bg-white">
-                                <Layers size={18} className="text-muted" />
-                              </span>
-                              <Select
-                                isMulti
-                                options={complexOptions}
-                                value={complexOptions.filter((option) =>
-                                  formData.complex_ids.includes(option.value)
-                                )}
-                                onChange={handleComplexChange}
-                                className={`basic-multi-select ${
-                                  errors.complex_ids ? "is-invalid" : ""
-                                }`}
-                                classNamePrefix="select"
-                                placeholder="Select Complexes"
-                              />
-                            </div>
-                            {errors.complex_ids && (
-                              <div className="text-danger small mt-1">
-                                {errors.complex_ids}
-                              </div>
-                            )}
-                          </div>
-                        )}
-
-                        <div className="col-md-6">
-                          <label className="form-label fw-semibold">
-                            International Litigation Experience
-                          </label>
-                          <select
-                            name="international_litigation_experience"
-                            value={formData.international_litigation_experience}
-                            onChange={handleChange}
-                            className={`form-select ${
-                              errors.international_litigation_experience
-                                ? "is-invalid"
-                                : ""
-                            }`}
-                          >
-                            <option value="">Select Experience</option>
-                            <option value="No">No</option>
-                            <option value="Less than 10">Less than 10</option>
-                            <option value="More than 10 but less than 50">
-                              More than 10 but less than 50
-                            </option>
-                            <option value="More than 50">More than 50</option>
-                          </select>
-                          {errors.international_litigation_experience && (
-                            <div className="text-danger small mt-1">
-                              {errors.international_litigation_experience}
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="col-12 mt-4">
-                          <h5 className="fw-semibold mb-3">Choose Your Plan</h5>
-                          <div className="row g-3">
-                            {["Annual", "Contributor"].map((plan) => (
-                              <div className="col-md-6" key={plan}>
-                                <div
-                                  className={`card h-100 ${
-                                    formData.plan === plan
-                                      ? "border-primary bg-primary bg-opacity-10"
-                                      : "border-light"
-                                  }`}
-                                  onClick={() => handlePlanSelect(plan)}
-                                  style={{ cursor: "pointer" }}
-                                >
-                                  <div className="card-body">
-                                    <h5 className="card-title fw-bold">
-                                      {plan === "Annual"
-                                        ? "Annual Subscription"
-                                        : "Contributor Plan"}
-                                    </h5>
-                                    <h4 className="text-primary">
-                                      {plan === "Annual" ? "₹4999" : "₹2999"}
-                                    </h4>
-                                    <p className="card-text text-muted">
-                                      {plan === "Annual"
-                                        ? "One-time payment for a full year of access."
-                                        : "4 free consultations included."}
-                                    </p>
-                                    {formData.plan === plan && (
-                                      <div className="text-end text-primary">
-                                        <i className="bi bi-check-circle-fill"></i>{" "}
-                                        Selected
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                          {errors.plan && (
-                            <div className="text-danger small mt-2">
-                              {errors.plan}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="d-flex justify-content-end mt-5">
-                        <button
-                          type="submit"
-                          className="btn btn-primary"
-                          disabled={loading || !formData.plan}
-                        >
-                          {loading ? (
-                            <>
-                              <span
-                                className="spinner-border spinner-border-sm me-2"
-                                role="status"
-                                aria-hidden="true"
-                              />
-                              Submitting...
-                            </>
-                          ) : (
-                            "Submit Basic Information"
-                          )}
-                        </button>
-                      </div>
-                    </form>
+                    <BasicInfoForm
+                      formData={formData}
+                      errors={errors}
+                      onChange={handleFormDataChange}
+                      onSubmit={handleBasicInfoSubmit}
+                      loading={loading}
+                    />
                   )}
 
                   {/* Step 2: Document Upload */}
                   {step === 2 && (
-                    <form onSubmit={handleDocumentUpload}>
-                      <h3 className="mb-4 text-primary">
-                        Upload Required Documents
-                      </h3>
-                      <p className="text-muted mb-4">
-                        Please upload the following documents in PDF, JPG, or
-                        PNG format (max 5MB each)
-                      </p>
-                      <div className="row g-3">
-                        {documentTypes.map(({ label, name, icon }, index) => (
-                          <div className="col-md-6" key={index}>
-                            <div className="card h-100 border-0 shadow-sm">
-                              <div className="card-body">
-                                <h5 className="card-title d-flex align-items-center">
-                                  {React.cloneElement(icon, {
-                                    className: "me-2 text-primary",
-                                    size: 20,
-                                  })}
-                                  {label}
-                                </h5>
-                                <div className="mt-3">
-                                  <input
-                                    type="file"
-                                    name={name}
-                                    className={`form-control ${
-                                      errors[name] ? "is-invalid" : ""
-                                    }`}
-                                    onChange={handleFileChange}
-                                    required
-                                    accept=".pdf,.jpg,.jpeg,.png"
-                                  />
-                                  {errors[name] && (
-                                    <div className="invalid-feedback d-block">
-                                      {errors[name]}
-                                    </div>
-                                  )}
-                                  <small className="text-muted">
-                                    PDF, JPG, or PNG (Max 5MB)
-                                  </small>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div className="d-flex justify-content-between mt-5">
-                        <button
-                          type="button"
-                          className="btn btn-outline-primary"
-                          onClick={prevStep}
-                          disabled={loading}
-                        >
-                          <ChevronLeft size={18} className="me-1" />
-                          Back
-                        </button>
-                        <button
-                          type="submit"
-                          className="btn btn-primary"
-                          disabled={loading || Object.keys(files).length < 4}
-                        >
-                          {loading ? (
-                            <>
-                              <span
-                                className="spinner-border spinner-border-sm me-2"
-                                role="status"
-                                aria-hidden="true"
-                              />
-                              Uploading...
-                            </>
-                          ) : (
-                            <>
-                              <Upload className="me-2" size={18} />
-                              Submit Documents
-                            </>
-                          )}
-                        </button>
-                      </div>
-                    </form>
+                    <DocumentUploadForm
+                      files={files}
+                      errors={errors}
+                      onFileChange={handleFileChange}
+                      onSubmit={handleDocumentUpload}
+                      onPrev={prevStep}
+                      loading={loading}
+                    />
                   )}
 
-                  {/* Step 3: Payment */}
+                  {/* Step 3: Payment (Mandatory) */}
                   {step === 3 && (
-                    <div>
-                      <h3 className="mb-4 text-primary">
-                        Complete Your Registration
-                      </h3>
-                      <div className="card border-primary mb-4">
-                        <div className="card-body">
-                          <h5 className="card-title text-primary">
-                            Payment Summary
-                          </h5>
-                          <div className="row mt-3">
-                            <div className="col-md-6">
-                              <p>
-                                <strong>Plan:</strong> {formData.plan}
-                              </p>
-                              <p>
-                                <strong>Amount:</strong>{" "}
-                                {formData.plan === "Annual" ? "₹4999" : "₹2999"}
-                              </p>
-                            </div>
-                            <div className="col-md-6">
-                              <p>
-                                <strong>Name:</strong> {formData.lawyer_name}
-                              </p>
-                              <p>
-                                <strong>Email:</strong> {formData.email_id}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="alert alert-info mt-3">
-                            <i className="bi bi-info-circle me-2"></i>
-                            Please complete payment to finalize your
-                            registration.
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="d-flex justify-content-between mt-5">
-                        <button
-                          type="button"
-                          className="btn btn-outline-primary"
-                          onClick={prevStep}
-                          disabled={loading}
-                        >
-                          <ChevronLeft size={18} className="me-1" />
-                          Back
-                        </button>
-                        <button
-                          type="button"
-                          className="btn btn-primary"
-                          onClick={handlePayment}
-                          disabled={loading}
-                        >
-                          {loading ? (
-                            <>
-                              <span
-                                className="spinner-border spinner-border-sm me-2"
-                                role="status"
-                                aria-hidden="true"
-                              />
-                              Processing...
-                            </>
-                          ) : (
-                            "Proceed to Payment"
-                          )}
-                        </button>
-                      </div>
-                    </div>
+                    <PaymentForm
+                      formData={formData}
+                      onPlanSelect={handlePlanSelect}
+                      onPayment={handlePayment}
+                      onPrev={prevStep}
+                      loading={loading}
+                    />
                   )}
 
-                  {/* Step 4: Confirmation */}
+                  {/* Step 4: Location Selection */}
                   {step === 4 && (
+                    <LocationSelectionForm
+                      formData={formData}
+                      states={states}
+                      districts={districts}
+                      errors={errors}
+                      statesLoading={statesLoading}
+                      onStateChange={handleStateChange}
+                      onDistrictChange={handleDistrictChange}
+                      onSubmit={handleLocationUpdate}
+                      onPrev={prevStep}
+                      loading={loading}
+                      sendingRegistration={sendingRegistration}
+                    />
+                  )}
+
+                  {/* Step 5: Confirmation */}
+                  {step === 5 && (
                     <div>
                       <h3 className="mb-4 text-primary">
                         Registration Complete
@@ -1031,8 +641,8 @@ const DistrictCourt = () => {
                           </h4>
                           <p className="lead">
                             Thank you for registering as a District Court
-                            Lawyer. Your account is being verified and you'll
-                            receive confirmation shortly.
+                            Lawyer. Your account has been successfully created
+                            and verified.
                           </p>
                           <div className="mt-4">
                             <h5>Registration Details</h5>
@@ -1044,20 +654,36 @@ const DistrictCourt = () => {
                                     <td>{formData.lawyer_name}</td>
                                   </tr>
                                   <tr>
-                                    <th className="text-end pe-3">State:</th>
-                                    <td>{formData.state}</td>
+                                    <th className="text-end pe-3">States:</th>
+                                    <td>
+                                      {formData.state_ids
+                                        ?.map((stateId) => {
+                                          const state = states.find(
+                                            (s) =>
+                                              String(s.state_id) ===
+                                              String(stateId)
+                                          );
+                                          return state?.name || stateId;
+                                        })
+                                        .join(", ")}
+                                    </td>
                                   </tr>
                                   <tr>
                                     <th className="text-end pe-3">
                                       Districts:
                                     </th>
-                                    <td>{formData.district_ids.join(", ")}</td>
-                                  </tr>
-                                  <tr>
-                                    <th className="text-end pe-3">
-                                      Complexes:
-                                    </th>
-                                    <td>{formData.complex_ids.join(", ")}</td>
+                                    <td>
+                                      {formData.district_ids
+                                        ?.map((districtId) => {
+                                          const district = districts.find(
+                                            (d) =>
+                                              String(d.district_id) ===
+                                              String(districtId)
+                                          );
+                                          return district?.name || districtId;
+                                        })
+                                        .join(", ")}
+                                    </td>
                                   </tr>
                                   <tr>
                                     <th className="text-end pe-3">Plan:</th>
@@ -1072,8 +698,8 @@ const DistrictCourt = () => {
                                   <tr>
                                     <th className="text-end pe-3">Status:</th>
                                     <td>
-                                      <span className="badge bg-warning">
-                                        Verification Pending
+                                      <span className="badge bg-success">
+                                        Active
                                       </span>
                                     </td>
                                   </tr>

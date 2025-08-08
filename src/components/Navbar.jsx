@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppBar, Toolbar, IconButton, InputBase, Box, Avatar, Menu, MenuItem, Typography, ButtonBase, } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
@@ -10,8 +10,22 @@ import { useCallContext } from "../Context/CallContext";
 const Navbar = ({ toggleSidebar }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const navigate = useNavigate();
+   const [user, setUser] = useState(null);
+   const [role, setRole] = useState(null);
   const { disconnectSocket, setSocket } = useCallContext();
 
+  useEffect(()=>{
+        const storedRole = localStorage.getItem("userRole");
+        const storedUser = JSON.parse(localStorage.getItem("user"));
+
+      if (storedRole && ["admin", "lawyer", "business_owner"].includes(storedRole)) {
+      setRole(storedRole);
+      setUser(storedUser);
+    } else {
+      navigate("/login");
+    }
+
+  }, [navigate])
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -82,12 +96,12 @@ const Navbar = ({ toggleSidebar }) => {
                   bgcolor: "secondary.main",
                 }}
               >
-                {/* {user?.fullname?.[0]?.toUpperCase() || "U"} */}
-                U
+                {user?.fullname?.[0]?.toUpperCase() || "U"}
+                {/* U */}
               </Avatar>
               <Typography variant="body2" fontWeight={500} sx={{ mr: 0.5 }} className="text-capitalize">
                 {/* {user?.fullname || "User"} */}
-                User
+                {user?.fullname?.charAt(0) || 'U'}
               </Typography>
               <ExpandMoreIcon
                 fontSize="small"
@@ -128,7 +142,7 @@ const Navbar = ({ toggleSidebar }) => {
             <MenuItem disabled>
               <Typography variant="body1" noWrap className="text-capitalize">
                 {/* {user?.fullname || "User"} */}
-                User
+                {user?.fullname?.charAt(0) || 'U'}
               </Typography>
             </MenuItem>
             <MenuItem onClick={handleLogout}>Logout</MenuItem>
