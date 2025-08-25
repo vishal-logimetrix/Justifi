@@ -19,7 +19,7 @@ const Dashboard = () => {
       
       // Only initialize socket if not already connected
       if (!isConnected && 
-          (storedRole === "lawyer" || storedRole === "business_owner") && 
+          (storedRole === "lawyer" || storedRole === "individual") && 
           token) {
         console.log("🔌 Initializing socket in Dashboard");
         initializeSocket(token);
@@ -33,7 +33,7 @@ const Dashboard = () => {
     <>
       {role === "admin" && <AdminDashboard />}
       {role === "lawyer" && <LawyerDashboard />}
-      {role === "business_owner" && <UserDashboard />}
+      {role === "individual" && <UserDashboard />}
     </>
   );
 };

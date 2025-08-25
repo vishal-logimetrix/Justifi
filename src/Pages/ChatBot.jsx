@@ -36,7 +36,7 @@ const ChatBot = () => {
     setIsLoading(true);
 
     try {
-      const response = await chatBotApi.post(`/chat`, { query: userMessage });
+      const response = await chatBotApi.post(`/chat`, { message: userMessage });
       const botResponse = response.data;
 
       const cleanedResponse = botResponse.response

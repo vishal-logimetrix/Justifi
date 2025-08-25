@@ -328,6 +328,10 @@ button:focus {
   animation: spin 1s linear infinite;
 }
 
+.privacy-policy{
+  margin-top: 80px;
+}
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }

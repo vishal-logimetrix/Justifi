@@ -2,6 +2,17 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { axiosState } from "../../api/axios";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  IconButton,
+  CircularProgress,
+  Typography,
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 
 const LawyerCaseDetails = () => {
   const { caseId } = useParams();
@@ -24,7 +35,9 @@ const LawyerCaseDetails = () => {
       try {
         setLoading(true);
         const response = await axiosState.get(
-          `${import.meta.env.VITE_API_URL_STATE}/api/get-districts-cases/${caseId}`
+          `${
+            import.meta.env.VITE_API_URL_STATE
+          }/api/get-districts-cases/${caseId}`
         );
         if (response.data?.status) {
           setCaseDetails(response.data.data);
@@ -754,9 +767,8 @@ const LawyerCaseDetails = () => {
         </div>
       </div>
 
-
       {/* Document Preview Modal */}
-      <div
+      {/* <div
         className={`modal fade ${showDocumentModal ? "show" : ""}`}
         style={{
           display: showDocumentModal ? "block" : "none",
@@ -839,83 +851,153 @@ const LawyerCaseDetails = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Modal Backdrop */}
-      {showDocumentModal && (
-        <div
-          className="modal-backdrop fade show"
-          onClick={closeDocumentModal}
-        ></div>
-      )}
+      <Dialog
+        open={showDocumentModal}
+        onClose={closeDocumentModal}
+        fullWidth
+        // maxWidth="md" // Medium size
+      >
+        <DialogTitle
+          sx={{
+            bgcolor: "primary.main",
+            color: "white",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          Document Preview
+          <IconButton onClick={closeDocumentModal} sx={{ color: "white" }}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
 
-      {showPdfModal && (
-  <>
-    <div
-      className="modal fade show"
-      style={{ display: "block", zIndex: 99999, }}
-      tabIndex="-1"
-    >
-      <div className="modal-dialog modal-xl">
-        <div className="modal-content">
-          <div className="modal-header bg-primary text-white">
-            <h5 className="modal-title">{pdfTitle}</h5>
-            <button
-              type="button"
-              className="btn-close btn-close-white"
-              onClick={() => setShowPdfModal(false)}
-            ></button>
-          </div>
+        <DialogContent dividers sx={{ p: 0 }}>
+          {documentLoadError ? (
+            <Typography color="error" align="center" sx={{ p: 4 }}>
+              Failed to load document. Please try again later.
+            </Typography>
+          ) : pdfBlobUrl ? (
+            <iframe
+              src={pdfBlobUrl}
+              title="PDF Preview"
+              style={{ width: "100%", height: "70vh", border: "none" }}
+            />
+          ) : documentHTML ? (
+            <div
+              style={{
+                padding: "1rem",
+                overflowY: "auto",
+                maxHeight: "70vh",
+              }}
+              dangerouslySetInnerHTML={{ __html: documentHTML }}
+            />
+          ) : (
+            <div className="text-center py-5">
+              <CircularProgress color="primary" />
+              <Typography sx={{ mt: 2 }}>Loading Document...</Typography>
+            </div>
+          )}
+        </DialogContent>
 
-          <div className="modal-body p-0" style={{ minHeight: "500px" }}>
-            {pdfLoadError ? (
-              <div className="text-danger text-center p-4">
-                Failed to load PDF. Please try again later.
-              </div>
-            ) : pdfLoading ? (
-              <div className="text-center py-5">
-                <div className="spinner-border text-primary" role="status" />
-                <p className="mt-3">Loading PDF...</p>
-              </div>
-            ) : pdfBlobUrl ? (
-              <iframe
-                src={pdfBlobUrl}
-                title="PDF Viewer"
-                style={{ width: "100%", height: "70vh", border: "none" }}
-              />
-            ) : null}
-          </div>
-
-          <div className="modal-footer">
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={() => setShowPdfModal(false)}
+        <DialogActions>
+          <Button
+            onClick={closeDocumentModal}
+            color="secondary"
+            variant="outlined"
+          >
+            Close
+          </Button>
+          {pdfBlobUrl && (
+            <Button
+              href={pdfBlobUrl}
+              download="document.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              color="primary"
+              variant="contained"
             >
-              Close
-            </button>
-            {pdfBlobUrl && (
-              <a
-                href={pdfBlobUrl}
-                download={`${pdfTitle}.pdf`}
-                className="btn btn-primary"
-              >
-                Download
-              </a>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
+              Download
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
 
-    {/* Backdrop */}
-    <div
-      className="modal-backdrop fade show"
-      onClick={() => setShowPdfModal(false)}
-    />
-  </>
-)}
+      {/* pdf model  */}
+      <Dialog
+        open={showPdfModal}
+        onClose={() => setShowPdfModal(false)}
+        fullWidth
+        // maxWidth="xl"
+        // PaperProps={{
+        //   sx: { minHeight: "500px" },
+        // }}
+      >
+        {/* Header */}
+        <DialogTitle
+          sx={{
+            bgcolor: "primary.main",
+            color: "white",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          {pdfTitle}
+          <IconButton
+            onClick={() => setShowPdfModal(false)}
+            sx={{ color: "white" }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
 
+        {/* Body */}
+        <DialogContent dividers sx={{ p: 0 }}>
+          {pdfLoadError ? (
+            <Typography color="error" align="center" sx={{ p: 4 }}>
+              Failed to load PDF. Please try again later.
+            </Typography>
+          ) : pdfLoading ? (
+            <div className="text-center py-5">
+              <CircularProgress color="primary" />
+              <Typography sx={{ mt: 2 }}>Loading PDF...</Typography>
+            </div>
+          ) : pdfBlobUrl ? (
+            <iframe
+              src={pdfBlobUrl}
+              title="PDF Viewer"
+              style={{ width: "100%", height: "70vh", border: "none" }}
+            />
+          ) : null}
+        </DialogContent>
+
+        {/* Footer */}
+        <DialogActions>
+          <Button
+            onClick={() => setShowPdfModal(false)}
+            color="secondary"
+            variant="outlined"
+          >
+            Close
+          </Button>
+          {pdfBlobUrl && (
+            <Button
+              href={pdfBlobUrl}
+              download={`${pdfTitle}.pdf`}
+              target="_blank"
+              rel="noopener noreferrer"
+              color="primary"
+              variant="contained"
+            >
+              Download
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
 
       <style>{`
         .nav-tabs-custom .nav-link {

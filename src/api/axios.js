@@ -44,6 +44,9 @@ const createAxiosInstance = (baseURL) => {
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
+      console.log(config)
+      console.log("Request Headers:", config.headers);
+
       return config;
     },
     (error) => Promise.reject(error)

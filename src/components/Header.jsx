@@ -15,6 +15,7 @@ const Header = () => {
     { to: "/home", label: "Home" },
     { to: "/about-us", label: "About" },
     { to: "/ask-query", label: "Ask Query" },
+    // { to: "/our-vision", label: "Our Vision" },
     { to: "/login", label: "Login" },
     { to: "/register", label: "Register" },
   ];

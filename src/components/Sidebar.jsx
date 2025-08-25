@@ -1,16 +1,15 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import {
-  Dashboard as DashboardIcon,
-  PersonAdd as UserAddIcon,
-  Logout as LogoutIcon,
-  History as HistoryIcon,
-  Gavel as CaseIcon,
-  Chat as ChatIcon,
-  People as PeopleIcon,
-  SmartToy as BotIcon
-} from "@mui/icons-material";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import UserAddIcon from "@mui/icons-material/PersonAdd";
+import LogoutIcon from "@mui/icons-material/Logout";
+import HistoryIcon from "@mui/icons-material/History";
+import CaseIcon from "@mui/icons-material/Gavel";
+import ChatIcon from "@mui/icons-material/Chat";
+import PeopleIcon from "@mui/icons-material/People";
+// import BotIcon from "@mui/icons-material/SmartToy";
+
 import { Avatar, Box, Divider, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Tooltip, Typography, useTheme } from "@mui/material";
-import logo from "../assets/images/logo_t.png";
+// import logo from "../assets/images/logo_t.png";
 import { useEffect, useState } from "react";
 import { useCallContext } from "../Context/CallContext";
 
@@ -26,7 +25,7 @@ const Sidebar = ({ open }) => {
     const storedRole = localStorage.getItem("userRole");
     const storedUser = JSON.parse(localStorage.getItem("user"));
     
-    if (storedRole && ["admin", "lawyer", "business_owner"].includes(storedRole)) {
+    if (storedRole && ["admin", "lawyer", "individual"].includes(storedRole)) {
       setRole(storedRole);
       setUser(storedUser);
     } else {
@@ -39,7 +38,7 @@ const Sidebar = ({ open }) => {
       text: "Dashboard",
       icon: <DashboardIcon />,
       path: "/dashboard",
-      roles: ["admin", "lawyer", "business_owner"],
+      roles: ["admin", "lawyer", "individual"],
     },
         {
       text: "Case Details",
@@ -64,19 +63,19 @@ const Sidebar = ({ open }) => {
       text: "All Lawyers",
       icon: <PeopleIcon />,
       path: "/lawyer-list",
-      roles: ["business_owner"],
+      roles: ["individual"],
     },
     {
       text: "Recent Chats",
       icon: <ChatIcon />,
       path: "/chat-history",
-      roles: ["business_owner"],
+      roles: ["individual"],
     },
     // {
     //   text: "Chat With Rylaw",
     //   icon: <BotIcon />,
     //   path: "/chat-bot",
-    //   roles: ["business_owner", "lawyer"],
+    //   roles: ["individual", "lawyer"],
     // },
     {
       text: "Profile",
@@ -96,7 +95,7 @@ const Sidebar = ({ open }) => {
     switch(role) {
       case "admin": return "Administrator";
       case "lawyer": return "Legal Counsel";
-      case "business_owner": return "Business Owner";
+      case "individual": return "Business Owner";
       default: return "User";
     }
   };

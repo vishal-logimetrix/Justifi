@@ -6,7 +6,9 @@ const Footer = () => {
   return (
     <footer className="bg-dark text-light pt-5 pb-4">
       <div className="container">
+        
         <div className="row g-4">
+          
           {/* Brand & Description */}
           <div className="col-md-4">
             <div className="d-flex align-items-center mb-3">
@@ -33,7 +35,7 @@ const Footer = () => {
           </div>
 
           {/* Contact Info */}
-          <div className="col-md-3">
+          <div className="col-md-2">
             <h6 className="text-uppercase fw-semibold mb-3">Contact</h6>
             <ul className="list-unstyled small">
               <li className="mb-2 d-flex align-items-center">
@@ -45,21 +47,43 @@ const Footer = () => {
                 +91-8000000000
               </li>
               <li className="d-flex align-items-center">
-                <MapPin size={16} className="me-2" />
-                Mumbai, India
+                <MapPin size={16} className="me-2 flex-shrink-0" />
+                RH 8, Om Dwarkanath CHS, Plot #11, Sector 19A, Nerul East, Navi Mumbai, Maharashtra - India - 400 706s
               </li>
             </ul>
           </div>
 
           {/* Social Media */}
-          <div className="col-md-3">
+          <div className="col-md-2">
             <h6 className="text-uppercase fw-semibold mb-3">Follow Us</h6>
             <div className="d-flex gap-3">
               <a href="#" className="text-white fs-5"><Facebook /></a>
               <a href="#" className="text-white fs-5"><Twitter /></a>
               <a href="#" className="text-white fs-5"><Linkedin /></a>
             </div>
+            {/* <ul className='list-unstyled small'>
+              <li>Privacy policy</li>
+              <li>Refund policy</li>
+              <li>Terms and conditions</li>
+            </ul> */}
           </div>
+
+          {/* Terms and conditions */}
+          <div className="col-md-2">
+            <h6 className="text-uppercase fw-semibold mb-3">Terms</h6>
+            <ul className='list-unstyled small'>
+              <li>
+                <Link to="/privacy-policy" className="text-white text-decoration-none">Privacy policy</Link>
+              </li>
+              <li>
+                <Link to="/refund-policy" className="text-white text-decoration-none">Refund policy</Link>
+              </li>
+              <li>
+                <Link to="/terms-conditions" className="text-white text-decoration-none">Terms and conditions</Link>
+              </li>
+            </ul>
+          </div>
+
         </div>
 
         {/* Bottom Bar */}

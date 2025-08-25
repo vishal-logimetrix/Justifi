@@ -1,21 +1,28 @@
 import { useEffect, useState } from "react";
-import {
-  Gavel,
-  TaskAlt,
-  PendingActions,
-  Lock,
-  Circle,
-} from "@mui/icons-material";
+// import {
+//   Gavel,
+//   TaskAlt,
+//   PendingActions,
+//   Lock,
+//   Circle,
+// } from "@mui/icons-material";
+
+import GavelIcon from "@mui/icons-material/Gavel";
+import TaskAltIcon from "@mui/icons-material/TaskAlt";
+import PendingActionsIcon from "@mui/icons-material/PendingActions";
+import LockIcon from "@mui/icons-material/Lock";
+// import CircleIcon from "@mui/icons-material/Circle";
+
 import {
   Button,
   CircularProgress,
   Skeleton,
-  Tooltip,
-  IconButton,
+  // Tooltip,
+  // IconButton,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import CaseStatusChart from "../components/Dashboard/CaseStatusChart";
+// import CaseStatusChart from "../components/Dashboard/CaseStatusChart";
 import CaseTypeChart from "../components/Dashboard/CaseTypeChart";
 import { useCallContext } from "../Context/CallContext";
 import IndiaStateMap from "../components/IndiaStateMap";
@@ -227,7 +234,7 @@ const LawyerDashboard = () => {
             }
           >
             <IconButton className="me-3">
-              <Circle style={{ color: isConnected ? "#28a745" : "#dc3545" }} />
+              <CircleIcon style={{ color: isConnected ? "#28a745" : "#dc3545" }} />
             </IconButton>
           </Tooltip> */}
           <Button
@@ -252,7 +259,7 @@ const LawyerDashboard = () => {
             <div className="card border-0 shadow-sm h-100">
               <div className="card-body d-flex align-items-center">
                 <div className="bg-primary bg-opacity-10 p-3 rounded-circle me-3">
-                  <Gavel className="text-primary" />
+                  <GavelIcon className="text-primary" />
                 </div>
                 <div>
                   <h6 className="text-muted mb-1">Total Cases</h6>
@@ -270,7 +277,7 @@ const LawyerDashboard = () => {
             <div className="card border-0 shadow-sm h-100">
               <div className="card-body d-flex align-items-center">
                 <div className="bg-success bg-opacity-10 p-3 rounded-circle me-3">
-                  <TaskAlt className="text-success" />
+                  <TaskAltIcon className="text-success" />
                 </div>
                 <div>
                   <h6 className="text-muted mb-1">Active Cases</h6>
@@ -288,7 +295,7 @@ const LawyerDashboard = () => {
             <div className="card border-0 shadow-sm h-100">
               <div className="card-body d-flex align-items-center">
                 <div className="bg-warning bg-opacity-10 p-3 rounded-circle me-3">
-                  <PendingActions className="text-warning" />
+                  <PendingActionsIcon className="text-warning" />
                 </div>
                 <div>
                   <h6 className="text-muted mb-1">Pending Cases</h6>
@@ -306,7 +313,7 @@ const LawyerDashboard = () => {
             <div className="card border-0 shadow-sm h-100">
               <div className="card-body d-flex align-items-center">
                 <div className="bg-danger bg-opacity-10 p-3 rounded-circle me-3">
-                  <Lock className="text-danger" />
+                  <LockIcon className="text-danger" />
                 </div>
                 <div>
                   <h6 className="text-muted mb-1">Closed Cases</h6>

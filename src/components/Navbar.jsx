@@ -18,7 +18,7 @@ const Navbar = ({ toggleSidebar }) => {
         const storedRole = localStorage.getItem("userRole");
         const storedUser = JSON.parse(localStorage.getItem("user"));
 
-      if (storedRole && ["admin", "lawyer", "business_owner"].includes(storedRole)) {
+      if (storedRole && ["admin", "lawyer", "individual"].includes(storedRole)) {
       setRole(storedRole);
       setUser(storedUser);
     } else {

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { BarChart, Target, Eye, Globe, Zap, ShieldCheck } from "lucide-react";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 const AboutUs = () => {
   const [values, setValues] = useState([]);
@@ -9,8 +11,10 @@ const AboutUs = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+
     // Simulate API call to fetch data
     setTimeout(() => {
+       AOS.init({ duration: 600, once: true });
       setValues([
         {
           id: 1,
@@ -48,7 +52,7 @@ const AboutUs = () => {
           name: "Rohit Patt",
           role: "CEO",
           bio: "With a strategic vision and analytical mindset, Rohit drives innovation and growth at Justifi.",
-          img: "https://randomuser.me/api/portraits/women/68.jpg",
+          img: "https://randomuser.me/api/portraits/men/30.jpg",
           linkedIn: "https://www.linkedin.com/in/rohit-patt-16a2a331/",
         },
         {
@@ -56,7 +60,7 @@ const AboutUs = () => {
           name: "Sandipan Basu",
           role: "CTO",
           bio: "Sandipan brings a wealth of experience in architecting and developing scalable, high-performance technology solutions.",
-          img: "https://randomuser.me/api/portraits/men/32.jpg",
+          img: "https://logimetrix.co.in/assets/team6-DQv73eg7.png",
           linkedIn: "https://www.linkedin.com/in/sandipan-basu-b67323335/",
         },
         {
@@ -64,7 +68,7 @@ const AboutUs = () => {
           name: "Avinash Acharya",
           role: "CLO",
           bio: "A seasoned advocate at the Rajasthan High Court, Avinash brings deep expertise in constitutional and corporate law.",
-          img: "https://randomuser.me/api/portraits/women/44.jpg",
+          img: "https://randomuser.me/api/portraits/men/67.jpg",
           linkedIn: "https://www.linkedin.com/in/avinash-acharya-6202a461/",
         },
         {
@@ -72,7 +76,7 @@ const AboutUs = () => {
           name: "Richa Rai",
           role: "CXO",
           bio: "Former Deloitte principal consultant leveraging finance and business leadership to enhance customer experience.",
-          img: "https://randomuser.me/api/portraits/men/67.jpg",
+          img: "https://logimetrix.co.in/assets/team-DcHuK7LX.jpg",
           linkedIn: "https://www.linkedin.com/in/richa-rai-94036123/",
         },
         // {
@@ -138,24 +142,19 @@ const AboutUs = () => {
           </div>
 
           <div className="row align-items-center">
-            <div className="col-lg-6 mb-4 mb-lg-0">
+            <div className="col-lg-6 mb-4 mb-lg-0" data-aos="fade-down">
               <img
                 src="https://images.unsplash.com/photo-1589391886645-d51941baf7fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
                 alt="Founding Team"
                 className="img-fluid rounded shadow"
               />
             </div>
-            <div className="col-lg-6">
+            <div className="col-lg-6" data-aos="fade-up">
               <h3 className="fw-bold mb-3" style={{ color: "#000080" }}>
-                The Beginning
+                About Justifi: Our Story & Commitment.
               </h3>
               <p className="text-muted mb-4">
-                Justifi was founded in 2023 with a simple yet powerful vision:
-                to make legal assistance accessible, affordable, and
-                understandable for every Indian. Our founder, Raj Sharma, a
-                former corporate lawyer, witnessed firsthand the challenges
-                ordinary citizens faced when navigating the complex legal
-                system.
+                Justifi was founded with the mission to bridge the gap between those seeking legal advice and the expert advocates who can provide it. We believe in leveraging technology to make legal services more accessible, transparent, and efficient for everyone.
               </p>
               <p className="text-muted mb-4">
                 After seeing one too many people forgo their legal rights due to
@@ -197,7 +196,7 @@ const AboutUs = () => {
       >
         <div className="container py-5">
           <div className="row">
-            <div className="col-lg-6 mb-5 mb-lg-0">
+            <div className="col-lg-6 mb-5 mb-lg-0" data-aos="fade-down">
               <div className="card h-100 border-0 shadow-lg">
                 <div className="card-body p-4 p-lg-5">
                   <div className="icon-lg bg-success rounded-circle d-inline-flex align-items-center justify-content-center mb-4">
@@ -210,16 +209,12 @@ const AboutUs = () => {
                     Our Mission
                   </h3>
                   <p className="card-text text-muted">
-                    To democratize legal assistance by leveraging cutting-edge
-                    technology and a nationwide network of vetted legal
-                    professionals. We aim to make legal support immediate,
-                    cashless, and understandable for individuals, families, and
-                    SMEs across every city and district in India.
+                    To democratize access to justice by providing a seamless, secure, and reliable platform where users can connect with qualified legal professionals for timely and affordable advice.
                   </p>
                 </div>
               </div>
             </div>
-            <div className="col-lg-6">
+            <div className="col-lg-6" data-aos="fade-down">
               <div className="card h-100 border-0 shadow-lg">
                 <div className="card-body p-4 p-lg-5">
                   <div className="icon-lg bg-warning rounded-circle d-inline-flex align-items-center justify-content-center mb-4">
@@ -229,14 +224,10 @@ const AboutUs = () => {
                     className="card-title fw-bold mb-3"
                     style={{ color: "#000080" }}
                   >
-                    Our Vision
+                    Our Commitment
                   </h3>
                   <p className="card-text text-muted">
-                    To become India's most trusted legal assistance platform,
-                    where anyone can find clarity, guidance, and representation
-                    regardless of their background or financial means. We
-                    envision a future where justice is not a privilege but an
-                    accessible right for every citizen.
+                    We are committed to maintaining the highest standards of professional ethics, data security, and regulatory compliance, ensuring a trustworthy environment for both our users and advocates.
                   </p>
                 </div>
               </div>
@@ -335,7 +326,7 @@ const AboutUs = () => {
           <div className="row g-4 justify-content-center">
             {teamMembers.map((member) => (
               <div key={member.id} className="col-sm-6 col-lg-4 col-xl-3">
-                <div className="card h-100 shadow-sm">
+                <div className="card h-100 shadow-sm" data-aos="zoom-in-down">
                   <img
                     src={member.img}
                     className="card-img-top"
@@ -430,13 +421,13 @@ const AboutUs = () => {
               <div className="d-flex flex-wrap justify-content-center gap-3">
                 <a
                   href="/find-lawyer"
-                  className="btn btn-success btn-lg px-4 py-3"
+                  className="btn btn-success btn-sm px-2 py-2"
                 >
                   Find a Lawyer
                 </a>
                 <a
                   href="/advocate-partner"
-                  className="btn btn-outline-primary btn-lg px-4 py-3"
+                  className="btn btn-outline-primary btn-sm px-2 py-2"
                 >
                   Join as Advocate
                 </a>

@@ -44,22 +44,23 @@ const HeroSection = () => {
           // style={{ backdropFilter: 'blur(10px)', maxWidth: '800px', margin: '0 auto' }}
         >
           <h1 className="display-4 fw-bold mb-3">
+            Connecting You to Expert Legal Advice, Simply.
+          </h1>
+          {/* <h1 className="display-4 fw-bold mb-3">
             Partner with Justifi: Empower Your Practice,
             <br />
             <span className="text-white">Expand Your Reach</span>
-          </h1>
+          </h1> */}
 
           <p className="lead text-white-50 mb-4">
-            Join India's fastest-growing legal assistance platform and connect
-            with clients across every city and district. Take your practice to
-            new heights with Justifi.
+            Justifi is your trusted online platform, designed to provide accessible and affordable legal consultations from verified advocates across India. Get clear, reliable advice when you need it most.
           </p>
 
           <Link
             to="/register"
-            className="btn btn-light text-primary btn-lg fw-bold px-4 py-3 d-inline-flex align-items-center"
+            className="btn btn-light text-primary btn-lg fw-bold px-4 py-2 d-inline-flex align-items-center"
           >
-            <Scale size={20} className="me-2" /> Join as Partner Advocate
+            <Scale size={20} className="me-2" /> Join our network
           </Link>
         </div>
       </div>

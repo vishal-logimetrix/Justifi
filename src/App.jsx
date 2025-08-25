@@ -26,6 +26,9 @@ import LawyerOptions from './Pages/LawyerOptions';
 import LawyerCaseDetails from './components/Dashboard/LawyerCaseDetails';
 import LawyerCasesList from './components/Dashboard/LawyerCaseList';
 import LawyerProfile from './Pages/LawyerProfile';
+import PrivacyPage from './Pages/PrivacyPage';
+import RefundPage from './Pages/RefundPage';
+import TermsAndConditions from './Pages/TermsAndConditions';
 
 
 
@@ -71,6 +74,9 @@ function App() {
           <Route path="/register/district-court" element={<DistrictCourt />} />
           <Route path="/register/user" element={<UserRegister />} />
           <Route path="/register/lawyer-options" element={<LawyerOptions />} />
+          <Route path="/privacy-policy" element={<PrivacyPage />} />
+          <Route path="/refund-policy" element={<RefundPage />} />
+          <Route path="/terms-conditions" element={<TermsAndConditions />} />
           <Route path='' element={<Layout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/lawyer-list" element={<LawyerList />} />

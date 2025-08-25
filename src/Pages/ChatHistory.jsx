@@ -13,11 +13,11 @@ import {
   IconButton,
   Typography,
   CircularProgress,
-  Tooltip,
+  // Tooltip,
 } from "@mui/material";
 import PhoneInTalkIcon from "@mui/icons-material/PhoneInTalk";
 // import { connectSocket, getSocket } from "../Socket/socket";
-import { Circle } from "@mui/icons-material";
+// import { Circle } from "@mui/icons-material";
 import { useCallContext } from "../Context/CallContext";
 
 const getGreeting = () => {

@@ -18,6 +18,14 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemButton,
+  Divider,
+  Tooltip,
+  Avatar,
 } from "@mui/material";
 import ChatIcon from "@mui/icons-material/Chat";
 import CloseIcon from "@mui/icons-material/Close";
@@ -25,12 +33,19 @@ import OpenInFullIcon from "@mui/icons-material/OpenInFull";
 import CloseFullscreenIcon from "@mui/icons-material/CloseFullscreen";
 import SendIcon from "@mui/icons-material/Send";
 import CallIcon from "@mui/icons-material/Call";
+import MenuIcon from "@mui/icons-material/Menu";
+import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import HistoryIcon from "@mui/icons-material/History";
+import SmartToyIcon from "@mui/icons-material/SmartToy";
+import PersonIcon from "@mui/icons-material/Person";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 import { keyframes } from "@emotion/react";
 import chatBotApi from "../api/chatBotApi";
 import bgImg from "../assets/images/img1.png";
-// import bgImg from "../assets/images/img2.png";
+import axios from "axios";
 
 // --- Animation Keyframes ---
 const bounce = keyframes`
@@ -54,7 +69,6 @@ const glow = keyframes`
   }
 `;
 
-
 const typingAnimation = keyframes`
   0%, 80%, 100% { 
     transform: scale(0);
@@ -65,17 +79,23 @@ const typingAnimation = keyframes`
 `;
 
 const DashboardLayout = () => {
+  const [user, setUser] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatFullscreen, setChatFullscreen] = useState(false);
+  const [chatHistoryOpen, setChatHistoryOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [chatHistory, setChatHistory] = useState([]);
+  const [currentChatId, setCurrentChatId] = useState(null);
+  const [loadingHistory, setLoadingHistory] = useState(false);
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery("(max-width:768px)");
+  const isMediumScreen = useMediaQuery("(max-width:1024px)");
   const sidebarTransition = "width 0.3s ease-in-out, margin 0.3s ease-in-out";
 
   useEffect(() => {
@@ -92,11 +112,120 @@ const DashboardLayout = () => {
   }, []);
 
   useEffect(() => {
+    const getUser = JSON.parse(localStorage.getItem("user"));
+    setUser(getUser);
+  }, []);
+  useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    if (chatOpen) {
+      loadChatHistory();
+    }
+  }, [chatOpen]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // Mock API functions - Replace these with your actual API calls
+  const loadChatHistory = async () => {
+    setLoadingHistory(true);
+    try {
+      const token = user.token;
+      const option = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      const { data } = await axios.get(
+        `${import.meta.env.VITE_API_URL_USER}rylaw_chat`,
+        option
+      );
+      if (data.success && Array.isArray(data.chats)) {
+        const formattedChats = data.chats.map((chat) => ({
+          id: chat.chat_id,
+          title: chat.title,
+          lastMessage: "", // Placeholder since API doesn't return this
+          timestamp: chat.created_at,
+          messageCount: 0, // Placeholder since API doesn't return this
+        }));
+
+        setChatHistory(formattedChats);
+      } else {
+        setChatHistory([]);
+      }
+    } catch (error) {
+      console.error("Error loading chat history:", error);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
+ const loadChatMessages = async (chatId) => {
+  setIsLoading(true);
+
+  try {
+    const token = user.token;
+    const option = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    const { data } = await axios.get(`${import.meta.env.VITE_API_URL_USER}rylaw_chat/${chatId}`, option);
+
+    if (data.success && Array.isArray(data.chat)) {
+      // Flatten each message into user and bot messages
+      const formattedMessages = data.chat.flatMap((msg) => [
+        {
+          sender: "user",
+          text: msg.query,
+          timestamp: msg.created_at, // optional if you want to use it
+        },
+        {
+          sender: "bot",
+          text: msg.response?.trim() || "",
+          timestamp: msg.created_at,
+        },
+      ]);
+
+      setMessages(formattedMessages);
+      setCurrentChatId(chatId);
+    } else {
+      setMessages([]);
+    }
+
+  } catch (error) {
+    console.error("Error loading chat messages:", error);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+  const createNewChat = () => {
+    setMessages([]);
+    setCurrentChatId(null);
+    setInput("");
+    if (isSmallScreen) {
+      setChatHistoryOpen(false);
+    }
+  };
+
+  const deleteChatHistory = async (chatId, event) => {
+    event.stopPropagation();
+    try {
+      // Replace with actual API call
+      // await chatBotApi.delete(`/chat/${chatId}`);
+      setChatHistory((prev) => prev.filter((chat) => chat.id !== chatId));
+      if (currentChatId === chatId) {
+        createNewChat();
+      }
+    } catch (error) {
+      console.error("Error deleting chat:", error);
+    }
   };
 
   const getBubbleColor = (sensitivity) => {
@@ -208,7 +337,11 @@ const DashboardLayout = () => {
     setIsLoading(true);
 
     try {
-      const response = await chatBotApi.post(`/chat`, { query: userMessage });
+      const response = await chatBotApi.post(`/chat`, {
+        message: userMessage,
+        chat_id: currentChatId ? currentChatId : "",
+        user_id: user.id,
+      });
       const botResponse = response.data;
 
       const cleanedResponse = botResponse.response
@@ -226,6 +359,25 @@ const DashboardLayout = () => {
         ...prev,
         { sender: "bot", text: cleanedResponse, data: botResponse },
       ]);
+
+      // If this is a new chat, add it to history and set current chat ID
+      if (!currentChatId) {
+        // const newChatId = Date.now(); // Use timestamp as ID for demo
+        const newChatId = "";
+        setCurrentChatId(newChatId);
+        const newChat = {
+          id: newChatId,
+          title:
+            userMessage.substring(0, 50) +
+            (userMessage.length > 50 ? "..." : ""),
+          lastMessage:
+            cleanedResponse.substring(0, 100) +
+            (cleanedResponse.length > 100 ? "..." : ""),
+          timestamp: new Date().toISOString(),
+          messageCount: 2,
+        };
+        setChatHistory((prev) => [newChat, ...prev]);
+      }
     } catch (error) {
       console.error("Error:", error);
       setMessages((prev) => [
@@ -246,6 +398,18 @@ const DashboardLayout = () => {
       e.preventDefault();
       sendMessage();
     }
+  };
+
+  const formatTimestamp = (timestamp) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffTime = Math.abs(now - date);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 1) return "Today";
+    if (diffDays === 2) return "Yesterday";
+    if (diffDays <= 7) return `${diffDays} days ago`;
+    return date.toLocaleDateString();
   };
 
   const renderSidebar = () => {
@@ -298,6 +462,192 @@ const DashboardLayout = () => {
           }}
         />
       ))}
+    </Box>
+  );
+
+  // Chat History Sidebar Component
+  const ChatHistorySidebar = () => (
+    <Box
+      sx={{
+        width: isSmallScreen ? "280px" : "320px",
+        height: "100%",
+        backgroundColor: "#f7f7f8",
+        borderRight: "1px solid #e5e5e5",
+        display: "flex",
+        flexDirection: "column",
+        position: "relative",
+        zIndex: 1,
+      }}
+    >
+      {/* Header */}
+      <Box
+        sx={{
+          p: 2,
+          borderBottom: "1px solid #e5e5e5",
+          backgroundColor: "#fff",
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 1,
+          }}
+        >
+          <Typography variant="h6" sx={{ fontWeight: 600, color: "#2d3748" }}>
+            Chat History
+          </Typography>
+          {isSmallScreen && (
+            <IconButton
+              size="small"
+              onClick={() => setChatHistoryOpen(false)}
+              sx={{ color: "#666" }}
+            >
+              <CloseIcon />
+            </IconButton>
+          )}
+        </Box>
+
+        <Button
+          fullWidth
+          variant="outlined"
+          startIcon={<AddIcon />}
+          onClick={createNewChat}
+          sx={{
+            borderColor: "#d1d5db",
+            color: "#374151",
+            textTransform: "none",
+            borderRadius: "8px",
+            "&:hover": {
+              backgroundColor: "#f9fafb",
+              borderColor: "#9ca3af",
+            },
+          }}
+        >
+          New Chat
+        </Button>
+      </Box>
+
+      {/* Chat History List */}
+      <Box sx={{ flex: 1, overflowY: "auto" }}>
+        {loadingHistory ? (
+          <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
+            <CircularProgress size={24} />
+          </Box>
+        ) : chatHistory.length === 0 ? (
+          <Box sx={{ p: 3, textAlign: "center" }}>
+            <HistoryIcon sx={{ fontSize: 48, color: "#9ca3af", mb: 1 }} />
+            <Typography variant="body2" color="text.secondary">
+              No chat history yet
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Start a conversation to see your history
+            </Typography>
+          </Box>
+        ) : (
+          <List sx={{ p: 1 }}>
+            {chatHistory.map((chat) => (
+              <ListItem key={chat.id} disablePadding sx={{ mb: 0.5 }}>
+                <ListItemButton
+                  onClick={() => loadChatMessages(chat.id)}
+                  selected={currentChatId === chat.id}
+                  sx={{
+                    borderRadius: "8px",
+                    mx: 1,
+                    transition: "all 0.2s",
+                    "&:hover": {
+                      backgroundColor: "#e5e7eb",
+                    },
+                    "&.Mui-selected": {
+                      backgroundColor: "#dbeafe",
+                      "&:hover": {
+                        backgroundColor: "#bfdbfe",
+                      },
+                    },
+                  }}
+                >
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontWeight: currentChatId === chat.id ? 600 : 400,
+                        color: "#1f2937",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        mb: 0.5,
+                      }}
+                    >
+                      {chat.title}
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: "#6b7280",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        display: "block",
+                      }}
+                    >
+                      {chat.lastMessage}
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: "#9ca3af",
+                        fontSize: "10px",
+                      }}
+                    >
+                      {formatTimestamp(chat.timestamp)} {" "}
+                      {/* {formatTimestamp(chat.timestamp)} • {chat.messageCount}{" "} */}
+                      messages
+                    </Typography>
+                  </Box>
+
+                  <Box sx={{ display: "flex", gap: 0.5 }}>
+                    <Tooltip title="Edit">
+                      <IconButton
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // Add edit functionality
+                        }}
+                        sx={{
+                          opacity: 0,
+                          transition: "opacity 0.2s",
+                          ".MuiListItemButton-root:hover &": {
+                            opacity: 1,
+                          },
+                        }}
+                      >
+                        <EditIcon sx={{ fontSize: 16 }} />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Delete">
+                      <IconButton
+                        size="small"
+                        onClick={(e) => deleteChatHistory(chat.id, e)}
+                        sx={{
+                          opacity: 0,
+                          transition: "opacity 0.2s",
+                          ".MuiListItemButton-root:hover &": {
+                            opacity: 1,
+                          },
+                          color: "#ef4444",
+                        }}
+                      >
+                        <DeleteIcon sx={{ fontSize: 16 }} />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
+        )}
+      </Box>
     </Box>
   );
 
@@ -361,7 +711,6 @@ const DashboardLayout = () => {
         </Box>
 
         {/* Chatbot Floating Icon with Animation */}
-        {/* {!chatOpen && ( */}
         <IconButton
           onClick={() => setChatOpen(true)}
           sx={{
@@ -380,7 +729,28 @@ const DashboardLayout = () => {
         >
           <ChatIcon fontSize="medium" />
         </IconButton>
-        {/* )} */}
+
+        {/* Mobile Chat History Toggle */}
+        {chatOpen && isSmallScreen && (
+          <IconButton
+            onClick={() => setChatHistoryOpen(true)}
+            sx={{
+              position: "fixed",
+              bottom: chatFullscreen ? 24 : 500,
+              left: 24,
+              zIndex: 1300,
+              backgroundColor: "#f3f4f6",
+              color: "#374151",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+              "&:hover": {
+                backgroundColor: "#e5e7eb",
+              },
+            }}
+            title="Chat History"
+          >
+            <MenuIcon />
+          </IconButton>
+        )}
 
         {/* Fullscreen Chat Backdrop */}
         {chatOpen && chatFullscreen && (
@@ -398,6 +768,21 @@ const DashboardLayout = () => {
           />
         )}
 
+        {/* Mobile Chat History Drawer */}
+        <Drawer
+          anchor="left"
+          open={chatHistoryOpen && isSmallScreen}
+          onClose={() => setChatHistoryOpen(false)}
+          sx={{
+            zIndex: 1500,
+            "& .MuiDrawer-paper": {
+              width: "280px",
+            },
+          }}
+        >
+          <ChatHistorySidebar />
+        </Drawer>
+
         {/* Chatbot Window */}
         {chatOpen && (
           <Paper
@@ -407,212 +792,415 @@ const DashboardLayout = () => {
               bottom: chatFullscreen ? "50%" : 80,
               right: chatFullscreen ? "50%" : 24,
               transform: chatFullscreen ? "translate(50%, 50%)" : "none",
-              width: chatFullscreen ? "60vw" : 320,
-              height: chatFullscreen ? "85vh" : 400,
+              width: chatFullscreen
+                ? isSmallScreen
+                  ? "85vw"
+                  : "75vw"
+                : isSmallScreen
+                ? "85vw"
+                : isMediumScreen
+                ? "400px"
+                : "500px",
+              height: chatFullscreen
+                ? isSmallScreen
+                  ? "85vh"
+                  : "85vh"
+                : isSmallScreen
+                ? "70vh"
+                : "500px",
               zIndex: 1400,
               display: "flex",
-              flexDirection: "column",
-              borderRadius: 2,
+              flexDirection: "row",
+              borderRadius: chatFullscreen ? 3 : 2,
               overflow: "hidden",
               transition: "all 0.3s ease-in-out",
-              // Add background image with low opacity
-              backgroundImage: `url(${bgImg})`,
-              backgroundSize: "contain",
-              backgroundPosition: "center",
-              backgroundRepeat: "no-repeat",
-              backgroundBlendMode: "overlay",
-              backgroundColor: "rgba(255, 255, 255, 0.9)",
-              "&::before": {
-                content: '""',
-                position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                backgroundImage: `url(${bgImg})`,
-                backgroundSize: "contain",
-                backgroundPosition: "center",
-                backgroundRepeat: "no-repeat",
-                opacity: 0.3,
-                zIndex: -1,
-              },
+              backgroundColor: "#fff",
+              boxShadow:
+                "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
             }}
           >
-            {/* Header */}
-            <Box
-              sx={{
-                backgroundColor: theme.palette.primary.main,
-                color: "#fff",
-                p: 1,
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                position: "relative", // Ensure it's above the background
-                zIndex: 1, // Keep header above background
-              }}
-            >
-              <Typography variant="subtitle1">Chat with Rylaw</Typography>
-              <Box>
-                {/* Expand/Collapse Toggle */}
-                <IconButton
-                  size="small"
-                  onClick={() => setChatFullscreen((prev) => !prev)}
-                >
-                  {chatFullscreen ? (
-                    <CloseFullscreenIcon sx={{ color: "#fff" }} />
-                  ) : (
-                    <OpenInFullIcon sx={{ color: "#fff" }} />
-                  )}
-                </IconButton>
-
-                {/* Close Button */}
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    setChatOpen(false);
-                    setChatFullscreen(false);
-                    setMessages([]);
-                    setInput("");
-                  }}
-                >
-                  <CloseIcon sx={{ color: "#fff" }} />
-                </IconButton>
+            {/* Chat History Sidebar - Desktop */}
+            {chatFullscreen && !isSmallScreen && (
+              <Box sx={{ width: "320px", borderRight: "1px solid #e5e5e5" }}>
+                <ChatHistorySidebar />
               </Box>
-            </Box>
+            )}
 
-            {/* Chat Content */}
-            <Box
-              sx={{
-                flex: 1,
-                p: 2,
-                overflowY: "auto",
-                backgroundColor: "rgba(250, 250, 250, 0.7)",
-                display: "flex",
-                flexDirection: "column",
-                position: "relative", // Ensure content is above background
-                zIndex: 1, // Keep content above background
-              }}
-            >
-              {messages.length === 0 && (
-                <Typography
-                  variant="body2"
-                  sx={{
-                    textAlign: "center",
-                    color: "text.secondary",
-                    mt: 2,
-                  }}
-                >
-                  Hi! How can I help you today?
-                </Typography>
-              )}
-
-              {messages.map((msg, i) => (
-                <Box
-                  key={i}
-                  sx={{
-                    display: "flex",
-                    justifyContent:
-                      msg.sender === "user" ? "flex-end" : "flex-start",
-                    mb: 1.5,
-                  }}
-                >
-                  <Box
-                    sx={{
-                      maxWidth: "85%",
-                      padding: "12px 16px",
-                      borderRadius: "20px",
-                      fontSize: "15px",
-                      lineHeight: 1.4,
-                      whiteSpace: "pre-wrap",
-                      wordWrap: "break-word",
-                      overflowWrap: "break-word",
-                      boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
-                      backgroundColor:
-                        msg.sender === "user"
-                          ? "#d1eaff"
-                          : getBubbleColor(msg.data?.case_sensitivity),
-                      borderBottomRightRadius: msg.sender === "user" ? 4 : 20,
-                      borderBottomLeftRadius: msg.sender === "bot" ? 4 : 20,
-                    }}
-                  >
-                    {msg.sender === "bot" ? renderBotResponse(msg) : msg.text}
-                  </Box>
-                </Box>
-              ))}
-
-              {isLoading && (
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "flex-start",
-                    mb: 1.5,
-                  }}
-                >
-                  <Box
-                    sx={{
-                      padding: "12px 16px",
-                      borderRadius: "20px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      backgroundColor: "rgba(255,255,255,0.7)",
-                    }}
-                  >
-                    <TypingIndicator />
-                  </Box>
-                </Box>
-              )}
-
-              <div ref={messagesEndRef} />
-            </Box>
-
-            {/* Input Area */}
-            <Box
-              sx={{
-                p: 1,
-                borderTop: "1px solid #ddd",
-                display: "flex",
-                gap: 1,
-                backgroundColor: "white",
-                position: "relative", // Ensure it's above the background
-                zIndex: 1, // Keep input area above background
-              }}
-            >
-              <TextField
-                multiline
-                minRows={1}
-                maxRows={4}
-                size="small"
-                placeholder="Type your legal query..."
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                disabled={isLoading}
-                inputRef={textareaRef}
+            {/* Main Chat Area */}
+            <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
+              {/* Header */}
+              <Box
                 sx={{
-                  flexGrow: 1,
-                  "& .MuiInputBase-root": {
-                    padding: "5px 12px",
-                  },
-                }}
-              />
-              <Button
-                variant="contained"
-                size="small"
-                onClick={sendMessage}
-                disabled={isLoading || !input.trim()}
-                sx={{
-                  minWidth: "auto",
-                  alignSelf: "flex-end",
-                  height: "32px",
+                  backgroundColor: "#fff",
+                  borderBottom: "1px solid #e5e5e5",
+                  p: 2,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  position: "relative",
+                  zIndex: 1,
                 }}
               >
-                {isLoading ? (
-                  <CircularProgress size={20} color="inherit" />
-                ) : (
-                  <SendIcon />
-                )}
-              </Button>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                  <Avatar
+                    sx={{
+                      bgcolor: theme.palette.primary.main,
+                      width: 32,
+                      height: 32,
+                    }}
+                  >
+                    <SmartToyIcon sx={{ fontSize: 18 }} />
+                  </Avatar>
+                  <Box>
+                    <Typography
+                      variant="subtitle1"
+                      sx={{ fontWeight: 600, color: "#1f2937" }}
+                    >
+                      Rylaw Assistant
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: "#6b7280" }}>
+                      Legal AI Assistant
+                    </Typography>
+                  </Box>
+                </Box>
+
+                <Box sx={{ display: "flex", gap: 1 }}>
+                  {/* Mobile History Toggle */}
+                  {isSmallScreen && (
+                    <IconButton
+                      size="small"
+                      onClick={() => setChatHistoryOpen(true)}
+                      sx={{ color: "#6b7280" }}
+                    >
+                      <MenuIcon />
+                    </IconButton>
+                  )}
+
+                  {/* Expand/Collapse Toggle */}
+                  <IconButton
+                    size="small"
+                    onClick={() => setChatFullscreen((prev) => !prev)}
+                    sx={{ color: "#6b7280" }}
+                  >
+                    {chatFullscreen ? (
+                      <CloseFullscreenIcon />
+                    ) : (
+                      <OpenInFullIcon />
+                    )}
+                  </IconButton>
+
+                  {/* Close Button */}
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      setChatOpen(false);
+                      setChatFullscreen(false);
+                      setChatHistoryOpen(false);
+                    }}
+                    sx={{ color: "#6b7280" }}
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                </Box>
+              </Box>
+
+              {/* Chat Messages */}
+              <Box
+                sx={{
+                  flex: 1,
+                  overflowY: "auto",
+                  backgroundColor: "#fff",
+                  display: "flex",
+                  flexDirection: "column",
+                  position: "relative",
+                  // backgroundImage: `url(${bgImg})`,
+                  backgroundSize: "contain",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                  "&::before": {
+                    content: '""',
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    // backgroundImage: `url(${bgImg})`,
+                    backgroundSize: "contain",
+                    backgroundPosition: "center",
+                    backgroundRepeat: "no-repeat",
+                    opacity: 0.05,
+                    zIndex: -1,
+                    pointerEvents: "none",
+                  },
+                }}
+              >
+                <Box sx={{ p: 3, position: "relative", zIndex: 1 }}>
+                  {messages.length === 0 && (
+                    <Box sx={{ textAlign: "center", mt: 8 }}>
+                      <Avatar
+                        sx={{
+                          bgcolor: theme.palette.primary.main,
+                          width: 64,
+                          height: 64,
+                          mx: "auto",
+                          mb: 2,
+                        }}
+                      >
+                        <SmartToyIcon sx={{ fontSize: 32 }} />
+                      </Avatar>
+                      <Typography
+                        variant="h5"
+                        sx={{
+                          color: "#1f2937",
+                          fontWeight: 600,
+                          mb: 1,
+                        }}
+                      >
+                        Welcome to Rylaw Assistant
+                      </Typography>
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          color: "#6b7280",
+                          maxWidth: "400px",
+                          mx: "auto",
+                        }}
+                      >
+                        Your intelligent legal assistant is here to help. Ask me
+                        anything about legal matters, and I'll provide guidance
+                        and relevant information.
+                      </Typography>
+                    </Box>
+                  )}
+
+                  {messages.map((msg, i) => (
+                    <Box
+                      key={i}
+                      sx={{
+                        display: "flex",
+                        mb: 3,
+                        alignItems: "flex-start",
+                        gap: 2,
+                      }}
+                    >
+                      {/* Avatar */}
+                      <Avatar
+                        sx={{
+                          width: 32,
+                          height: 32,
+                          bgcolor:
+                            msg.sender === "user"
+                              ? "#10b981"
+                              : theme.palette.primary.main,
+                          flexShrink: 0,
+                        }}
+                      >
+                        {msg.sender === "user" ? (
+                          <PersonIcon sx={{ fontSize: 18 }} />
+                        ) : (
+                          <SmartToyIcon sx={{ fontSize: 18 }} />
+                        )}
+                      </Avatar>
+
+                      {/* Message Content */}
+                      <Box
+                        sx={{
+                          flex: 1,
+                          minWidth: 0,
+                        }}
+                      >
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: "#6b7280",
+                            fontWeight: 500,
+                            mb: 1,
+                            display: "block",
+                          }}
+                        >
+                          {msg.sender === "user" ? "You" : "Rylaw Assistant"}
+                        </Typography>
+
+                        <Box
+                          sx={{
+                            backgroundColor:
+                              msg.sender === "user"
+                                ? "#f3f4f6"
+                                : getBubbleColor(msg.data?.case_sensitivity) ||
+                                  "#f9fafb",
+                            padding: "16px",
+                            borderRadius: "12px",
+                            fontSize: "15px",
+                            lineHeight: 1.6,
+                            whiteSpace: "pre-wrap",
+                            wordWrap: "break-word",
+                            overflowWrap: "break-word",
+                            border: "1px solid #e5e7eb",
+                            position: "relative",
+                          }}
+                        >
+                          {msg.sender === "bot"
+                            ? renderBotResponse(msg)
+                            : msg.text}
+                        </Box>
+                      </Box>
+                    </Box>
+                  ))}
+
+                  {isLoading && (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        mb: 3,
+                        alignItems: "flex-start",
+                        gap: 2,
+                      }}
+                    >
+                      <Avatar
+                        sx={{
+                          width: 32,
+                          height: 32,
+                          bgcolor: theme.palette.primary.main,
+                          flexShrink: 0,
+                        }}
+                      >
+                        <SmartToyIcon sx={{ fontSize: 18 }} />
+                      </Avatar>
+                      <Box sx={{ flex: 1 }}>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: "#6b7280",
+                            fontWeight: 500,
+                            mb: 1,
+                            display: "block",
+                          }}
+                        >
+                          Rylaw Assistant
+                        </Typography>
+                        <Box
+                          sx={{
+                            backgroundColor: "#f9fafb",
+                            padding: "16px",
+                            borderRadius: "12px",
+                            border: "1px solid #e5e7eb",
+                            display: "inline-block",
+                          }}
+                        >
+                          <TypingIndicator />
+                        </Box>
+                      </Box>
+                    </Box>
+                  )}
+
+                  <div ref={messagesEndRef} />
+                </Box>
+              </Box>
+
+              {/* Input Area */}
+              <Box
+                sx={{
+                  p: 3,
+                  borderTop: "1px solid #e5e7eb",
+                  backgroundColor: "#fff",
+                  position: "relative",
+                  zIndex: 1,
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    gap: 2,
+                    alignItems: "flex-end",
+                    maxWidth: "800px",
+                    mx: "auto",
+                  }}
+                >
+                  <TextField
+                    multiline
+                    minRows={1}
+                    maxRows={4}
+                    placeholder="Message Rylaw Assistant..."
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    disabled={isLoading}
+                    inputRef={textareaRef}
+                    sx={{
+                      flexGrow: 1,
+                      "& .MuiOutlinedInput-root": {
+                        backgroundColor: "#f9fafb",
+                        borderRadius: "24px",
+                        padding: "12px 20px",
+                        fontSize: "15px",
+                        border: "1px solid #d1d5db",
+                        "& fieldset": {
+                          border: "none",
+                        },
+                        "&:hover": {
+                          backgroundColor: "#f3f4f6",
+                        },
+                        "&.Mui-focused": {
+                          backgroundColor: "#fff",
+                          boxShadow: "0 0 0 2px rgba(59, 130, 246, 0.1)",
+                        },
+                      },
+                      "& .MuiInputBase-input": {
+                        padding: 0,
+                        "&::placeholder": {
+                          color: "#9ca3af",
+                          opacity: 1,
+                        },
+                      },
+                    }}
+                  />
+                  <IconButton
+                    onClick={sendMessage}
+                    disabled={isLoading || !input.trim()}
+                    sx={{
+                      backgroundColor:
+                        input.trim() && !isLoading
+                          ? theme.palette.primary.main
+                          : "#e5e7eb",
+                      color: input.trim() && !isLoading ? "#fff" : "#9ca3af",
+                      width: 44,
+                      height: 44,
+                      "&:hover": {
+                        backgroundColor:
+                          input.trim() && !isLoading
+                            ? theme.palette.primary.dark
+                            : "#d1d5db",
+                      },
+                      "&:disabled": {
+                        backgroundColor: "#e5e7eb",
+                        color: "#9ca3af",
+                      },
+                    }}
+                  >
+                    {isLoading ? (
+                      <CircularProgress size={20} color="inherit" />
+                    ) : (
+                      <SendIcon sx={{ fontSize: 20 }} />
+                    )}
+                  </IconButton>
+                </Box>
+
+                {/* Disclaimer */}
+                <Typography
+                  variant="caption"
+                  sx={{
+                    display: "block",
+                    textAlign: "center",
+                    color: "#9ca3af",
+                    mt: 2,
+                    maxWidth: "600px",
+                    mx: "auto",
+                  }}
+                >
+                  Rylaw Assistant can make mistakes. Please verify important
+                  legal information with qualified professionals.
+                </Typography>
+              </Box>
             </Box>
           </Paper>
         )}
