@@ -38,6 +38,7 @@ const DistrictCourt = () => {
   const [states, setStates] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [allDistricts, setAllDistricts] = useState([]); // Stores all districts from API
+  const [legalAreas, setLegalAreas] = useState([]);
 
   // Form states - Updated structure
   const [formData, setFormData] = useState({
@@ -59,6 +60,7 @@ const DistrictCourt = () => {
     languages_known_international: "",
     international_litigation_experience: "",
     // Changed to support multiple states
+    legalArea: [],
     state_ids: [],
     district_ids: [],
   });
@@ -120,6 +122,21 @@ const DistrictCourt = () => {
     }
   }, [formData.state_ids, allDistricts]);
 
+  useEffect(() => {
+    getLegalAreas();
+  }, []);
+
+  const getLegalAreas = async () => {
+    try {
+      const { data } = await axios.get("/legal/legal-dropdown");
+      if (data.success) {
+        setLegalAreas(data.data); // array of {id, legal_area}
+      }
+    } catch (error) {
+      console.error("Error fetching legal areas:", error);
+    }
+  };
+
   // Send registration data to Bar Council
   const sendRegistrationToBarCouncil = async (
     barCouncilId,
@@ -128,7 +145,7 @@ const DistrictCourt = () => {
   ) => {
     setSendingRegistration(true);
     try {
-      console.log("user id for bar council id", userId)
+      console.log("user id for bar council id", userId);
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL_STATE}/fetch/cases-barcouncil`,
         {
@@ -199,6 +216,13 @@ const DistrictCourt = () => {
       newErrors.languages_known_international = "Required";
     if (!formData.international_litigation_experience.trim())
       newErrors.international_litigation_experience = "Select a value";
+     // Add validation for legalArea
+    if (!formData.legalArea || formData.legalArea.length === 0) {
+      newErrors.legalArea = "At least one legal area is required";
+    }
+
+ setErrors(newErrors);
+ return Object.keys(newErrors).length === 0;
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -582,6 +606,7 @@ const DistrictCourt = () => {
                       onChange={handleFormDataChange}
                       onSubmit={handleBasicInfoSubmit}
                       loading={loading}
+                      legalAreas={legalAreas}
                     />
                   )}
 

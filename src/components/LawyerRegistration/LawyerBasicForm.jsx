@@ -135,9 +135,9 @@ const LawyerBasicForm = ({ onSuccess, onClose }) => {
               onSuccess(res.lawyer_id);
             }
           } catch (err) {
-            toast.error(
-              "Payment succeeded, but registration failed. Contact support."
-            );
+            // toast.error(
+            //   "Payment succeeded, but registration failed. Contact support."
+            // );
           } finally {
             setLoading(false);
           }

@@ -110,7 +110,7 @@ const ForUsers = () => {
           <div className="d-flex justify-content-center align-items-center">
             <button
               id="clarify-issue-btn"
-              className="btn btn-primary fw-semibold "
+              className="btn btn-success fw-semibold "
             >
               ✨ Clarify My Legal Issue
             </button>

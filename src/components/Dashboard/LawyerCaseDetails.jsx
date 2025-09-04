@@ -545,7 +545,7 @@ const LawyerCaseDetails = () => {
             <div className="timeline">
               {caseDetails.history?.map((event, index) => (
                 <div key={index} className="timeline-item">
-                  <div className="timeline-badge bg-primary"></div>
+                  <div className="timeline-badge bg-success"></div>
                   <div className="timeline-content card border-0 shadow-sm">
                     <div className="card-body">
                       <div className="d-flex justify-content-between align-items-center mb-2">
@@ -565,7 +565,7 @@ const LawyerCaseDetails = () => {
                       </div>
                       <button
                         type="button"
-                        className="btn btn-sm btn-outline-primary"
+                        className="btn btn-sm btn-outline-success"
                         onClick={() => openDocumentModal(event)}
                       >
                         <i className="bi bi-box-arrow-up-right me-1"></i>View
@@ -647,7 +647,7 @@ const LawyerCaseDetails = () => {
                   <div className="card-body">
                     <div className="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
                       <span className="fw-medium">Current Stage:</span>
-                      <span className="badge bg-primary px-3 py-2">
+                      <span className="badge bg-success px-3 py-2">
                         {caseDetails.status?.caseStage || "N/A"}
                       </span>
                     </div>
@@ -706,7 +706,7 @@ const LawyerCaseDetails = () => {
 
                     <div className="d-flex justify-content-between mb-4">
                       <div className="text-center">
-                        <div className="icon-md bg-primary text-white rounded-circle mb-2 mx-auto d-flex align-items-center justify-content-center">
+                        <div className="icon-md bg-success text-white rounded-circle mb-2 mx-auto d-flex align-items-center justify-content-center">
                           <i className="bi bi-file-earmark-text"></i>
                         </div>
                         <p className="mb-0 small">Filed</p>
@@ -716,7 +716,7 @@ const LawyerCaseDetails = () => {
                       </div>
 
                       <div className="text-center">
-                        <div className="icon-md bg-primary text-white rounded-circle mb-2 mx-auto d-flex align-items-center justify-content-center">
+                        <div className="icon-md bg-success text-white rounded-circle mb-2 mx-auto d-flex align-items-center justify-content-center">
                           <i className="bi bi-check-circle"></i>
                         </div>
                         <p className="mb-0 small">Registered</p>
@@ -726,7 +726,7 @@ const LawyerCaseDetails = () => {
                       </div>
 
                       <div className="text-center">
-                        <div className="icon-md bg-primary text-white rounded-circle mb-2 mx-auto d-flex align-items-center justify-content-center">
+                        <div className="icon-md bg-success text-white rounded-circle mb-2 mx-auto d-flex align-items-center justify-content-center">
                           <i className="bi bi-calendar-event"></i>
                         </div>
                         <p className="mb-0 small">First Hearing</p>
@@ -766,92 +766,6 @@ const LawyerCaseDetails = () => {
           )}
         </div>
       </div>
-
-      {/* Document Preview Modal */}
-      {/* <div
-        className={`modal fade ${showDocumentModal ? "show" : ""}`}
-        style={{
-          display: showDocumentModal ? "block" : "none",
-          zIndex: "99999",
-        }}
-        tabIndex="-1"
-      >
-        <div className="modal-dialog modal-xl">
-          <div className="modal-content">
-            <div className="modal-header bg-primary text-white">
-              <h5 className="modal-title">
-                {currentDocument?.name || "Document Preview"}
-              </h5>
-              <button
-                type="button"
-                className="btn-close btn-close-white"
-                onClick={closeDocumentModal}
-              ></button>
-            </div>
-
-            <div className="modal-body p-0" style={{ minHeight: "500px" }}>
-              {documentLoadError ? (
-                <div className="d-flex flex-column align-items-center justify-content-center py-5">
-                  <i className="bi bi-exclamation-triangle text-warning fs-1 mb-3"></i>
-                  <h5 className="mb-2">Document Cannot Be Previewed</h5>
-                  <p className="text-muted mb-4 text-center">
-                    This document cannot be previewed due to security
-                    restrictions. Please download the document to view it.
-                  </p>
-                  <a
-                    href={currentDocument?.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn btn-primary"
-                  >
-                    <i className="bi bi-download me-2"></i>Download Document
-                  </a>
-                </div>
-              ) : pdfBlobUrl ? (
-                <iframe
-                  src={pdfBlobUrl}
-                  title="PDF Preview"
-                  width="100%"
-                  height="600px"
-                  style={{ border: "none" }}
-                />
-              ) : documentHTML ? (
-                <div
-                  style={{
-                    padding: "1rem",
-                    overflowY: "auto",
-                    maxHeight: "70vh",
-                  }}
-                  dangerouslySetInnerHTML={{ __html: documentHTML }}
-                />
-              ) : (
-                <div className="text-center py-5">
-                  <div className="spinner-border text-primary" role="status" />
-                  <p className="mt-3">Loading Document...</p>
-                </div>
-              )}
-            </div>
-
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={closeDocumentModal}
-              >
-                <i className="bi bi-x me-2"></i>Close
-              </button>
-              <a
-                href={currentDocument?.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn-primary"
-              >
-                <i className="bi bi-download me-2"></i>Download
-              </a>
-            </div>
-          </div>
-        </div>
-      </div> */}
 
       {/* Modal Backdrop */}
       <Dialog
@@ -1008,11 +922,11 @@ const LawyerCaseDetails = () => {
           color: #6c757d;
         }
         
-        .nav-tabs-custom .nav-link.active {
-          color: #0d6efd;
-          background: transparent;
-          border-bottom: 3px solid #0d6efd;
-        }
+.nav-tabs-custom .nav-link.active {
+  color: #28a745; /* green text */
+  background: transparent;
+  border-bottom: 3px solid #28a745; /* green border */
+}
         
         .nav-tabs-custom .nav-link i {
           margin-right: 8px;

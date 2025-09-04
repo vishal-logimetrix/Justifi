@@ -26,6 +26,9 @@ import {
   Divider,
   Tooltip,
   Avatar,
+  Alert,
+  Chip,
+  LinearProgress,
 } from "@mui/material";
 import ChatIcon from "@mui/icons-material/Chat";
 import CloseIcon from "@mui/icons-material/Close";
@@ -35,11 +38,13 @@ import SendIcon from "@mui/icons-material/Send";
 import CallIcon from "@mui/icons-material/Call";
 import MenuIcon from "@mui/icons-material/Menu";
 import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import HistoryIcon from "@mui/icons-material/History";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import PersonIcon from "@mui/icons-material/Person";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 import { keyframes } from "@emotion/react";
@@ -90,8 +95,16 @@ const DashboardLayout = () => {
   const [chatHistory, setChatHistory] = useState([]);
   const [currentChatId, setCurrentChatId] = useState(null);
   const [loadingHistory, setLoadingHistory] = useState(false);
+  
+  // PDF Upload States
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [fileError, setFileError] = useState("");
+  const [dragActive, setDragActive] = useState(false);
+  
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery("(max-width:768px)");
@@ -115,6 +128,7 @@ const DashboardLayout = () => {
     const getUser = JSON.parse(localStorage.getItem("user"));
     setUser(getUser);
   }, []);
+
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -129,7 +143,6 @@ const DashboardLayout = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // Mock API functions - Replace these with your actual API calls
   const loadChatHistory = async () => {
     setLoadingHistory(true);
     try {
@@ -139,18 +152,14 @@ const DashboardLayout = () => {
           Authorization: `Bearer ${token}`,
         },
       };
-
-      const { data } = await axios.get(
-        `${import.meta.env.VITE_API_URL_USER}rylaw_chat`,
-        option
-      );
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL_USER}/rylaw_chat`, option);
       if (data.success && Array.isArray(data.chats)) {
         const formattedChats = data.chats.map((chat) => ({
           id: chat.chat_id,
           title: chat.title,
-          lastMessage: "", // Placeholder since API doesn't return this
+          lastMessage: chat.last_message || "", 
           timestamp: chat.created_at,
-          messageCount: 0, // Placeholder since API doesn't return this
+          messageCount: chat.message_count || 0,
         }));
 
         setChatHistory(formattedChats);
@@ -164,51 +173,52 @@ const DashboardLayout = () => {
     }
   };
 
- const loadChatMessages = async (chatId) => {
-  setIsLoading(true);
+  const loadChatMessages = async (chatId) => {
+    setIsLoading(true);
 
-  try {
-    const token = user.token;
-    const option = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-
-    const { data } = await axios.get(`${import.meta.env.VITE_API_URL_USER}rylaw_chat/${chatId}`, option);
-
-    if (data.success && Array.isArray(data.chat)) {
-      // Flatten each message into user and bot messages
-      const formattedMessages = data.chat.flatMap((msg) => [
-        {
-          sender: "user",
-          text: msg.query,
-          timestamp: msg.created_at, // optional if you want to use it
+    try {
+      const token = user.token;
+      const option = {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-        {
-          sender: "bot",
-          text: msg.response?.trim() || "",
-          timestamp: msg.created_at,
-        },
-      ]);
+      };
+      
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL_USER}/rylaw_chat/${chatId}`, option);
 
-      setMessages(formattedMessages);
-      setCurrentChatId(chatId);
-    } else {
-      setMessages([]);
+      if (data.success && Array.isArray(data.chat)) {
+        const formattedMessages = data.chat.flatMap((msg) => [
+          {
+            sender: "user",
+            text: msg.query,
+            timestamp: msg.created_at,
+          },
+          {
+            sender: "bot",
+            text: msg.response?.trim() || "",
+            timestamp: msg.created_at,
+          },
+        ]);
+
+        setMessages(formattedMessages);
+        setCurrentChatId(chatId);
+      } else {
+        setMessages([]);
+      }
+
+    } catch (error) {
+      console.error("Error loading chat messages:", error);
+    } finally {
+      setIsLoading(false);
     }
-
-  } catch (error) {
-    console.error("Error loading chat messages:", error);
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
   const createNewChat = () => {
     setMessages([]);
     setCurrentChatId(null);
     setInput("");
+    setUploadedFile(null);
+    setFileError("");
     if (isSmallScreen) {
       setChatHistoryOpen(false);
     }
@@ -217,8 +227,15 @@ const DashboardLayout = () => {
   const deleteChatHistory = async (chatId, event) => {
     event.stopPropagation();
     try {
-      // Replace with actual API call
-      // await chatBotApi.delete(`/chat/${chatId}`);
+      const token = user.token;
+      const option = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      await axios.delete(`${import.meta.env.VITE_API_URL_USER}/rylaw_chat/${chatId}`, option);
+      
       setChatHistory((prev) => prev.filter((chat) => chat.id !== chatId));
       if (currentChatId === chatId) {
         createNewChat();
@@ -226,6 +243,90 @@ const DashboardLayout = () => {
     } catch (error) {
       console.error("Error deleting chat:", error);
     }
+  };
+
+  // PDF Upload Functions
+  const validateFile = (file) => {
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    const allowedTypes = ['application/pdf'];
+
+    if (!allowedTypes.includes(file.type)) {
+      return "Please upload only PDF files.";
+    }
+
+    if (file.size > maxSize) {
+      return "File size must be less than 5MB.";
+    }
+
+    return null;
+  };
+
+  const handleFileSelect = (file) => {
+    const error = validateFile(file);
+    
+    if (error) {
+      setFileError(error);
+      return;
+    }
+
+    setFileError("");
+    setUploadedFile(file);
+    
+    // Simulate upload progress
+    setUploadProgress(0);
+    const interval = setInterval(() => {
+      setUploadProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          return 100;
+        }
+        return prev + 10;
+      });
+    }, 100);
+  };
+
+  const handleFileInputChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      handleFileSelect(file);
+    }
+  };
+
+  const handleDrag = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFileSelect(e.dataTransfer.files[0]);
+    }
+  };
+
+  const removeFile = () => {
+    setUploadedFile(null);
+    setFileError("");
+    setUploadProgress(0);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
   const getBubbleColor = (sensitivity) => {
@@ -329,19 +430,49 @@ const DashboardLayout = () => {
   };
 
   const sendMessage = async () => {
-    if (!input.trim() || isLoading) return;
+    if ((!input.trim() && !uploadedFile) || isLoading) return;
+    
     const userMessage = input.trim();
+    const messageToSend = uploadedFile ? 
+      `${userMessage}\n\n📎 Attached: ${uploadedFile.name}` : 
+      userMessage;
 
-    setMessages((prev) => [...prev, { sender: "user", text: userMessage }]);
+    setMessages((prev) => [...prev, { 
+      sender: "user", 
+      text: messageToSend,
+      hasFile: !!uploadedFile,
+      fileName: uploadedFile?.name,
+      fileSize: uploadedFile?.size
+    }]);
+    
     setInput("");
     setIsLoading(true);
 
     try {
+      // TODO: Uncomment and implement when PDF API is ready
+      /*
+      const formData = new FormData();
+      formData.append('message', userMessage);
+      if (uploadedFile) {
+        formData.append('pdf_file', uploadedFile);
+      }
+      formData.append('chat_id', currentChatId ? currentChatId : "");
+      formData.append('user_id', user.id);
+
+      const response = await chatBotApi.post(`/chat`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      */
+
+      // Temporary mock response for PDF handling
       const response = await chatBotApi.post(`/chat`, {
-        message: userMessage,
+        message: userMessage + (uploadedFile ? ` [PDF: ${uploadedFile.name}]` : ''),
         chat_id: currentChatId ? currentChatId : "",
         user_id: user.id,
       });
+
       const botResponse = response.data;
 
       const cleanedResponse = botResponse.response
@@ -361,23 +492,33 @@ const DashboardLayout = () => {
       ]);
 
       // If this is a new chat, add it to history and set current chat ID
-      if (!currentChatId) {
-        // const newChatId = Date.now(); // Use timestamp as ID for demo
-        const newChatId = "";
-        setCurrentChatId(newChatId);
+      if (!currentChatId && botResponse.chat_id) {
+        setCurrentChatId(botResponse.chat_id);
         const newChat = {
-          id: newChatId,
-          title:
-            userMessage.substring(0, 50) +
-            (userMessage.length > 50 ? "..." : ""),
-          lastMessage:
-            cleanedResponse.substring(0, 100) +
-            (cleanedResponse.length > 100 ? "..." : ""),
+          id: botResponse.chat_id,
+          title: userMessage.substring(0, 50) + (userMessage.length > 50 ? "..." : ""),
+          lastMessage: cleanedResponse.substring(0, 100) + (cleanedResponse.length > 100 ? "..." : ""),
           timestamp: new Date().toISOString(),
           messageCount: 2,
         };
         setChatHistory((prev) => [newChat, ...prev]);
+      } else if (currentChatId) {
+        // Update existing chat in history
+        setChatHistory(prev => prev.map(chat => 
+          chat.id === currentChatId 
+            ? {
+                ...chat,
+                lastMessage: cleanedResponse.substring(0, 100) + (cleanedResponse.length > 100 ? "..." : ""),
+                timestamp: new Date().toISOString(),
+                messageCount: chat.messageCount + 2
+              }
+            : chat
+        ));
       }
+
+      // Clear uploaded file after sending
+      removeFile();
+
     } catch (error) {
       console.error("Error:", error);
       setMessages((prev) => [
@@ -462,6 +603,103 @@ const DashboardLayout = () => {
           }}
         />
       ))}
+    </Box>
+  );
+
+  // File Upload Area Component
+  const FileUploadArea = () => (
+    <Box
+      sx={{
+        border: dragActive ? "2px dashed #10b981" : "2px dashed #d1d5db",
+        borderRadius: "12px",
+        p: 3,
+        textAlign: "center",
+        backgroundColor: dragActive ? "#f0fdf4" : "#f9fafb",
+        cursor: "pointer",
+        transition: "all 0.3s ease",
+        "&:hover": {
+          borderColor: "#10b981",
+          backgroundColor: "#f0fdf4",
+        },
+      }}
+      onDragEnter={handleDrag}
+      onDragLeave={handleDrag}
+      onDragOver={handleDrag}
+      onDrop={handleDrop}
+      onClick={() => fileInputRef.current?.click()}
+    >
+      <CloudUploadIcon 
+        sx={{ 
+          fontSize: 48, 
+          color: dragActive ? "#10b981" : "#9ca3af",
+          mb: 2 
+        }} 
+      />
+      <Typography variant="body1" sx={{ color: "#374151", mb: 1 }}>
+        {dragActive ? "Drop your PDF file here" : "Upload a PDF document"}
+      </Typography>
+      <Typography variant="body2" sx={{ color: "#6b7280" }}>
+        Drag and drop or click to browse (Max 5MB)
+      </Typography>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".pdf"
+        onChange={handleFileInputChange}
+        style={{ display: "none" }}
+      />
+    </Box>
+  );
+
+  // Uploaded File Display Component
+  const UploadedFileDisplay = () => (
+    <Box
+      sx={{
+        border: "1px solid #e5e7eb",
+        borderRadius: "12px",
+        p: 2,
+        backgroundColor: "#f9fafb",
+        display: "flex",
+        alignItems: "center",
+        gap: 2,
+      }}
+    >
+      <PictureAsPdfIcon sx={{ color: "#dc2626", fontSize: 32 }} />
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Typography
+          variant="body2"
+          sx={{
+            fontWeight: 500,
+            color: "#374151",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {uploadedFile.name}
+        </Typography>
+        <Typography variant="caption" sx={{ color: "#6b7280" }}>
+          {formatFileSize(uploadedFile.size)}
+        </Typography>
+        {uploadProgress < 100 && (
+          <LinearProgress
+            variant="determinate"
+            value={uploadProgress}
+            sx={{ mt: 1, height: 4, borderRadius: 2 }}
+          />
+        )}
+        {uploadProgress === 100 && (
+          <Chip
+            label="Ready"
+            size="small"
+            color="success"
+            sx={{ mt: 1, height: 20 }}
+          />
+        )}
+      </Box>
+      <IconButton size="small" onClick={removeFile} sx={{ color: "#6b7280" }}>
+        <CloseIcon />
+      </IconButton>
     </Box>
   );
 
@@ -600,31 +838,11 @@ const DashboardLayout = () => {
                         fontSize: "10px",
                       }}
                     >
-                      {formatTimestamp(chat.timestamp)} {" "}
-                      {/* {formatTimestamp(chat.timestamp)} • {chat.messageCount}{" "} */}
-                      messages
+                      {formatTimestamp(chat.timestamp)}
                     </Typography>
                   </Box>
 
                   <Box sx={{ display: "flex", gap: 0.5 }}>
-                    <Tooltip title="Edit">
-                      <IconButton
-                        size="small"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          // Add edit functionality
-                        }}
-                        sx={{
-                          opacity: 0,
-                          transition: "opacity 0.2s",
-                          ".MuiListItemButton-root:hover &": {
-                            opacity: 1,
-                          },
-                        }}
-                      >
-                        <EditIcon sx={{ fontSize: 16 }} />
-                      </IconButton>
-                    </Tooltip>
                     <Tooltip title="Delete">
                       <IconButton
                         size="small"
@@ -718,11 +936,11 @@ const DashboardLayout = () => {
             bottom: 24,
             right: 24,
             zIndex: 1300,
-            backgroundColor: theme.palette.primary.main,
+            backgroundColor: theme.palette.success.main,
             color: "#fff",
             animation: `${bounce} 1.8s infinite, ${glow} 3s infinite`,
             "&:hover": {
-              backgroundColor: theme.palette.primary.dark,
+              backgroundColor: theme.palette.success.dark,
             },
           }}
           title="Chat With Rylaw"
@@ -794,20 +1012,20 @@ const DashboardLayout = () => {
               transform: chatFullscreen ? "translate(50%, 50%)" : "none",
               width: chatFullscreen
                 ? isSmallScreen
-                  ? "85vw"
-                  : "75vw"
+                  ? "95vw"
+                  : "90vw"
                 : isSmallScreen
-                ? "85vw"
+                ? "95vw"
                 : isMediumScreen
-                ? "400px"
-                : "500px",
+                ? "450px"
+                : "550px",
               height: chatFullscreen
                 ? isSmallScreen
-                  ? "85vh"
+                  ? "90vh"
                   : "85vh"
                 : isSmallScreen
-                ? "70vh"
-                : "500px",
+                ? "75vh"
+                : "600px",
               zIndex: 1400,
               display: "flex",
               flexDirection: "row",
@@ -844,7 +1062,7 @@ const DashboardLayout = () => {
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                   <Avatar
                     sx={{
-                      bgcolor: theme.palette.primary.main,
+                      bgcolor: theme.palette.success.main,
                       width: 32,
                       height: 32,
                     }}
@@ -856,7 +1074,7 @@ const DashboardLayout = () => {
                       variant="subtitle1"
                       sx={{ fontWeight: 600, color: "#1f2937" }}
                     >
-                      Rylaw Assistant
+                      Rylaw Bot
                     </Typography>
                     <Typography variant="caption" sx={{ color: "#6b7280" }}>
                       Legal AI Assistant
@@ -913,10 +1131,6 @@ const DashboardLayout = () => {
                   display: "flex",
                   flexDirection: "column",
                   position: "relative",
-                  // backgroundImage: `url(${bgImg})`,
-                  backgroundSize: "contain",
-                  backgroundPosition: "center",
-                  backgroundRepeat: "no-repeat",
                   "&::before": {
                     content: '""',
                     position: "absolute",
@@ -924,7 +1138,6 @@ const DashboardLayout = () => {
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    // backgroundImage: `url(${bgImg})`,
                     backgroundSize: "contain",
                     backgroundPosition: "center",
                     backgroundRepeat: "no-repeat",
@@ -936,10 +1149,10 @@ const DashboardLayout = () => {
               >
                 <Box sx={{ p: 3, position: "relative", zIndex: 1 }}>
                   {messages.length === 0 && (
-                    <Box sx={{ textAlign: "center", mt: 8 }}>
+                    <Box sx={{ textAlign: "center", mt: 4 }}>
                       <Avatar
                         sx={{
-                          bgcolor: theme.palette.primary.main,
+                          bgcolor: theme.palette.success.main,
                           width: 64,
                           height: 64,
                           mx: "auto",
@@ -956,7 +1169,7 @@ const DashboardLayout = () => {
                           mb: 1,
                         }}
                       >
-                        Welcome to Rylaw Assistant
+                        Welcome to Rylaw Bot
                       </Typography>
                       <Typography
                         variant="body1"
@@ -964,12 +1177,17 @@ const DashboardLayout = () => {
                           color: "#6b7280",
                           maxWidth: "400px",
                           mx: "auto",
+                          mb: 3,
                         }}
                       >
                         Your intelligent legal assistant is here to help. Ask me
-                        anything about legal matters, and I'll provide guidance
-                        and relevant information.
+                        anything about legal matters or upload a PDF document for analysis.
                       </Typography>
+                      
+                      {/* Upload area in welcome screen */}
+                      <Box sx={{ maxWidth: "400px", mx: "auto", mt: 3 }}>
+                        <FileUploadArea />
+                      </Box>
                     </Box>
                   )}
 
@@ -991,7 +1209,7 @@ const DashboardLayout = () => {
                           bgcolor:
                             msg.sender === "user"
                               ? "#10b981"
-                              : theme.palette.primary.main,
+                              : theme.palette.success.main,
                           flexShrink: 0,
                         }}
                       >
@@ -1018,7 +1236,7 @@ const DashboardLayout = () => {
                             display: "block",
                           }}
                         >
-                          {msg.sender === "user" ? "You" : "Rylaw Assistant"}
+                          {msg.sender === "user" ? "You" : "Rylaw Bot"}
                         </Typography>
 
                         <Box
@@ -1039,9 +1257,28 @@ const DashboardLayout = () => {
                             position: "relative",
                           }}
                         >
-                          {msg.sender === "bot"
-                            ? renderBotResponse(msg)
-                            : msg.text}
+                          {msg.sender === "bot" ? (
+                            renderBotResponse(msg)
+                          ) : (
+                            <>
+                              {msg.text}
+                              {msg.hasFile && (
+                                <Box sx={{ mt: 2, pt: 2, borderTop: "1px solid #e5e7eb" }}>
+                                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                    <PictureAsPdfIcon sx={{ color: "#dc2626", fontSize: 20 }} />
+                                    <Box>
+                                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                                        {msg.fileName}
+                                      </Typography>
+                                      <Typography variant="caption" sx={{ color: "#6b7280" }}>
+                                        {formatFileSize(msg.fileSize)}
+                                      </Typography>
+                                    </Box>
+                                  </Box>
+                                </Box>
+                              )}
+                            </>
+                          )}
                         </Box>
                       </Box>
                     </Box>
@@ -1060,7 +1297,7 @@ const DashboardLayout = () => {
                         sx={{
                           width: 32,
                           height: 32,
-                          bgcolor: theme.palette.primary.main,
+                          bgcolor: theme.palette.success.main,
                           flexShrink: 0,
                         }}
                       >
@@ -1076,7 +1313,7 @@ const DashboardLayout = () => {
                             display: "block",
                           }}
                         >
-                          Rylaw Assistant
+                          Rylaw Bot
                         </Typography>
                         <Box
                           sx={{
@@ -1100,106 +1337,151 @@ const DashboardLayout = () => {
               {/* Input Area */}
               <Box
                 sx={{
-                  p: 3,
                   borderTop: "1px solid #e5e7eb",
                   backgroundColor: "#fff",
                   position: "relative",
                   zIndex: 1,
                 }}
               >
-                <Box
-                  sx={{
-                    display: "flex",
-                    gap: 2,
-                    alignItems: "flex-end",
-                    maxWidth: "800px",
-                    mx: "auto",
-                  }}
-                >
-                  <TextField
-                    multiline
-                    minRows={1}
-                    maxRows={4}
-                    placeholder="Message Rylaw Assistant..."
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    disabled={isLoading}
-                    inputRef={textareaRef}
-                    sx={{
-                      flexGrow: 1,
-                      "& .MuiOutlinedInput-root": {
-                        backgroundColor: "#f9fafb",
-                        borderRadius: "24px",
-                        padding: "12px 20px",
-                        fontSize: "15px",
-                        border: "1px solid #d1d5db",
-                        "& fieldset": {
-                          border: "none",
-                        },
+                {/* File Upload Section */}
+                {!uploadedFile && messages.length > 0 && (
+                  <Box sx={{ p: 2, pb: 0 }}>
+                    <Button
+                      startIcon={<AttachFileIcon />}
+                      onClick={() => fileInputRef.current?.click()}
+                      sx={{
+                        textTransform: "none",
+                        color: "#6b7280",
+                        fontSize: "13px",
                         "&:hover": {
                           backgroundColor: "#f3f4f6",
                         },
-                        "&.Mui-focused": {
-                          backgroundColor: "#fff",
-                          boxShadow: "0 0 0 2px rgba(59, 130, 246, 0.1)",
-                        },
-                      },
-                      "& .MuiInputBase-input": {
-                        padding: 0,
-                        "&::placeholder": {
-                          color: "#9ca3af",
-                          opacity: 1,
-                        },
-                      },
-                    }}
-                  />
-                  <IconButton
-                    onClick={sendMessage}
-                    disabled={isLoading || !input.trim()}
+                      }}
+                    >
+                      Upload PDF
+                    </Button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".pdf"
+                      onChange={handleFileInputChange}
+                      style={{ display: "none" }}
+                    />
+                  </Box>
+                )}
+
+                {/* File Display or Error */}
+                {(uploadedFile || fileError) && (
+                  <Box sx={{ p: 2, pb: 0 }}>
+                    {fileError && (
+                      <Alert 
+                        severity="error" 
+                        onClose={() => setFileError("")}
+                        sx={{ mb: 2 }}
+                      >
+                        {fileError}
+                      </Alert>
+                    )}
+                    {uploadedFile && <UploadedFileDisplay />}
+                  </Box>
+                )}
+
+                {/* Message Input */}
+                <Box sx={{ p: 3 }}>
+                  <Box
                     sx={{
-                      backgroundColor:
-                        input.trim() && !isLoading
-                          ? theme.palette.primary.main
-                          : "#e5e7eb",
-                      color: input.trim() && !isLoading ? "#fff" : "#9ca3af",
-                      width: 44,
-                      height: 44,
-                      "&:hover": {
-                        backgroundColor:
-                          input.trim() && !isLoading
-                            ? theme.palette.primary.dark
-                            : "#d1d5db",
-                      },
-                      "&:disabled": {
-                        backgroundColor: "#e5e7eb",
-                        color: "#9ca3af",
-                      },
+                      display: "flex",
+                      gap: 2,
+                      alignItems: "flex-end",
+                      maxWidth: "800px",
+                      mx: "auto",
                     }}
                   >
-                    {isLoading ? (
-                      <CircularProgress size={20} color="inherit" />
-                    ) : (
-                      <SendIcon sx={{ fontSize: 20 }} />
-                    )}
-                  </IconButton>
-                </Box>
+                    <TextField
+                      multiline
+                      minRows={1}
+                      maxRows={4}
+                      placeholder="Message Rylaw Bot..."
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      disabled={isLoading}
+                      inputRef={textareaRef}
+                      sx={{
+                        flexGrow: 1,
+                        "& .MuiOutlinedInput-root": {
+                          backgroundColor: "#f9fafb",
+                          borderRadius: "24px",
+                          padding: "12px 20px",
+                          fontSize: "15px",
+                          border: "1px solid #d1d5db",
+                          "& fieldset": {
+                            border: "none",
+                          },
+                          "&:hover": {
+                            backgroundColor: "#f3f4f6",
+                          },
+                          "&.Mui-focused": {
+                            backgroundColor: "#fff",
+                            boxShadow: "0 0 0 2px rgba(59, 130, 246, 0.1)",
+                          },
+                        },
+                        "& .MuiInputBase-input": {
+                          padding: 0,
+                          "&::placeholder": {
+                            color: "#9ca3af",
+                            opacity: 1,
+                          },
+                        },
+                      }}
+                    />
+                    <IconButton
+                      onClick={sendMessage}
+                      disabled={isLoading || (!input.trim() && !uploadedFile)}
+                      sx={{
+                        backgroundColor:
+                          (input.trim() || uploadedFile) && !isLoading
+                            ? theme.palette.success.main
+                            : "#e5e7eb",
+                        color: (input.trim() || uploadedFile) && !isLoading ? "#fff" : "#9ca3af",
+                        width: 44,
+                        height: 44,
+                        "&:hover": {
+                          backgroundColor:
+                            (input.trim() || uploadedFile) && !isLoading
+                              ? theme.palette.success.dark
+                              : "#d1d5db",
+                        },
+                        "&:disabled": {
+                          backgroundColor: "#e5e7eb",
+                          color: "#9ca3af",
+                        },
+                      }}
+                    >
+                      {isLoading ? (
+                        <CircularProgress size={20} color="inherit" />
+                      ) : (
+                        <SendIcon sx={{ fontSize: 20 }} />
+                      )}
+                    </IconButton>
+                  </Box>
 
-                {/* Disclaimer */}
-                <Typography
-                  variant="caption"
-                  sx={{
-                    display: "block",
-                    textAlign: "center",
-                    color: "#9ca3af",
-                    mt: 2,
-                    maxWidth: "600px",
-                    mx: "auto",
-                  }}
-                >
-                  Rylaw Assistant can make mistakes. Please verify important
-                  legal information with qualified professionals.
-                </Typography>
+                  {/* Disclaimer */}
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      display: "block",
+                      textAlign: "center",
+                      color: "#9ca3af",
+                      mt: 2,
+                      maxWidth: "600px",
+                      mx: "auto",
+                    }}
+                  >
+                    Rylaw Bot can make mistakes. Please verify important
+                    legal information with qualified professionals.
+                  </Typography>
+                </Box>
               </Box>
             </Box>
           </Paper>

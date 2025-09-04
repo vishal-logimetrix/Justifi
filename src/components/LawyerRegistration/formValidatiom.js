@@ -160,7 +160,7 @@ export const isBasicInfoComplete = (formData) => {
     'bar_council_reg_no', 'state_council_reg_no', 'pan_number',
     'aadhar_number', 'bank_account_number', 'ifsc_code', 'upi_id',
     'languages_known_indian', 'languages_known_international',
-    'international_litigation_experience'
+    'international_litigation_experience', 'legalArea'
   ];
   
   return requiredFields.every(field => 

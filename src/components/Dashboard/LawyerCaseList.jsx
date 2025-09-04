@@ -30,13 +30,11 @@ const LawyerCasesList = () => {
     setLoading(true);
     try {
       const districtIds = districts.map((d) => d.id).join(",");
-      const res = await axiosState.get(
-        `${
-          import.meta.env.VITE_API_URL_STATE
-        }/api/get-districts-cases?districtId=${districtIds}`
-      );
+      console.log("----------", districtIds)
+      const res = await axiosState.get(`${import.meta.env.VITE_API_URL_STATE}/api/get-districts-cases?districtId=${districtIds}`);
+      console.log("----------", res)
       if (res.data?.status) {
-        setCases(res.data.data);
+        setCases(res.data.data); 
       } else {
         setCases([]);
       }
@@ -232,7 +230,7 @@ const LawyerCasesList = () => {
                           <td>
                             <Link
                               to={`/cases/${caseItem.id}`}
-                              className="text-decoration-none"
+                              className="text-decoration-none text-muted"
                             >
                               {caseItem.title}
                             </Link>

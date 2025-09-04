@@ -69,12 +69,12 @@ const WhyPartner = () => {
                 }}
               >
                 <div
-                  className="icon-circle mb-3 mx-auto d-flex align-items-center justify-content-center"
+                  className="icon-circle bg-success mb-3 mx-auto d-flex align-items-center justify-content-center"
                   style={{
                     width: "60px",
                     height: "60px",
                     borderRadius: "50%",
-                    background: "linear-gradient(135deg, #007bff 0%, #00c6ff 100%)",
+                    // background: "linear-gradient(135deg, #007bff 0%, #00c6ff 100%)",
                     color: "#fff",
                   }}
                 >

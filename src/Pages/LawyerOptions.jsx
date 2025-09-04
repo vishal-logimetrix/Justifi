@@ -61,7 +61,7 @@ const LawyerOptions = () => {
               <ArrowLeft size={18} className="me-1" /> Back to selection
             </button>
 
-            <span className="badge bg-info bg-opacity-10 text-info py-2 px-3 mb-3">
+            <span className="badge bg-success text-white py-2 px-3 mb-3">
               Legal Professional Registration
             </span>
             <h2 className="fw-bold mb-3">Select Your Court of Practice</h2>

@@ -36,7 +36,7 @@ const UserDashboard = () => {
           display: "flex",
           alignItems: "center",
           gap: 1.5,
-          background: "linear-gradient(135deg, #1976d2, #0d47a1)",
+          background: "linear-gradient(135deg, #43a047, #1b5e20)",
           borderRadius: "8px",
           px: 3,
           py: 2,

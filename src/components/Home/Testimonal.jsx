@@ -62,11 +62,11 @@ const Testimonial = () => {
               style={{ maxWidth: "800px" }}
             >
               <div className="quote-icon mb-3">
-                <Quote size={40} className="text-primary opacity-75" />
+                <Quote size={40} className="text-seccess opacity-75" />
               </div>
               <p className="fs-5 fst-italic text-dark">"{t.text}"</p>
               <div className="author mt-4">
-                <h5 className="mb-0 fw-bold text-primary">{t.author}</h5>
+                <h5 className="mb-0 fw-bold text-seccess">{t.author}</h5>
                 <small className="text-muted">{t.court}</small>
               </div>
             </div>

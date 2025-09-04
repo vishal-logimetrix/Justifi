@@ -12,9 +12,9 @@ const Footer = () => {
           {/* Brand & Description */}
           <div className="col-md-4">
             <div className="d-flex align-items-center mb-3">
-              <div className="bg-primary p-2 rounded-circle me-2">
+              {/* <div className="bg-primary p-2 rounded-circle me-2">
                 <Scale size={24} className="text-white" />
-              </div>
+              </div> */}
               <h5 className="fw-bold mb-0">JUSTIFI</h5>
             </div>
             <p className="small">

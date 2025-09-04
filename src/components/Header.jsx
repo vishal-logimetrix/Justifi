@@ -12,8 +12,8 @@ const Header = () => {
   };
 
   const navLinks = [
-    { to: "/home", label: "Home" },
-    { to: "/about-us", label: "About" },
+    { to: "/partner-program", label: "Partner Program" },
+    { to: "/About", label: "About" },
     { to: "/ask-query", label: "Ask Query" },
     // { to: "/our-vision", label: "Our Vision" },
     { to: "/login", label: "Login" },
@@ -26,9 +26,9 @@ const Header = () => {
         <nav className="navbar navbar-expand-lg navbar-light">
           <div className="container">
             <Link className="navbar-brand d-flex align-items-center" to="/home">
-              <div className="bg-primary p-2 rounded-circle me-2">
+              {/* <div className="bg-primary p-2 rounded-circle me-2">
                 <Scale size={32} className="text-white" />
-              </div>
+              </div> */}
               <span className="fw-bold">
                 <img src={logo} alt="logo" style={{ height: "50px" }} />
               </span>
@@ -68,7 +68,7 @@ const Header = () => {
       <div className={`custom-offcanvas ${showOffcanvas ? "show" : ""}`}>
         <div className="offcanvas-header border-bottom px-4 py-3 d-flex justify-content-between align-items-center">
           <Link className="navbar-brand d-flex align-items-center" to="/home">
-            <div className="bg-primary p-2 rounded-circle me-2">
+            <div className="bg-success p-2 rounded-circle me-2">
               <Scale size={32} className="text-white" />
             </div>
             <span className="fw-bold">
@@ -159,7 +159,7 @@ const Header = () => {
         }
         .active-link {
           position: relative;
-          color: #0d6efd !important;
+          color: green !important;
         }
         .active-link::after {
           content: "";
@@ -168,7 +168,7 @@ const Header = () => {
           left: 0;
           width: 100%;
           height: 2px;
-          background-color: #0d6efd;
+          background-color: green;
         }
       `}</style>
     </>

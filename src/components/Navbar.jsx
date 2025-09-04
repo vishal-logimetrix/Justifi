@@ -93,7 +93,7 @@ const Navbar = ({ toggleSidebar }) => {
                   height: 32,
                   fontSize: 14,
                   mr: 1,
-                  bgcolor: "secondary.main",
+                  bgcolor: "warning.main",
                 }}
               >
                 {user?.fullname?.[0]?.toUpperCase() || "U"}
@@ -101,7 +101,7 @@ const Navbar = ({ toggleSidebar }) => {
               </Avatar>
               <Typography variant="body2" fontWeight={500} sx={{ mr: 0.5 }} className="text-capitalize">
                 {/* {user?.fullname || "User"} */}
-                {user?.fullname?.charAt(0) || 'U'}
+                {user?.fullname || 'U'}
               </Typography>
               <ExpandMoreIcon
                 fontSize="small"
@@ -139,12 +139,11 @@ const Navbar = ({ toggleSidebar }) => {
             disableScrollLock={true}
             keepMounted
           >
-            <MenuItem disabled>
+            {/* <MenuItem disabled>
               <Typography variant="body1" noWrap className="text-capitalize">
-                {/* {user?.fullname || "User"} */}
-                {user?.fullname?.charAt(0) || 'U'}
+                {user?.fullname || 'U'}
               </Typography>
-            </MenuItem>
+            </MenuItem> */}
             <MenuItem onClick={handleLogout}>Logout</MenuItem>
           </Menu>
         </Box>

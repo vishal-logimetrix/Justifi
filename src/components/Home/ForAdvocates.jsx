@@ -24,7 +24,7 @@ const ForAdvocates = () => {
             <div className="card h-100 text-center border-1 shadow-sm">
               <div className="card-body d-flex flex-column">
                 <h3 className="fw-bold">Basic</h3>
-                <p className="display-6 text-primary mb-3">
+                <p className="display-6 text-success mb-3">
                   ₹1,001 <small className="text-muted fs-6">one-time</small>
                 </p>
                 <ul className="list-unstyled text-start flex-grow-1">
@@ -42,13 +42,13 @@ const ForAdvocates = () => {
 
           {/* Standard */}
           <div className="col-lg-4">
-            <div className="card h-100 text-center border-primary border-2 shadow">
-              <div className="position-absolute top-0 start-50 translate-middle badge bg-primary text-white rounded-pill px-3 py-1">
+            <div className="card h-100 text-center border-success border-2 shadow">
+              <div className="position-absolute top-0 start-50 translate-middle badge bg-success text-white rounded-pill px-3 py-1">
                 RECOMMENDED
               </div>
               <div className="card-body d-flex flex-column">
                 <h3 className="fw-bold">Standard</h3>
-                <p className="display-6 text-primary mb-3">
+                <p className="display-6 text-success mb-3">
                   ₹7,999 <small className="text-muted fs-6">/ year</small>
                 </p>
                 <ul className="list-unstyled text-start flex-grow-1">
@@ -70,7 +70,7 @@ const ForAdvocates = () => {
             <div className="card h-100 text-center border-1 shadow-sm">
               <div className="card-body d-flex flex-column">
                 <h3 className="fw-bold">Premium</h3>
-                <p className="display-6 text-primary mb-3">
+                <p className="display-6 text-success mb-3">
                   ₹14,999 <small className="text-muted fs-6">/ year</small>
                 </p>
                 <ul className="list-unstyled text-start flex-grow-1">

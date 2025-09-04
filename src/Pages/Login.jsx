@@ -113,13 +113,12 @@ const Login = () => {
         className="container-fluid vh-100 p-0 "
         style={{ marginTop: "50px" }}
       >
+        
         <div className="row g-0 h-100">
           {/* Left Side - Enhanced Lawyer Info */}
           <div
-            className="col-lg-7 p-4 p-lg-5 d-flex flex-column justify-content-center text-white position-relative overflow-hidden"
-            style={{
-              background: "linear-gradient(to right, #007bff, #0056b3)",
-            }}
+            className="col-lg-7 p-4 bg-success p-lg-5 d-flex flex-column justify-content-center text-white position-relative overflow-hidden"
+            // style={{background: "linear-gradient(to right, #007bff, #0056b3)",}}
           >
             {/* Decorative elements */}
             <div
@@ -139,7 +138,7 @@ const Login = () => {
               }}
             ></div>
             <div
-              className="position-absolute top-50 start-0 bg-info opacity-10"
+              className="position-absolute top-50 start-0 bg-danger opacity-10"
               style={{
                 width: "150px",
                 height: "150px",
@@ -150,18 +149,18 @@ const Login = () => {
             {/* Content */}
             <div className="position-relative z-1">
               <div className="d-flex align-items-center mb-4">
-                <div className="bg-primary p-3 rounded-circle d-flex align-items-center justify-content-center me-3">
+                {/* <div className="bg-primary p-3 rounded-circle d-flex align-items-center justify-content-center me-3">
                   <Scale size={36} className="text-white" />
-                </div>
-                <h1 className="display-4 fw-bold mb-0">
+                </div> */}
+                {/* <h1 className="display-4 fw-bold mb-0">
                   <img src={logo} alt="logo" />
-                </h1>
+                </h1> */}
                 {/* <h1 className="display-4 fw-bold mb-0">
                 JUSTIFI
               </h1> */}
               </div>
 
-              <p className="lead mb-5 text-light opacity-75">
+              <p className="lead mb-5 text-white">
                 The premier platform for legal professionals to manage cases,
                 clients, and credentials with unparalleled efficiency.
               </p>
@@ -169,7 +168,7 @@ const Login = () => {
               <div className="row g-4 mb-5">
                 <div className="col-md-6">
                   <div className="d-flex align-items-start">
-                    <div className="bg-primary p-2 rounded-circle d-flex align-items-center justify-content-center me-3 mt-1">
+                    <div className="bg-warning p-2 rounded-circle d-flex align-items-center justify-content-center me-3 mt-1">
                       <Briefcase size={20} className="text-white" />
                     </div>
                     <div>
@@ -184,7 +183,7 @@ const Login = () => {
 
                 <div className="col-md-6">
                   <div className="d-flex align-items-start">
-                    <div className="bg-primary p-2 rounded-circle d-flex align-items-center justify-content-center me-3 mt-1">
+                    <div className="bg-warning p-2 rounded-circle d-flex align-items-center justify-content-center me-3 mt-1">
                       <FileText size={20} className="text-white" />
                     </div>
                     <div>
@@ -199,7 +198,7 @@ const Login = () => {
 
                 <div className="col-md-6">
                   <div className="d-flex align-items-start">
-                    <div className="bg-primary p-2 rounded-circle d-flex align-items-center justify-content-center me-3 mt-1">
+                    <div className="bg-warning p-2 rounded-circle d-flex align-items-center justify-content-center me-3 mt-1">
                       <Calendar size={20} className="text-white" />
                     </div>
                     <div>
@@ -214,7 +213,7 @@ const Login = () => {
 
                 <div className="col-md-6">
                   <div className="d-flex align-items-start">
-                    <div className="bg-primary p-2 rounded-circle d-flex align-items-center justify-content-center me-3 mt-1">
+                    <div className="bg-warning p-2 rounded-circle d-flex align-items-center justify-content-center me-3 mt-1">
                       <BarChart2 size={20} className="text-white" />
                     </div>
                     <div>
@@ -230,7 +229,7 @@ const Login = () => {
 
               <div className=" border border-light border-opacity-10 p-4 rounded-3 shadow-lg">
                 <div className="d-flex align-items-center mb-2">
-                  <ShieldCheck className="me-2 text-primary" size={20} />
+                  <ShieldCheck className="me-2 text-warning" size={20} />
                   <h5 className="fw-bold mb-0">Bar Association Verified</h5>
                 </div>
                 <p className="mb-0 small opacity-75">
@@ -274,7 +273,10 @@ const Login = () => {
                     <Scale size={32} className="text-white" />
                   </div> */}
                 </div>
-                <h2 className="fw-bold text-dark">JUSTIFI</h2>
+                <h2 className="fw-bold text-dark">
+                  <img src={logo} alt="logo" />
+                </h2>
+                {/* <h2 className="fw-bold text-dark">JUSTIFI</h2> */}
                 <p className="text-muted">Justice... Simplified.</p>
               </div>
 
@@ -285,7 +287,7 @@ const Login = () => {
                     className="form-label fw-medium text-dark"
                   >
                     <div className="d-flex align-items-center">
-                      <User className="me-2 text-primary" size={18} />
+                      <User className="me-2 text-success" size={18} />
                       Email
                     </div>
                   </label>
@@ -293,7 +295,7 @@ const Login = () => {
                     type="email"
                     className="form-control form-control-lg border-1 border-dark border-opacity-10"
                     id="email"
-                    placeholder="john.doe@lawfirm.com"
+                    placeholder="rylaw@justifi.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -305,7 +307,7 @@ const Login = () => {
                     className="form-label fw-medium text-dark"
                   >
                     <div className="d-flex align-items-center">
-                      <Lock className="me-2 text-primary" size={18} />
+                      <Lock className="me-2 text-success" size={18} />
                       Password
                     </div>
                   </label>
@@ -331,7 +333,7 @@ const Login = () => {
 
                 <button
                   type="submit"
-                  className="btn btn-primary btn-lg w-100 mb-3 fw-bold shadow"
+                  className="btn btn-success btn-lg w-100 mb-3 fw-bold shadow"
                 >
                   Login
                 </button>

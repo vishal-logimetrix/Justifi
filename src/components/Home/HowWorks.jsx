@@ -47,12 +47,12 @@ const HowItWorks = () => {
             return (
               <div key={index} className="text-center flex-fill position-relative">
                 <div
-                  className="d-flex justify-content-center align-items-center mx-auto mb-3"
+                  className="d-flex bg-warning justify-content-center align-items-center mx-auto mb-3"
                   style={{
                     width: "64px",
                     height: "64px",
                     borderRadius: "50%",
-                    background: "linear-gradient(135deg, #007bff, #00c6ff)",
+                    // background: "linear-gradient(135deg, #007bff, #00c6ff)",
                     boxShadow: "0 0 20px rgba(0, 123, 255, 0.2)",
                     color: "#fff",
                     zIndex: 2,
@@ -68,11 +68,11 @@ const HowItWorks = () => {
                 {/* Connector line (except last step) */}
                 {index !== steps.length - 1 && (
                   <div
-                    className="d-none d-md-block position-absolute top-50 start-100 translate-middle-y"
+                    className="d-none bg-success d-md-block position-absolute top-50 start-100 translate-middle-y"
                     style={{
                       height: "4px",
                       width: "100px",
-                      background: "linear-gradient(to right, #007bff, #00c6ff)",
+                      // background: "linear-gradient(to right, #007bff, #00c6ff)",
                       zIndex: 1,
                     }}
                   />

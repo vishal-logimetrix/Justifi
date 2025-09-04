@@ -6,6 +6,7 @@ import HistoryIcon from "@mui/icons-material/History";
 import CaseIcon from "@mui/icons-material/Gavel";
 import ChatIcon from "@mui/icons-material/Chat";
 import PeopleIcon from "@mui/icons-material/People";
+import logo from "../assets/images/logo2-removebg-preview.png";
 // import BotIcon from "@mui/icons-material/SmartToy";
 
 import { Avatar, Box, Divider, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Tooltip, Typography, useTheme } from "@mui/material";
@@ -115,8 +116,8 @@ const Sidebar = ({ open }) => {
           easing: theme.transitions.easing.sharp,
           duration: theme.transitions.duration.enteringScreen,
         }),
-        bgcolor: theme.palette.primary.main,
-        color: theme.palette.primary.contrastText,
+        bgcolor: theme.palette.success.main,
+        color: theme.palette.success.contrastText,
       }}
     >
       {open && (
@@ -131,7 +132,7 @@ const Sidebar = ({ open }) => {
               borderBottom: `1px solid ${theme.palette.divider}`
             }}
           >
-            {/* <img 
+            <img 
               src={logo} 
               alt="Logo" 
               style={{ 
@@ -140,8 +141,8 @@ const Sidebar = ({ open }) => {
                 height: 'auto',
                 filter: 'brightness(0) invert(1)'
               }} 
-            /> */}
-            <h1>JUSTIFI</h1>
+            />
+            {/* <h1>JUSTIFI</h1> */}
           </Box>
 
           {/* Menu Items */}
@@ -169,14 +170,14 @@ const Sidebar = ({ open }) => {
                         borderRadius: 1,
                         mx: 1,
                         '&.Mui-selected': {
-                          bgcolor: theme.palette.primary.light,
-                          color: theme.palette.primary.contrastText,
+                          bgcolor: theme.palette.success.light,
+                          color: theme.palette.success.contrastText,
                           '&:hover': {
-                            bgcolor: theme.palette.primary.light,
+                            bgcolor: theme.palette.success.light,
                           }
                         },
                         '&:hover': {
-                          bgcolor: theme.palette.primary.dark,
+                          bgcolor: theme.palette.success.dark,
                         }
                       }}
                     >
@@ -223,7 +224,7 @@ const Sidebar = ({ open }) => {
                   width: 40, 
                   height: 40, 
                   mr: 2,
-                  bgcolor: theme.palette.secondary.main 
+                  bgcolor: theme.palette.warning.main 
                 }}
               >
                 {user?.fullname?.charAt(0) || 'U'}

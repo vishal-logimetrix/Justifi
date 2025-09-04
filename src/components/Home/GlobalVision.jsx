@@ -12,7 +12,7 @@ const GlobalVision = () => {
     justifyContent: "center",
     fontSize: 28,
     color: "#fff",
-    background: "linear-gradient(135deg, #007bff, #00c6ff)",
+    // background: "linear-gradient(135deg, #007bff, #00c6ff)",
     boxShadow: "0 4px 12px rgba(13,148,136,0.15)",
     marginBottom: 12,
   };
@@ -35,7 +35,7 @@ const GlobalVision = () => {
           <div className="col-12 col-md-6">
             <div className="d-flex align-items-start h-100">
               <div className="me-3" style={{ minWidth: 80 }}>
-                <div style={iconStyle} aria-hidden="true"><i className="bi bi-wallet2"></i></div>
+                <div className="bg-success" style={iconStyle} aria-hidden="true"><i className="bi bi-wallet2"></i></div>
               </div>
               <div className="flex-grow-1 text-start">
                 <h3 className="h5 fw-semibold">Bridging the Access Gap</h3>
@@ -53,7 +53,7 @@ const GlobalVision = () => {
           <div className="col-12 col-md-6">
             <div className="d-flex align-items-start h-100">
               <div className="me-3" style={{ minWidth: 80 }}>
-                <div style={iconStyle} aria-hidden="true"><i className="bi bi-lock"></i></div>
+                <div className="bg-success" style={iconStyle} aria-hidden="true"><i className="bi bi-lock"></i></div>
               </div>
               <div className="flex-grow-1 text-start">
                 <h3 className="h5 fw-semibold">Cultivating Unwavering Trust</h3>
@@ -70,7 +70,7 @@ const GlobalVision = () => {
           <div className="col-12 col-md-6">
             <div className="d-flex align-items-start h-100">
               <div className="me-3" style={{ minWidth: 80 }}>
-                <div style={iconStyle} aria-hidden="true"><i className="bi bi-graph-up-arrow"></i></div>
+                <div className="bg-success" style={iconStyle} aria-hidden="true"><i className="bi bi-graph-up-arrow"></i></div>
               </div>
               <div className="flex-grow-1 text-start">
                 <h3 className="h5 fw-semibold">Empowering Legal Professionals</h3>
@@ -86,7 +86,7 @@ const GlobalVision = () => {
           <div className="col-12 col-md-6">
             <div className="d-flex align-items-start h-100">
               <div className="me-3" style={{ minWidth: 80 }}>
-                <div style={iconStyle} aria-hidden="true"><i className="bi bi-globe2"></i></div>
+                <div className="bg-success" style={iconStyle} aria-hidden="true"><i className="bi bi-globe2"></i></div>
               </div>
               <div className="flex-grow-1 text-start">
                 <h3 className="h5 fw-semibold">A Global Blueprint for Justice</h3>

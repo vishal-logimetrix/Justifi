@@ -58,7 +58,7 @@ const HeroSection = () => {
 
           <Link
             to="/register"
-            className="btn btn-light text-primary btn-lg fw-bold px-4 py-2 d-inline-flex align-items-center"
+            className="btn btn-light text-success btn-lg fw-bold px-4 py-2 d-inline-flex align-items-center"
           >
             <Scale size={20} className="me-2" /> Join our network
           </Link>

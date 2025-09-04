@@ -239,7 +239,7 @@ const LawyerDashboard = () => {
           </Tooltip> */}
           <Button
             variant="contained"
-            color="primary"
+            color="success"
             onClick={fetchCases}
             disabled={loading}
             size="small"

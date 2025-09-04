@@ -30,8 +30,6 @@ import PrivacyPage from './Pages/PrivacyPage';
 import RefundPage from './Pages/RefundPage';
 import TermsAndConditions from './Pages/TermsAndConditions';
 
-
-
 function App() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
@@ -60,12 +58,12 @@ function App() {
     <CallProvider>
       <ToastContainer position="top-right" autoClose={3000} />
       {!isOnline ? (
-        <OfflinePage /> // 👈 Show offline screen if no internet
+        <OfflinePage /> 
       ) : (
         <Routes>
-          <Route path="/" element={<Navigate to="/home" />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="/about-us" element={<AboutUs />} />
+          <Route path="/" element={<Navigate to="/partner-program" />} />
+          <Route path="/partner-program" element={<Home />} />
+          <Route path="/About" element={<AboutUs />} />
           <Route path="/ask-query" element={<AskQuery />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />

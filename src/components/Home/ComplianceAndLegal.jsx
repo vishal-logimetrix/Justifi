@@ -83,13 +83,13 @@ const ComplianceAndLegal = () => {
           <div className="d-flex justify-content-center gap-3 mt-3">
             <button
               id="open-tos"
-              className="btn btn-primary fw-semibold px-4 py-2"
+              className="btn btn-success fw-semibold px-4 py-2"
             >
               Terms of Service
             </button>
             <button
               id="open-privacy"
-              className="btn btn-primary fw-semibold px-4 py-2"
+              className="btn btn-success fw-semibold px-4 py-2"
             >
               Privacy Policy
             </button>

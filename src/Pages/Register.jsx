@@ -54,6 +54,7 @@ const Register = () => {
     <>
       <Header />
       <div className="bg-light min-vh-100" style={{ marginTop: "100px" }}>
+        
         <section
           className="hero-section py-5"
           style={{
@@ -107,11 +108,11 @@ const Register = () => {
                 </div>
               </div>
               <div className="col-lg-6 mb-3">
-                <div className="bg-primary text-white rounded-3 p-4 p-lg-5 shadow mt-3 mb-5">
+                <div className="bg-success text-white rounded-3 p-4 p-lg-5 shadow mt-3 mb-5">
                   <div className="d-flex align-items-center mb-4">
-                    <div className="bg-white p-3 rounded-circle me-3">
+                    {/* <div className="bg-white p-3 rounded-circle me-3">
                       <Scale size={32} className="text-primary" />
-                    </div>
+                    </div> */}
                     <h2 className="mb-0">Account Registration</h2>
                   </div>
                   <p className="mb-4">
@@ -198,6 +199,7 @@ const Register = () => {
             </div>
           </div>
         </div>
+
         <Footer />
       </div>
     </>

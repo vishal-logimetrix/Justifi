@@ -63,7 +63,7 @@ const Call = () => {
           <button className="btn btn-outline-secondary me-2">
             <i className="bi bi-filter me-1"></i> Filter
           </button>
-          <button className="btn btn-primary">
+          <button className="btn btn-success">
             <i className="bi bi-download me-1"></i> Export
           </button>
         </div>
@@ -95,7 +95,7 @@ const Call = () => {
                     <td>
                       <div className="d-flex align-items-center">
                         <div
-                          className="me-2 d-flex align-items-center justify-content-center bg-primary text-white rounded-circle"
+                          className="me-2 d-flex align-items-center justify-content-center bg-success text-white rounded-circle"
                           style={{ width: '32px', height: '32px', fontSize: '14px' }}
                         >
                           {call.name.charAt(0)}
@@ -106,12 +106,12 @@ const Call = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="text-primary">{call.caseReference}</td>
+                    <td className="text-mute">{call.caseReference}</td>
                     <td>{formatTime(call.duration)}</td>
                     <td>{getStatusBadge(call.status)}</td>
                     <td className="text-end">
                       <button
-                        className="btn btn-sm btn-outline-primary"
+                        className="btn btn-sm btn-outline-warning"
                         onClick={() => setSelectedCall(call)}
                       >
                         <i className="bi bi-eye"></i> View
@@ -146,7 +146,7 @@ const Call = () => {
             <>
               <div className="text-center mb-4">
                 <div
-                  className="mx-auto mb-3 d-flex align-items-center justify-content-center bg-primary text-white rounded-circle"
+                  className="mx-auto mb-3 d-flex align-items-center justify-content-center bg-success text-white rounded-circle"
                   style={{ width: '64px', height: '64px', fontSize: '24px' }}
                 >
                   {selectedCall.name.charAt(0)}
@@ -172,7 +172,7 @@ const Call = () => {
                 </li>
                 <li className="list-group-item d-flex justify-content-between">
                   <span className="text-muted">Case Reference</span>
-                  <span className="fw-medium text-primary">{selectedCall.caseReference}</span>
+                  <span className="fw-medium text-warning">{selectedCall.caseReference}</span>
                 </li>
                 <li className="list-group-item d-flex justify-content-between">
                   <span className="text-muted">Status</span>
@@ -181,8 +181,8 @@ const Call = () => {
               </ul>
 
               <div className="mt-4 d-flex justify-content-end gap-2">
-                <Button variant="outlined" onClick={() => setSelectedCall(null)}>Close</Button>
-                <Button variant="contained" startIcon={<i className="bi bi-telephone"></i>}>
+                <Button color='success' variant="outlined" onClick={() => setSelectedCall(null)}>Close</Button>
+                <Button color='success' variant="contained" startIcon={<i className="bi bi-telephone"></i>}>
                   Call Back
                 </Button>
               </div>

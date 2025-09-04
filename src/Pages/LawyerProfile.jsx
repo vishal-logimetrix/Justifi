@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Edit, Star, StarOff, Briefcase, GraduationCap, Globe, Phone, Mail, MapPin } from "lucide-react";
 import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from '@mui/material';
 
 
 const LawyerProfile = () => {
+
   const [profile, setProfile] = useState({
     name: "Robert Johnson",
     title: "Senior Corporate Lawyer",
@@ -88,6 +89,13 @@ const LawyerProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({ ...profile });
   const [activeTab, setActiveTab] = useState("overview");
+  const [ user, setUser ] = useState(null)
+
+  useEffect(()=>{
+    const loggedUser = localStorage.getItem("user");
+    setUser(JSON.parse(loggedUser))
+    console.log(JSON.parse(loggedUser))
+  }, [])
 
   const handleEditChange = (e) => {
     const { name, value } = e.target;
@@ -180,7 +188,7 @@ const LawyerProfile = () => {
           >
             Cancel
           </Button>
-          <Button onClick={handleSave} color="primary" variant="contained">
+          <Button onClick={handleSave} color="success" variant="contained">
             Save Changes
           </Button>
         </DialogActions>
@@ -197,7 +205,7 @@ const LawyerProfile = () => {
                     {profile.name.charAt(0)}
                   </div> */}
                   <button
-                    className="btn btn-primary btn-sm rounded-circle position-absolute bottom-0 end-0"
+                    className="btn btn-success btn-sm rounded-circle position-absolute bottom-0 end-0"
                     style={{
                         height: '40px',
                         width: '40px'
@@ -208,8 +216,8 @@ const LawyerProfile = () => {
                   </button>
                 </div>
                 <div className="ms-4">
-                  <h1 className="mb-1">{profile.name}</h1>
-                  <h4 className="text-muted mb-3">{profile.title}</h4>
+                  <h1 className="mb-1">{user?.fullname || ""}</h1>
+                  <h4 className="text-muted mb-3">{user?.role}</h4>
 
                   <div className="d-flex align-items-center mb-2">
                     <div className="d-flex me-3">
@@ -223,15 +231,15 @@ const LawyerProfile = () => {
 
                   <div className="d-flex flex-wrap">
                     <div className="me-4 mb-2 d-flex align-items-center">
-                      <Phone className="me-2 text-primary" />
+                      <Phone className="me-2 text-success" />
                       <span>{profile.phone}</span>
                     </div>
                     <div className="me-4 mb-2 d-flex align-items-center">
-                      <Mail className="me-2 text-primary" />
-                      <span>{profile.email}</span>
+                      <Mail className="me-2 text-success" />
+                      <span>{user?.email}</span>
                     </div>
                     <div className="mb-2 d-flex align-items-center">
-                      <MapPin className="me-2 text-primary" />
+                      <MapPin className="me-2 text-success" />
                       <span>{profile.address}</span>
                     </div>
                   </div>
@@ -252,7 +260,7 @@ const LawyerProfile = () => {
                 {profile.specialties.map((spec, index) => (
                   <span
                     key={index}
-                    className="badge bg-primary bg-opacity-10 text-primary me-2 mb-2"
+                    className="badge bg-success bg-opacity-10 text-success me-2 mb-2"
                   >
                     {spec}
                   </span>
@@ -271,7 +279,7 @@ const LawyerProfile = () => {
                 {profile.languages.map((lang, index) => (
                   <li key={index} className="list-group-item border-0 px-0">
                     <div className="d-flex align-items-center">
-                      <Globe className="me-2 text-primary" />
+                      <Globe className="me-2 text-success" />
                       <span>{lang}</span>
                     </div>
                   </li>
@@ -293,8 +301,8 @@ const LawyerProfile = () => {
                     className="list-group-item border-0 px-0 py-3"
                   >
                     <div className="d-flex align-items-start">
-                      <div className="bg-primary bg-opacity-10 p-2 rounded-circle me-3">
-                        <GraduationCap className="text-primary" />
+                      <div className="bg-success bg-opacity-10 p-2 rounded-circle me-3">
+                        <GraduationCap className="text-success" />
                       </div>
                       <div>
                         <h6 className="mb-1">{edu.degree}</h6>

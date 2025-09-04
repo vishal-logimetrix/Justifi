@@ -12,11 +12,20 @@ import {
   Languages,
   Globe,
 } from "lucide-react";
-import { BASIC_INFO_FIELDS, INTERNATIONAL_LITIGATION_OPTIONS } from "./registrationConstant";
-import { formatAadharNumber, formatContactNumber, formatIFSCCode, formatPANNumber, isBasicInfoComplete } from "./formValidatiom";
+import Select from 'react-select';
+import {
+  BASIC_INFO_FIELDS,
+  INTERNATIONAL_LITIGATION_OPTIONS,
+} from "./registrationConstant";
+import {
+  formatAadharNumber,
+  formatContactNumber,
+  formatIFSCCode,
+  formatPANNumber,
+  isBasicInfoComplete,
+} from "./formValidatiom";
 
-const BasicInfoForm = ({ formData, errors, onChange, onSubmit, loading }) => {
-  
+const BasicInfoForm = ({ formData, errors, onChange, onSubmit, loading, legalAreas }) => {
   const iconMap = {
     User: <User />,
     Calendar: <Calendar />,
@@ -28,32 +37,37 @@ const BasicInfoForm = ({ formData, errors, onChange, onSubmit, loading }) => {
     Landmark: <Landmark />,
     Banknote: <Banknote />,
     Languages: <Languages />,
-    Globe: <Globe />
+    Globe: <Globe />,
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     let formattedValue = value;
-    
+
     // Apply formatting based on field type
     switch (name) {
-      case 'aadhar_number':
+      case "aadhar_number":
         formattedValue = formatAadharNumber(value);
         break;
-      case 'pan_number':
+      case "pan_number":
         formattedValue = formatPANNumber(value);
         break;
-      case 'ifsc_code':
+      case "ifsc_code":
         formattedValue = formatIFSCCode(value);
         break;
-      case 'contact_no':
+      case "contact_no":
         formattedValue = formatContactNumber(value);
         break;
       default:
         formattedValue = value;
     }
-    
+
     onChange(name, formattedValue);
+  };
+
+  const handleLegalAreaChange = (selectedOptions) => {
+    const selectedValues = selectedOptions ? selectedOptions.map(option => option.value) : [];
+    onChange('legalArea', selectedValues);
   };
 
   const handleSubmit = (e) => {
@@ -61,25 +75,36 @@ const BasicInfoForm = ({ formData, errors, onChange, onSubmit, loading }) => {
     onSubmit();
   };
 
+  // Prepare options for react-select
+  const legalAreaOptions = legalAreas.map(area => ({
+    value: area.id,
+    label: area.legal_area
+  }));
+
+  // Get selected values for react-select
+  const selectedLegalAreas = legalAreaOptions.filter(option => 
+    formData.legalArea && formData.legalArea.includes(option.value)
+  );
+
   // Check if all required fields are filled
   const isFormValid = isBasicInfoComplete(formData);
 
   return (
     <form onSubmit={handleSubmit}>
-      <h3 className="mb-4 text-primary">
-        Personal & Professional Information
-      </h3>
+      <h3 className="mb-4 text-primary">Personal & Professional Information</h3>
       <p className="text-muted mb-4">
-        Please fill in all the required information accurately. Fields marked with * are mandatory.
+        Please fill in all the required information accurately. Fields marked
+        with * are mandatory.
       </p>
-      
+
       <div className="row g-3">
         {BASIC_INFO_FIELDS.map((field, index) => {
           const Icon = iconMap[field.icon];
           return (
             <div className={field.colSize} key={index}>
               <label className="form-label fw-semibold">
-                {field.label} {field.required && <span className="text-danger">*</span>}
+                {field.label}{" "}
+                {field.required && <span className="text-danger">*</span>}
               </label>
               <div className="input-group mb-1">
                 <span className="input-group-text bg-white">
@@ -98,10 +123,17 @@ const BasicInfoForm = ({ formData, errors, onChange, onSubmit, loading }) => {
                   value={formData[field.name] || ""}
                   onChange={handleChange}
                   required={field.required}
-                  maxLength={field.name === 'contact_no' ? 10 : 
-                           field.name === 'pan_number' ? 10 :
-                           field.name === 'aadhar_number' ? 14 :
-                           field.name === 'ifsc_code' ? 11 : undefined}
+                  maxLength={
+                    field.name === "contact_no"
+                      ? 10
+                      : field.name === "pan_number"
+                      ? 10
+                      : field.name === "aadhar_number"
+                      ? 14
+                      : field.name === "ifsc_code"
+                      ? 11
+                      : undefined
+                  }
                 />
               </div>
               {errors[field.name] && (
@@ -113,10 +145,36 @@ const BasicInfoForm = ({ formData, errors, onChange, onSubmit, loading }) => {
           );
         })}
 
+        {/* Legal Areas Multi-Select Dropdown */}
+        <div className="col-md-12">
+          <label className="form-label fw-semibold">
+            Legal Areas of Practice <span className="text-danger">*</span>
+          </label>
+          <Select
+            isMulti
+            name="legalArea"
+            options={legalAreaOptions}
+            className={`basic-multi-select ${errors.legalArea ? 'is-invalid' : ''}`}
+            classNamePrefix="select"
+            value={selectedLegalAreas}
+            onChange={handleLegalAreaChange}
+            placeholder="Select legal areas of practice..."
+          />
+          {errors.legalArea && (
+            <div className="text-danger small mt-1">
+              {errors.legalArea}
+            </div>
+          )}
+          <div className="form-text">
+            Hold Ctrl/Cmd to select multiple areas
+          </div>
+        </div>
+
         {/* International Litigation Experience Dropdown */}
         <div className="col-md-6">
           <label className="form-label fw-semibold">
-            International Litigation Experience <span className="text-danger">*</span>
+            International Litigation Experience{" "}
+            <span className="text-danger">*</span>
           </label>
           <div className="input-group mb-1">
             <span className="input-group-text bg-white">

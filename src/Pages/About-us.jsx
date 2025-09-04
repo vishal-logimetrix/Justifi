@@ -4,6 +4,17 @@ import Footer from "../components/Footer";
 import { BarChart, Target, Eye, Globe, Zap, ShieldCheck } from "lucide-react";
 import AOS from "aos";
 import "aos/dist/aos.css";
+import rohit_sir from "../assets/images/rohit_sir.jpeg"
+import avinash_sir from "../assets/images/avinash_sir.jpeg"
+import sandipan_sir from "../assets/images/Sandipan_sir2.jpeg"
+import WhyPartner from "../components/Home/WhyPartner";
+import HowItWorks from "../components/Home/HowWorks";
+import GlobalVision from "../components/Home/GlobalVision";
+import ForUsers from "../components/Home/ForUsers";
+import ForAdvocates from "../components/Home/ForAdvocates";
+import FAQ from "../components/Home/FAQ";
+import ComplianceAndLegal from "../components/Home/ComplianceAndLegal";
+import Testimonial from "../components/Home/Testimonal";
 
 const AboutUs = () => {
   const [values, setValues] = useState([]);
@@ -52,7 +63,7 @@ const AboutUs = () => {
           name: "Rohit Patt",
           role: "CEO",
           bio: "With a strategic vision and analytical mindset, Rohit drives innovation and growth at Justifi.",
-          img: "https://randomuser.me/api/portraits/men/30.jpg",
+          img: rohit_sir,
           linkedIn: "https://www.linkedin.com/in/rohit-patt-16a2a331/",
         },
         {
@@ -60,7 +71,7 @@ const AboutUs = () => {
           name: "Sandipan Basu",
           role: "CTO",
           bio: "Sandipan brings a wealth of experience in architecting and developing scalable, high-performance technology solutions.",
-          img: "https://logimetrix.co.in/assets/team6-DQv73eg7.png",
+          img: sandipan_sir,
           linkedIn: "https://www.linkedin.com/in/sandipan-basu-b67323335/",
         },
         {
@@ -68,7 +79,7 @@ const AboutUs = () => {
           name: "Avinash Acharya",
           role: "CLO",
           bio: "A seasoned advocate at the Rajasthan High Court, Avinash brings deep expertise in constitutional and corporate law.",
-          img: "https://randomuser.me/api/portraits/men/67.jpg",
+          img: avinash_sir,
           linkedIn: "https://www.linkedin.com/in/avinash-acharya-6202a461/",
         },
         {
@@ -123,7 +134,7 @@ const AboutUs = () => {
       </section>
 
       {/* Our Story */}
-      <section id="our-story" className="py-5 bg-light">
+      {/* <section id="our-story" className="py-5 bg-light">
         <div className="container py-5">
           <div className="row justify-content-center mb-5">
             <div className="col-lg-8 text-center">
@@ -165,12 +176,12 @@ const AboutUs = () => {
               <div className="d-flex align-items-center">
                 <div className="flex-shrink-0">
                   <div
-                    className="rounded-circle d-flex align-items-center justify-content-center"
+                    className="rounded-circle bg-success d-flex align-items-center justify-content-center"
                     style={{
                       width: "60px",
                       height: "60px",
-                      background:
-                        "linear-gradient(135deg, #007bff 0%, #00c6ff 100%)",
+                      // background:
+                      //   "linear-gradient(135deg, #007bff 0%, #00c6ff 100%)",
                     }}
                   >
                     <BarChart className="text-white" size={24} />
@@ -187,10 +198,10 @@ const AboutUs = () => {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Mission & Vision */}
-      <section
+      {/* <section
         className="py-5"
         style={{ backgroundColor: "#000080", color: "white" }}
       >
@@ -234,10 +245,10 @@ const AboutUs = () => {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Our Values */}
-      <section className="py-5 bg-light">
+      {/* <section className="py-5 bg-light">
         <div className="container py-5">
           <div className="row justify-content-center mb-5">
             <div className="col-lg-8 text-center">
@@ -256,7 +267,7 @@ const AboutUs = () => {
 
           {loading ? (
             <div className="text-center py-5">
-              <div className="spinner-border text-primary" role="status">
+              <div className="spinner-border text-success" role="status">
                 <span className="visually-hidden">Loading...</span>
               </div>
             </div>
@@ -267,13 +278,8 @@ const AboutUs = () => {
                   <div className="card h-100 border-0 shadow-sm">
                     <div className="card-body p-4 text-center">
                       <div
-                        className="icon-md rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
-                        style={{
-                          background:
-                            "linear-gradient(135deg, #007bff 0%, #00c6ff 100%)",
-                        }}
+                      className="icon-md bg-success rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
                       >
-                        {/* Replaced Bootstrap icons with Lucide icons */}
                         {value.icon === "bi bi-globe" && (
                           <Globe className="text-white" size={24} />
                         )}
@@ -303,15 +309,15 @@ const AboutUs = () => {
             </div>
           )}
         </div>
-      </section>
+      </section> */}
 
       {/* Our Team */}
-      <section id="our-team" className="py-5">
+      {/* <section id="our-team" className="py-5">
         <div className="container py-5">
           <div className="row justify-content-center mb-5">
             <div className="col-lg-8 text-center">
               <h2 className="fw-bold mb-3" style={{ color: "#000080" }}>
-                Meet Our Leadership
+                Meet Our Leadership Team
               </h2>
               <div
                 className="divider mb-4 mx-auto"
@@ -340,7 +346,7 @@ const AboutUs = () => {
                     >
                       {member.name}
                     </h5>
-                    <p className="text-center text-primary fw-semibold mb-2">
+                    <p className="text-center text-success fw-semibold mb-2">
                       {member.role}
                     </p>
                     <p
@@ -360,7 +366,7 @@ const AboutUs = () => {
                           href={member.linkedIn}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="btn btn-outline-primary btn-sm"
+                          className="btn btn-outline-success btn-sm"
                         >
                           <i className="bi bi-linkedin me-1"></i> LinkedIn
                         </a>
@@ -372,10 +378,10 @@ const AboutUs = () => {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Stats Section */}
-      <section className="py-5" style={{ backgroundColor: "#f8f9fa" }}>
+      {/* <section className="py-5" style={{ backgroundColor: "#f8f9fa" }}>
         <div className="container py-4">
           <div className="row g-4 text-center">
             <div className="col-md-3">
@@ -404,10 +410,10 @@ const AboutUs = () => {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* CTA */}
-      <section className="py-5">
+      {/* <section className="py-5">
         <div className="container py-5">
           <div className="row justify-content-center">
             <div className="col-lg-8 text-center">
@@ -427,7 +433,7 @@ const AboutUs = () => {
                 </a>
                 <a
                   href="/advocate-partner"
-                  className="btn btn-outline-primary btn-sm px-2 py-2"
+                  className="btn btn-outline-success btn-sm px-2 py-2"
                 >
                   Join as Advocate
                 </a>
@@ -435,7 +441,16 @@ const AboutUs = () => {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
+
+      <WhyPartner />
+      <HowItWorks />
+      <GlobalVision />
+      <ForUsers />
+      <ForAdvocates />
+      <Testimonial />
+      <FAQ />
+      <ComplianceAndLegal />
 
       <Footer />
     </div>
